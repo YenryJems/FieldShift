@@ -99,7 +99,7 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
   selectedMonth,
   onSelectMonth,
 }) => {
-  const { language, t } = useLanguage();
+  const { t } = useLanguage();
   const [weights, setWeights] = useState<PriorityWeights>({
     water: 25,
     erosion: 25,
@@ -112,6 +112,7 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
   );
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [copiedSms, setCopiedSms] = useState(false);
+  const [copyFailed, setCopyFailed] = useState(false);
 
   const farm = getFarmById(farmId);
   const evaluation = rankFarmStrategies(
@@ -138,6 +139,18 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
     evaluation.climate.adjustedGwetRoot < 0.6 ||
     evaluation.climate.adjustedGwetTop < 0.55;
 
+  const fieldBrief = formatSmsFieldBrief({
+    farm,
+    climate: evaluation.climate,
+    topScore,
+    topStrategy: topStrategyObj,
+    cfiWindow: cfiWindows[0],
+    droughtAlert: isDroughtCondition ? t.droughtAlertBanner : undefined,
+  });
+  const fieldAdvisory = isDroughtCondition
+    ? t.droughtAlertBanner
+    : `No drought trigger is active. Review the ${cfiWindows[0].badgeText.toLowerCase()} 90-day spray window before applying inputs.`;
+
   const handleWeightChange = (key: keyof PriorityWeights, value: number) => {
     setWeights((prev) => ({
       ...prev,
@@ -156,30 +169,42 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
       return;
     }
 
-    const speechText = `${farm.name}, ${evaluation.climate.monthLabel}. ${t.droughtAlertBanner} Top recommended strategy: ${topStrategyObj.name}, scoring ${topScore.fariScore.toFixed(1)} out of 100. ${topStrategyObj.explanations.whySuggested} Local review alert: ${topStrategyObj.explanations.localReviewAlerts}`;
+    const riskText = isDroughtCondition
+      ? `Urgent water stress advisory: ${t.droughtAlertBanner}`
+      : `Spray window status: ${cfiWindows[0].badgeText}. ${cfiWindows[0].farmerActionAdvisory}`;
+    const speechText = `${farm.name}, ${evaluation.climate.monthLabel}. ${riskText} Top recommended strategy: ${topStrategyObj.name}, scoring ${topScore.fariScore.toFixed(1)} out of 100. ${topStrategyObj.explanations.whySuggested} Local review alert: ${topStrategyObj.explanations.localReviewAlerts}`;
     setIsSpeaking(true);
-    speakFieldAdvisory(speechText, language, () => setIsSpeaking(false));
+    speakFieldAdvisory(speechText, 'en', () => setIsSpeaking(false));
   };
 
   const handleCopyBrief = async () => {
-    const briefText = formatSmsFieldBrief({
-      farm,
-      climate: evaluation.climate,
-      topScore,
-      topStrategy: topStrategyObj,
-      cfiWindow: cfiWindows[0],
-      droughtAlert: isDroughtCondition ? t.droughtAlertBanner : undefined,
-    });
-
+    let copied = false;
     try {
       if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        await navigator.clipboard.writeText(briefText);
-        setCopiedSms(true);
-        window.setTimeout(() => setCopiedSms(false), 2500);
+        await navigator.clipboard.writeText(fieldBrief);
+        copied = true;
       }
     } catch {
-      setCopiedSms(false);
+      copied = false;
     }
+    if (!copied && typeof document !== 'undefined') {
+      const textarea = document.createElement('textarea');
+      textarea.value = fieldBrief;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        copied = document.execCommand('copy');
+      } catch {
+        copied = false;
+      }
+      textarea.remove();
+    }
+    setCopiedSms(copied);
+    setCopyFailed(!copied);
+    if (copied) window.setTimeout(() => setCopiedSms(false), 2500);
   };
 
   const handlePrintBrief = () => {
@@ -223,6 +248,25 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
       aria-labelledby="fari-engine-heading"
       className="space-y-6 rounded-2xl border border-[#D4DDD0] bg-white p-5 shadow-xs sm:p-7"
     >
+      <article id="field-brief-print" className="hidden" aria-label="Printable farm field brief">
+        <p className="font-mono text-xs font-bold uppercase tracking-wider">FieldShift · MAO / Extension Field Brief</p>
+        <h1 className="mt-2 text-2xl font-extrabold">{farm.name}</h1>
+        <p className="mt-1">{farm.locationLabel} · {Math.abs(farm.latitude).toFixed(3)}°{farm.latitude < 0 ? 'S' : 'N'}, {Math.abs(farm.longitude).toFixed(3)}°{farm.longitude < 0 ? 'W' : 'E'} · {farm.elevationM} m · {farm.slopePct}% slope</p>
+        <hr className="my-4" />
+        <h2 className="font-bold">Recommended rotation: {topStrategyObj.name}</h2>
+        <p className="mt-1">Crops: {topStrategyObj.crops.join(' + ')} · FARI {topScore.fariScore.toFixed(1)}/100</p>
+        <h2 className="mt-4 font-bold">Current risk signals · {evaluation.climate.monthLabel} · {evaluation.climate.scenarioLabel}</h2>
+        <p className="mt-1">NASA POWER: T2M {evaluation.climate.adjustedTempC.toFixed(1)}°C · Rain {evaluation.climate.adjustedDailyPrecipMm.toFixed(1)} mm/day · GWETROOT {evaluation.climate.adjustedGwetRoot.toFixed(2)} · GWETTOP {evaluation.climate.adjustedGwetTop.toFixed(2)}</p>
+        <p className="mt-1">90-day spray window: {cfiWindows[0].badgeText} — {cfiWindows[0].farmerActionAdvisory}</p>
+        {isDroughtCondition && <p className="mt-1 font-bold">Water stress alert: {t.droughtAlertBanner}</p>}
+        <h2 className="mt-4 font-bold">Before planting, review with your MAO or cooperative</h2>
+        <ul className="mt-1 list-disc pl-5">
+          <li>Confirm soil pH, texture, and N-P-K with a local soil test.</li>
+          <li>Check seed or cutting availability, market access, and planting dates.</li>
+          <li>Confirm water supply, field drainage, slope, and labor needs locally.</li>
+        </ul>
+        <p className="mt-4 text-xs">NASA data and modeled indicators support planning; they do not replace farmer judgment, local soil testing, or certified agricultural extension advice.</p>
+      </article>
       {/* Section Header & Action Toolbar */}
       <div className="flex flex-col gap-4 border-b border-[#E2E8DF] pb-5 lg:flex-row lg:items-start lg:justify-between">
         <div className="max-w-3xl">
@@ -281,6 +325,9 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
             <ClipboardCopy className="h-4 w-4" aria-hidden="true" />
             <span>{copiedSms ? 'Copied SMS brief!' : t.copySmsBriefButton}</span>
           </button>
+          <span aria-live="polite" className="text-xs font-semibold text-[#536458]">
+            {copiedSms ? 'Brief copied.' : copyFailed ? 'Copy unavailable in this browser.' : ''}
+          </span>
           <button
             type="button"
             onClick={handlePrintBrief}
@@ -290,14 +337,17 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
             <span>{t.printBriefButton}</span>
           </button>
         </div>
+        {copyFailed && (
+          <span role="status" className="sr-only">Copy failed. Select and copy the brief from the printable version.</span>
+        )}
       </div>
 
-      {/* Trilingual Drought / Low-Moisture Action Banner (Includes Exact Binisaya Alert) */}
+      {/* English Drought / Low-Moisture Action Banner */}
       <div
         role="region"
         aria-label="Field moisture & spray advisory banner"
         className={`rounded-xl border p-4 ${
-          isDroughtCondition || language === 'ceb'
+          isDroughtCondition
             ? 'border-[#E6B86A] bg-[#FFF8EB] text-[#5F3DC4]'
             : 'border-[#C7D5C5] bg-[#F5F9F3]'
         }`}
@@ -313,21 +363,10 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
                 <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#92400E]">
                   Field Action Advisory · {t.languageName}
                 </span>
-                <span className="rounded bg-white/80 px-2 py-0.5 font-mono text-[10px] font-semibold text-[#65766A]">
-                  {t.reviewNotice}
-                </span>
               </div>
               <p className="mt-1 text-sm font-bold text-[#1F2937]">
-                {t.droughtAlertBanner}
+                {fieldAdvisory}
               </p>
-              {language !== 'ceb' && (
-                <p className="mt-1 text-xs italic text-[#4B5563]">
-                  Binisaya field alert:{' '}
-                  <span className="font-semibold not-italic text-[#17271D]">
-                    &ldquo;Uga kaayo ang yuta—ayaw una pag-spray og pampabulak; pagtanom og munggo o kamote aron mapanalipdan ang kaumog.&rdquo;
-                  </span>
-                </p>
-              )}
             </div>
           </div>
           <div className="shrink-0 rounded-lg border border-[#E2E8DF] bg-white px-3 py-2 font-mono text-xs text-[#263B2E]">

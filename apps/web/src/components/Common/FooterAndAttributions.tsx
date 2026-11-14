@@ -78,26 +78,26 @@ export const FooterAndAttributions: React.FC = () => {
         </div>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {t.glossaryItems.map((item) => (
-            <article
+            <details
               key={item.term}
               className="rounded-xl border border-[#E2E8DF] bg-[#FAFBF9] p-4"
             >
-              <div className="flex items-center justify-between gap-2">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B3D91]">
                 <h4 className="text-sm font-extrabold text-[#1B4332]">
                   {item.term}
                 </h4>
                 <span className="rounded bg-[#E8F3EC] px-2 py-0.5 font-mono text-[10px] font-bold text-[#2D6A4F]">
                   {item.shortCode}
                 </span>
-              </div>
-              <p className="mt-2 text-xs leading-5 text-[#536458]">
+              </summary>
+              <p className="mt-3 rounded-lg border border-[#E2E8DF] bg-white p-3 text-xs leading-5 text-[#536458]">
                 {item.definition}
               </p>
-              <p className="mt-2 border-t border-[#E2E8DF] pt-2 text-xs leading-5 text-[#17271D]">
+              <span className="mt-2 block border-t border-[#E2E8DF] pt-2 text-[#17271D]">
                 <strong>On the farm: </strong>
                 {item.farmerMeaning}
-              </p>
-            </article>
+              </span>
+            </details>
           ))}
         </div>
       </section>

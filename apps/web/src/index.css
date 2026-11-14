@@ -78,6 +78,23 @@ input[type="range"].fieldshift-slider::-moz-range-thumb {
   header, .no-print {
     display: none !important;
   }
+  body * {
+    visibility: hidden !important;
+  }
+  #field-brief-print,
+  #field-brief-print * {
+    visibility: visible !important;
+  }
+  #field-brief-print {
+    display: block !important;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    padding: 12mm;
+    color: #111C16 !important;
+    background: #FFFFFF !important;
+    font-size: 10pt;
+  }
   body {
     background: #FFFFFF !important;
     color: #000000 !important;

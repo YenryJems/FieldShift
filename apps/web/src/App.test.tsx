@@ -71,11 +71,9 @@ describe('home view and full FieldShift specification suite', () => {
     expect(markup).toContain('Illustrative / modeled');
     expect(markup).toContain('Rule-based suitability ensemble (RF-style)');
     expect(markup).toContain('Orbital Confidence 80% | Ground-Truth Testing Required 20%');
-
-    // Exact Binisaya drought alert string and mandatory verbatim NASA disclaimer
-    expect(markup).toContain(
-      'Uga kaayo ang yuta—ayaw una pag-spray og pampabulak; pagtanom og munggo o kamote aron mapanalipdan ang kaumog.',
-    );
+    // English-only interface and mandatory verbatim NASA disclaimer
+    expect(markup).toContain('English');
+    expect(markup).not.toContain('Binisaya');
     expect(markup).toContain(
       'NASA does not endorse any non-U.S. Government entity. FieldShift is an educational decision-support prototype designed to support, and never replace, farmer judgment, local soil testing, and certified agricultural extension expertise.',
     );
@@ -107,12 +105,8 @@ describe('home view and full FieldShift specification suite', () => {
     }
   });
 
-  it('includes English, Binisaya, and Tagalog translations with native-speaker review notice and 4 glossary terms', () => {
+  it('provides the English interface and four plain-language glossary terms', () => {
     expect(TRANSLATIONS.en.glossaryItems).toHaveLength(4);
-    expect(TRANSLATIONS.ceb.glossaryItems).toHaveLength(4);
-    expect(TRANSLATIONS.tl.glossaryItems).toHaveLength(4);
-    expect(TRANSLATIONS.ceb.droughtAlertBanner).toBe(
-      'Uga kaayo ang yuta—ayaw una pag-spray og pampabulak; pagtanom og munggo o kamote aron mapanalipdan ang kaumog.',
-    );
+    expect(Object.keys(TRANSLATIONS)).toEqual(['en']);
   });
 });

@@ -5,7 +5,7 @@ export const isSpeechSynthesisSupported = (): boolean =>
 
 export const speakFieldAdvisory = (
   text: string,
-  languageCode: 'en' | 'ceb' | 'tl' = 'en',
+  languageCode: 'en' = 'en',
   onEnd?: () => void,
 ): boolean => {
   if (!isSpeechSynthesisSupported()) {

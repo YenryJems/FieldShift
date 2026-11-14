@@ -15,16 +15,19 @@ export const formatSmsFieldBrief = (params: {
   droughtAlert?: string;
 }): string => {
   const { farm, climate, topScore, topStrategy, cfiWindow, droughtAlert } = params;
+  const latitudeHemisphere = farm.latitude < 0 ? 'S' : 'N';
+  const longitudeHemisphere = farm.longitude < 0 ? 'W' : 'E';
   const lines = [
     `[FIELDSHIFT MAO / EXTENSION BRIEF]`,
-    `Farm: ${farm.name} (${farm.locationLabel}, ${farm.latitude.toFixed(3)}N, ${farm.longitude.toFixed(3)}E, ${farm.elevationM}m, ${farm.slopePct}% slope)`,
+    `Farm: ${farm.name} (${farm.locationLabel}, ${Math.abs(farm.latitude).toFixed(3)}${latitudeHemisphere}, ${Math.abs(farm.longitude).toFixed(3)}${longitudeHemisphere}, ${farm.elevationM}m, ${farm.slopePct}% slope)`,
     `Soil: ${farm.soilType} | Month: ${climate.monthLabel} | Scenario: ${climate.scenarioLabel}`,
     `NASA POWER Signals: T2M ${climate.adjustedTempC.toFixed(1)}C (Tmax ${climate.adjustedMaxTempC.toFixed(1)}C) | Rain ${climate.adjustedDailyPrecipMm.toFixed(2)} mm/day | GWETROOT ${climate.adjustedGwetRoot.toFixed(2)}`,
     `Top Ranked Strategy: ${topStrategy.shortLabel} — FARI ${topScore.fariScore.toFixed(1)}/100 (W:${Math.round(topScore.pillars.water * 100)} E:${Math.round(topScore.pillars.erosion * 100)} N:${Math.round(topScore.pillars.nutrients * 100)} M:${Math.round(topScore.pillars.market * 100)})`,
     `Crops: ${topStrategy.crops.join(' + ')} | Est. N-Fix: +${topStrategy.nFixKgHa} kg N/ha (Projected estimate)`,
     `90-Day Spray Validator (${cfiWindow.monthLabel}): ${cfiWindow.badgeText} — ${cfiWindow.farmerActionAdvisory}`,
     ...(droughtAlert ? [`Alert: ${droughtAlert}`] : []),
-    `MAO Action: ${topStrategy.explanations.localReviewAlerts}`,
+    `MAO Review: ${topStrategy.explanations.localReviewAlerts}`,
+    `Checklist: Confirm soil pH and N-P-K with a local test; verify seed and market access; confirm planting dates and water/terrain fit with the MAO or cooperative.`,
     `Note: Educational decision support prototype; verify with local soil lab & extension office.`,
   ];
   return lines.join('\n');
