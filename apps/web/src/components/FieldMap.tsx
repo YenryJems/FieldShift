@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { SplitSlider } from './SplitSlider';
 import {
   FARMS_BY_ID,
   plotLocations,
@@ -81,6 +82,7 @@ export const FieldMap: React.FC<FieldMapProps> = ({
   const mapInstanceRef = useRef<L.Map | null>(null);
   const overlayGroupRef = useRef<L.LayerGroup | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
+  const osmOverlayRef = useRef<L.TileLayer | null>(null);
 
   const [activeOverlays, setActiveOverlays] = useState<EnvironmentalOverlayId[]>([
     'water-stress',
@@ -88,6 +90,7 @@ export const FieldMap: React.FC<FieldMapProps> = ({
   const [tileError, setTileError] = useState(false);
   const [showSplitComparison, setShowSplitComparison] = useState(false);
   const [splitPercent, setSplitPercent] = useState(50);
+  const [showOsmOverlay, setShowOsmOverlay] = useState(true);
 
   const plotConfig = plotLocations.plots.find((plot) => plot.id === selectedPlotId);
   if (!plotConfig) {
@@ -182,6 +185,29 @@ export const FieldMap: React.FC<FieldMapProps> = ({
       if (tileLayerRef.current === tileLayer) tileLayerRef.current = null;
     };
   }, [mapLayer]);
+
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    osmOverlayRef.current?.remove();
+    osmOverlayRef.current = null;
+    if (!showOsmOverlay || mapLayer !== 'satellite') return;
+
+    const osmOverlay = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19,
+      opacity: 0.26,
+    });
+    osmOverlay.on('tileerror', () => setTileError(true));
+    osmOverlay.addTo(map);
+    osmOverlayRef.current = osmOverlay;
+
+    return () => {
+      osmOverlay.remove();
+      if (osmOverlayRef.current === osmOverlay) osmOverlayRef.current = null;
+    };
+  }, [mapLayer, showOsmOverlay]);
 
   useEffect(() => {
     const map = mapInstanceRef.current;
@@ -307,6 +333,16 @@ export const FieldMap: React.FC<FieldMapProps> = ({
               ? 'Hide Before/After Split View'
               : 'Compare Baseline vs. Rotation Split View'}
           </button>
+          {mapLayer === 'satellite' && (
+            <button
+              type="button"
+              aria-pressed={showOsmOverlay}
+              onClick={() => setShowOsmOverlay((visible) => !visible)}
+              className="rounded-lg border border-[#C7D5C5] bg-white px-2.5 py-1 text-[11px] font-bold text-[#1B4332] hover:bg-[#EEF5EB] focus-visible:outline-2 focus-visible:outline-offset-2"
+            >
+              {showOsmOverlay ? 'Hide' : 'Show'} OSM roads &amp; boundaries
+            </button>
+          )}
         </div>
 
         <div
@@ -371,50 +407,9 @@ export const FieldMap: React.FC<FieldMapProps> = ({
           aria-label={`Map of ${plotConfig.name}, ${activeMonthData.month} historical NASA POWER signals`}
         />
 
-        {showSplitComparison && (
-          <div
-            aria-label="Before and after split comparison overlay"
-            className="pointer-events-none absolute inset-0 z-[900] select-none"
-          >
-            {/* Left Side: Baseline Monoculture Stress */}
-            <div
-              className="absolute inset-y-0 left-0 bg-gradient-to-br from-orange-600/35 via-amber-700/25 to-red-700/35 backdrop-blur-[1px]"
-              style={{ width: `${splitPercent}%` }}
-            >
-              <div className="m-3 inline-block rounded-lg border border-orange-300 bg-orange-950/85 px-2.5 py-1.5 text-[11px] text-orange-100 shadow">
-                <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-orange-300">
-                  S1 Baseline Monoculture · Illustrative / modeled
-                </p>
-                <p className="font-semibold">
-                  Exposed bare-fallow topsoil, higher evaporative heat loss &amp; slope runoff
-                </p>
-              </div>
-            </div>
+        {showSplitComparison && <SplitSlider value={splitPercent} onChange={setSplitPercent} />}
 
-            {/* Right Side: Resilient Crop Rotation */}
-            <div
-              className="absolute inset-y-0 right-0 bg-gradient-to-bl from-emerald-600/30 via-teal-600/20 to-green-700/30"
-              style={{ width: `${100 - splitPercent}%` }}
-            >
-              <div className="m-3 float-right inline-block rounded-lg border border-emerald-300 bg-emerald-950/85 px-2.5 py-1.5 text-right text-[11px] text-emerald-100 shadow">
-                <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-emerald-300">
-                  S2/S3 Adaptive Rotation · Illustrative / modeled
-                </p>
-                <p className="font-semibold">
-                  Living legume/camote canopy, cooler root zone &amp; biological N-fixation nodules
-                </p>
-              </div>
-            </div>
-
-            {/* Divider Line */}
-            <div
-              className="absolute inset-y-0 w-0.5 bg-white shadow-[0_0_8px_rgba(0,0,0,0.6)]"
-              style={{ left: `${splitPercent}%` }}
-            />
-          </div>
-        )}
-
-        <div className="absolute bottom-3 left-3 z-[1000] max-w-[calc(100%-1.5rem)] rounded-lg border border-slate-700 bg-slate-900/90 px-3 py-2 text-xs text-slate-100 shadow backdrop-blur-sm">
+        <div className={`absolute ${showSplitComparison ? 'bottom-16' : 'bottom-3'} left-3 z-[1000] max-w-[calc(100%-1.5rem)] rounded-lg border border-slate-700 bg-slate-900/90 px-3 py-2 text-xs text-slate-100 shadow backdrop-blur-sm`}>
           <span className="font-semibold text-emerald-400">
             Historical {activeMonthData.month} signal:
           </span>{' '}
@@ -424,24 +419,7 @@ export const FieldMap: React.FC<FieldMapProps> = ({
         </div>
       </div>
 
-      {showSplitComparison && (
-        <div className="flex items-center gap-3 rounded-lg border border-[#D4DDD0] bg-white px-3.5 py-2 text-xs">
-          <span className="font-bold text-orange-800">S1 Baseline</span>
-          <input
-            type="range"
-            min={10}
-            max={90}
-            value={splitPercent}
-            aria-label="Split screen comparison slider between S1 baseline and adaptive rotation"
-            onChange={(e) => setSplitPercent(Number(e.target.value))}
-            className="h-2 flex-1 cursor-pointer accent-[#1B4332]"
-          />
-          <span className="font-bold text-emerald-800">S2/S3 Resilient Rotation</span>
-          <span className="rounded bg-amber-100 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-amber-900">
-            Illustrative / modeled
-          </span>
-        </div>
-      )}
+
     </div>
   );
 };
