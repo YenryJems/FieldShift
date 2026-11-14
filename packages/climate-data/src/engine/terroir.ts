@@ -10,12 +10,12 @@ import { clamp, roundTo } from './normalization';
 import { applyClimateStress } from './stress';
 
 /**
- * Estimates synthetic urea reduction percentage (0% for non-legumes, 15-40% for legumes).
+ * Estimates synthetic urea reduction percentage (0% for non-legumes, 25-40% for legumes).
  * Labeled as a literature-range "Projected estimate" in the UI.
  */
 export const calculateUreaReductionPct = (nFixKgHa: number): number => {
   if (!Number.isFinite(nFixKgHa) || nFixKgHa <= 0) return 0;
-  return Math.round(clamp(25 + 15 * ((nFixKgHa - 35) / 45), 15, 40));
+  return Math.round(clamp(25 + 15 * ((nFixKgHa - 35) / 45), 25, 40));
 };
 
 export const calculateMangoSugarLoadingIndex = (
@@ -65,13 +65,10 @@ export const calculateTerroirAssessment = (
   const omContribution = roundTo(strategy.residueMulch * 0.65, 2);
   const phBufferContribution = roundTo(strategy.residueMulch * 0.2, 2);
 
-  const nGap = roundTo(Math.max(0, target.nitrogenKgHa - (base.nitrogenKgHa + nContribution)), 1);
-  const pGap = roundTo(Math.max(0, target.phosphorusPpm - (base.phosphorusPpm + pContribution)), 1);
-  const kGap = roundTo(Math.max(0, target.potassiumPpm - (base.potassiumPpm + kContribution)), 1);
-  const omGap = roundTo(
-    Math.max(0, target.organicMatterPct - (base.organicMatterPct + omContribution)),
-    2,
-  );
+  const nGap = roundTo(target.nitrogenKgHa - (base.nitrogenKgHa + nContribution), 1);
+  const pGap = roundTo(target.phosphorusPpm - (base.phosphorusPpm + pContribution), 1);
+  const kGap = roundTo(target.potassiumPpm - (base.potassiumPpm + kContribution), 1);
+  const omGap = roundTo(target.organicMatterPct - (base.organicMatterPct + omContribution), 2);
   const phDelta = roundTo(target.ph - (base.ph + phBufferContribution), 2);
 
   const nutrientGaps: NutrientGapItem[] = [

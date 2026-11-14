@@ -175,6 +175,16 @@ describe('Phase 5 & 4 — Terroir, SI Comparison, CFI Spray Validator & Soil Cer
     expect(marTerroir.estimatedUreaReductionPct).toBeGreaterThanOrEqual(25);
     expect(marTerroir.estimatedUreaReductionPct).toBeLessThanOrEqual(40);
     expect(calculateUreaReductionPct(0)).toBe(0);
+    expect(calculateUreaReductionPct(20)).toBe(25);
+    expect(calculateUreaReductionPct(80)).toBe(40);
+    const guimaras = FARMS_BY_ID.guimaras;
+    const s3NitrogenGap = marTerroir.nutrientGaps.find(
+      (gap) => gap.nutrient === 'Nitrogen (kg N/ha eq.)',
+    );
+    expect(s3NitrogenGap?.adjustmentGap).toBe(
+      guimaras.targetIdealProfile.nitrogenKgHa -
+        (guimaras.soilBaseline.nitrogenKgHa + guimaras.strategies[2].nFixKgHa),
+    );
     expect(calculateMangoSugarLoadingIndex(22, 24, 6).sugarLoadingIndex).toBeGreaterThan(80);
   });
 
