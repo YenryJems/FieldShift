@@ -327,9 +327,21 @@ export interface GroundTruthSoilCertificationTier {
 export interface GroundTruthFieldInput {
   measuredPh: number | null;
   measuredNitrogenKgHa: number | null;
+  measuredPhosphorusPpm: number | null;
+  measuredPotassiumPpm: number | null;
   measuredOrganicMatterPct: number | null;
+  soilTextureClass: SoilTextureClass | null;
   soilTextureVerified: boolean;
 }
+
+export type SoilTextureClass =
+  | 'sand'
+  | 'loamy-sand'
+  | 'sandy-loam'
+  | 'loam'
+  | 'silt-loam'
+  | 'clay-loam'
+  | 'clay';
 
 export interface SoilCertificateEvaluation {
   farmId: FarmId;

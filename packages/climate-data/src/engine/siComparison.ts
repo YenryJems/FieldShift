@@ -286,13 +286,25 @@ export const evaluateTwoTierSoilCertificate = (
     groundTruth.measuredPh <= 9.0;
   const hasN =
     typeof groundTruth?.measuredNitrogenKgHa === 'number' &&
-    groundTruth.measuredNitrogenKgHa >= 0;
+    groundTruth.measuredNitrogenKgHa >= 0 &&
+    groundTruth.measuredNitrogenKgHa <= 1000;
+  const hasP =
+    typeof groundTruth?.measuredPhosphorusPpm === 'number' &&
+    groundTruth.measuredPhosphorusPpm >= 0 &&
+    groundTruth.measuredPhosphorusPpm <= 5000;
+  const hasK =
+    typeof groundTruth?.measuredPotassiumPpm === 'number' &&
+    groundTruth.measuredPotassiumPpm >= 0 &&
+    groundTruth.measuredPotassiumPpm <= 5000;
   const hasOm =
     typeof groundTruth?.measuredOrganicMatterPct === 'number' &&
-    groundTruth.measuredOrganicMatterPct >= 0;
-  const hasTexture = groundTruth?.soilTextureVerified === true;
+    groundTruth.measuredOrganicMatterPct >= 0 &&
+    groundTruth.measuredOrganicMatterPct <= 15;
+  const hasTexture =
+    groundTruth?.soilTextureVerified === true &&
+    typeof groundTruth.soilTextureClass === 'string';
 
-  const groundTruthVerified = hasPh && hasN && hasOm && hasTexture;
+  const groundTruthVerified = hasPh && hasN && hasP && hasK && hasOm && hasTexture;
 
   let tier2GroundTruthScore = 0;
   if (groundTruthVerified && groundTruth) {
@@ -306,13 +318,25 @@ export const evaluateTwoTierSoilCertificate = (
       0.3,
       1,
     );
+    const pScore = clamp(
+      (groundTruth.measuredPhosphorusPpm as number) / farm.targetIdealProfile.phosphorusPpm,
+      0.3,
+      1,
+    );
+    const kScore = clamp(
+      (groundTruth.measuredPotassiumPpm as number) / farm.targetIdealProfile.potassiumPpm,
+      0.3,
+      1,
+    );
     const omScore = clamp(
       (groundTruth.measuredOrganicMatterPct as number) /
         farm.targetIdealProfile.organicMatterPct,
       0.3,
       1,
     );
-    tier2GroundTruthScore = Math.round(100 * (0.35 * phScore + 0.35 * nScore + 0.3 * omScore));
+    tier2GroundTruthScore = Math.round(
+      100 * (0.2 * phScore + 0.2 * nScore + 0.2 * pScore + 0.2 * kScore + 0.2 * omScore),
+    );
   }
 
   const combinedCertificateScore = Math.round(

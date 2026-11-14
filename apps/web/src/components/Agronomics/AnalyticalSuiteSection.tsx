@@ -1,11 +1,8 @@
 import React, { useState } from 'react';
 import {
   Activity,
-  Award,
   Beaker,
-  CheckCircle2,
   Cpu,
-  FlaskConical,
   Info,
   Leaf,
   Satellite,
@@ -16,7 +13,6 @@ import {
 import {
   calculateSiComparison,
   calculateTerroirAssessment,
-  evaluateTwoTierSoilCertificate,
   getEcoCropReferencesForCrops,
   FarmId,
   getFarmById,
@@ -25,6 +21,7 @@ import {
 import { useLanguage } from '../../context/LanguageContext';
 import { FrostIndicator } from './FrostIndicator';
 import { SprayValidator } from './SprayValidator';
+import { SoilCertificate } from '../Certification/SoilCertificate';
 
 interface AnalyticalSuiteSectionProps {
   farmId: FarmId;
@@ -39,18 +36,7 @@ export const AnalyticalSuiteSection: React.FC<AnalyticalSuiteSectionProps> = ({
   const [selectedStrategyId, setSelectedStrategyId] = useState<StrategyId>('S2');
   const [seedFilter, setSeedFilter] = useState<'all' | 'commercial' | 'open-pollinated'>('all');
 
-  // Ground-Truth Tier 2 Interactive Field Kit State
   const farm = getFarmById(farmId);
-  const [measuredPh, setMeasuredPh] = useState<string>(
-    farm.soilBaseline.ph.toFixed(1),
-  );
-  const [measuredN, setMeasuredN] = useState<string>(
-    String(farm.soilBaseline.nitrogenKgHa + 35),
-  );
-  const [measuredOm, setMeasuredOm] = useState<string>(
-    (farm.soilBaseline.organicMatterPct + 0.4).toFixed(1),
-  );
-  const [textureVerified, setTextureVerified] = useState<boolean>(true);
 
   const terroir = calculateTerroirAssessment(
     farmId,
@@ -63,23 +49,6 @@ export const AnalyticalSuiteSection: React.FC<AnalyticalSuiteSectionProps> = ({
     selectedMonth,
     'baseline',
     selectedStrategyId,
-  );
-
-  const parsedPh = Number.parseFloat(measuredPh);
-  const parsedN = Number.parseFloat(measuredN);
-  const parsedOm = Number.parseFloat(measuredOm);
-
-  const certificate = evaluateTwoTierSoilCertificate(
-    farmId,
-    selectedStrategyId,
-    selectedMonth,
-    'baseline',
-    {
-      measuredPh: Number.isFinite(parsedPh) ? parsedPh : null,
-      measuredNitrogenKgHa: Number.isFinite(parsedN) ? parsedN : null,
-      measuredOrganicMatterPct: Number.isFinite(parsedOm) ? parsedOm : null,
-      soilTextureVerified: textureVerified,
-    },
   );
 
   const activeStrategy =
@@ -426,161 +395,12 @@ export const AnalyticalSuiteSection: React.FC<AnalyticalSuiteSectionProps> = ({
 
       </section>
 
-      {/* 4. Two-Tier Soil Resilience Certificate + Satellite vs Ground-Truth Matrix */}
-      <section
-        aria-labelledby="soil-certificate-heading"
-        className="rounded-2xl border border-[#D4DDD0] bg-white p-5 sm:p-6"
-      >
-        <div className="flex flex-col gap-2 border-b border-[#E2E8DF] pb-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <Award className="h-4 w-4 text-[#1B4332]" aria-hidden="true" />
-              <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#52715E]">
-                Two-Tier Soil Resilience &amp; Terroir Certification
-              </span>
-            </div>
-            <h3
-              id="soil-certificate-heading"
-              className="mt-1 text-xl font-extrabold text-[#17271D]"
-            >
-              Tier 1 Orbital Assessment (80%) + Tier 2 Ground-Truth Field Kit Verification (20%)
-            </h3>
-          </div>
-          <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-xs font-extrabold ${
-              certificate.groundTruthVerified
-                ? 'bg-[#1B4332] text-white'
-                : 'bg-[#FFF3CD] text-[#92400E]'
-            }`}
-          >
-            <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
-            {certificate.badgeStatus}
-          </span>
-        </div>
-
-        <div className="mt-4 grid gap-6 lg:grid-cols-12">
-          {/* Interactive Tier 2 Field Kit Form */}
-          <div className="rounded-xl border border-[#D4DDD0] bg-[#F8FAF7] p-4 lg:col-span-6">
-            <div className="flex items-center gap-2">
-              <FlaskConical className="h-4 w-4 text-[#1B4332]" aria-hidden="true" />
-              <h4 className="text-sm font-extrabold text-[#17271D]">
-                Tier 2: Local Soil Test Kit Input (20% Weight)
-              </h4>
-            </div>
-            <p className="mt-1 text-xs text-[#536458]">
-              Enter measurements from a BSWM / DA Soil Test Kit (STK) or Municipal Agriculturist Office (MAO) lab check to unlock full verification.
-            </p>
-
-            <div className="mt-3 grid gap-3 sm:grid-cols-3">
-              <label className="block text-xs font-bold text-[#263B2E]">
-                Measured Soil pH
-                <input
-                  type="number"
-                  step="0.1"
-                  min="3.5"
-                  max="9.0"
-                  value={measuredPh}
-                  onChange={(e) => setMeasuredPh(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-[#C7D5C5] bg-white px-2.5 py-1.5 font-mono text-xs"
-                />
-              </label>
-              <label className="block text-xs font-bold text-[#263B2E]">
-                Available N (kg/ha)
-                <input
-                  type="number"
-                  step="5"
-                  min="0"
-                  max="300"
-                  value={measuredN}
-                  onChange={(e) => setMeasuredN(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-[#C7D5C5] bg-white px-2.5 py-1.5 font-mono text-xs"
-                />
-              </label>
-              <label className="block text-xs font-bold text-[#263B2E]">
-                Organic Matter (%)
-                <input
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  max="15"
-                  value={measuredOm}
-                  onChange={(e) => setMeasuredOm(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-[#C7D5C5] bg-white px-2.5 py-1.5 font-mono text-xs"
-                />
-              </label>
-            </div>
-
-            <label className="mt-3 inline-flex cursor-pointer items-center gap-2 text-xs font-bold text-[#1B4332]">
-              <input
-                type="checkbox"
-                checked={textureVerified}
-                onChange={(e) => setTextureVerified(e.target.checked)}
-                className="h-4 w-4 accent-[#1B4332]"
-              />
-              <span>
-                On-farm soil texture ({farm.soilType}) &amp; root health visually verified with extension staff
-              </span>
-            </label>
-
-            <div className="mt-4 grid grid-cols-3 gap-2 rounded-lg border border-[#C7D5C5] bg-white p-3 text-center font-mono">
-              <div>
-                <p className="text-[10px] uppercase text-[#65766A]">Tier 1 Orbital (80%)</p>
-                <p className="mt-0.5 text-lg font-extrabold text-[#17271D]">
-                  {certificate.tier1OrbitalScore}/100
-                </p>
-              </div>
-              <div>
-                <p className="text-[10px] uppercase text-[#65766A]">Tier 2 Field Kit (20%)</p>
-                <p className="mt-0.5 text-lg font-extrabold text-[#2D6A4F]">
-                  {certificate.tier2GroundTruthScore}/100
-                </p>
-              </div>
-              <div className="rounded bg-[#E8F3EC] p-1">
-                <p className="text-[10px] font-bold uppercase text-[#1B4332]">
-                  Combined Score
-                </p>
-                <p className="mt-0.5 text-lg font-extrabold text-[#1B4332]">
-                  {certificate.combinedCertificateScore}/100
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Honest Satellite vs Ground-Truth Capability Matrix */}
-          <div className="rounded-xl border border-[#D4DDD0] bg-[#F8FAF7] p-4 lg:col-span-6">
-            <h4 className="text-sm font-extrabold text-[#17271D]">
-              Scientific Honesty: What Satellites Can vs. Cannot Measure
-            </h4>
-            <p className="mt-1 text-xs text-[#536458]">
-              Why FieldShift requires a 20% on-farm ground-truth check before issuing a verified certificate:
-            </p>
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-lg border border-[#C7D5C5] bg-white p-3 text-xs">
-                <p className="font-bold text-[#1B4332]">
-                  Orbital Satellites Measure Well (80%)
-                </p>
-                <ul className="mt-1.5 list-disc space-y-1 pl-4 text-[11px] text-[#3B4D41]">
-                  <li>Grid-cell root-zone &amp; surface wetness indices (`GWETROOT`, `GWETTOP`)</li>
-                  <li>Daily &amp; monthly precipitation and storm bursts (`PRECTOTCORR`, `IMERG`)</li>
-                  <li>2m air temperature extremes (`T2M_MAX`, `T2M_MIN`) and solar irradiance</li>
-                  <li>Canopy greenness (`NDVI`) and regional terrain slope (`SRTM DEM`)</li>
-                </ul>
-              </div>
-              <div className="rounded-lg border border-[#F3D9A4] bg-[#FFFBEB] p-3 text-xs">
-                <p className="font-bold text-[#92400E]">
-                  Requires On-Farm Ground-Truth (20%)
-                </p>
-                <ul className="mt-1.5 list-disc space-y-1 pl-4 text-[11px] text-[#78350F]">
-                  <li>Subsurface soil pH and lime buffering requirement</li>
-                  <li>Plant-available N-P-K and micronutrient concentrations</li>
-                  <li>Soil-borne pathogens, root-knot nematodes, and bacterial wilt</li>
-                  <li>Sub-meter rill/gully erosion and actual internal fruit Brix</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <SoilCertificate
+        key={farmId}
+        farmId={farmId}
+        strategyId={selectedStrategyId}
+        month={selectedMonth}
+      />
 
       {/* 5. Climate-Matched Seed & Livestock Forage Market Hub */}
       <section

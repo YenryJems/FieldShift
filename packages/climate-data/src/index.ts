@@ -44,6 +44,7 @@ export type {
   SiComparisonResult,
   SoilCertificateEvaluation,
   SoilNutrientProfile,
+  SoilTextureClass,
   StrategyExplanations,
   StrategyId,
   StressScenarioId,

@@ -224,10 +224,23 @@ describe('Phase 5 & 4 — Terroir, SI Comparison, CFI Spray Validator & Soil Cer
     expect(prelim.groundTruthVerified).toBe(false);
     expect(prelim.badgeStatus).toBe('Preliminary Orbital Tier (80% Max)');
 
-    const verified = evaluateTwoTierSoilCertificate('bukidnon', 'S3', 7, 'baseline', {
+    const incomplete = evaluateTwoTierSoilCertificate('bukidnon', 'S3', 7, 'baseline', {
       measuredPh: 6.0,
       measuredNitrogenKgHa: 85,
       measuredOrganicMatterPct: 3.2,
+      soilTextureClass: 'loam',
+      soilTextureVerified: true,
+    });
+    expect(incomplete.groundTruthVerified).toBe(false);
+    expect(incomplete.tier2GroundTruthScore).toBe(0);
+
+    const verified = evaluateTwoTierSoilCertificate('bukidnon', 'S3', 7, 'baseline', {
+      measuredPh: 6.0,
+      measuredNitrogenKgHa: 85,
+      measuredPhosphorusPpm: 28,
+      measuredPotassiumPpm: 165,
+      measuredOrganicMatterPct: 3.2,
+      soilTextureClass: 'loam',
       soilTextureVerified: true,
     });
     expect(verified.groundTruthVerified).toBe(true);
