@@ -1,12 +1,14 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Award, CheckCircle2, FlaskConical, Info } from 'lucide-react';
 import {
   evaluateTwoTierSoilCertificate,
+  FARMS_BY_ID,
   type FarmId,
   type SoilTextureClass,
   type StrategyId,
 } from '@fieldshift/climate-data';
 import { GroundTruthModal } from './GroundTruthModal';
+import { getSentinelNdviAtPoint, type SentinelNdviObservation } from '../../utils/satelliteObservations';
 
 interface SoilCertificateProps {
   farmId: FarmId;
@@ -33,6 +35,25 @@ export const SoilCertificate: React.FC<SoilCertificateProps> = ({ farmId, strate
   const [soilTextureClass, setSoilTextureClass] = useState<SoilTextureClass | ''>('');
   const [textureVerified, setTextureVerified] = useState(false);
   const [comparisonOpen, setComparisonOpen] = useState(false);
+  const [sentinelNdvi, setSentinelNdvi] = useState<SentinelNdviObservation | null>(null);
+  const [sentinelStatus, setSentinelStatus] = useState<'loading' | 'ready' | 'unavailable' | 'error'>('loading');
+
+  useEffect(() => {
+    const farm = FARMS_BY_ID[farmId];
+    const controller = new AbortController();
+    setSentinelNdvi(null);
+    setSentinelStatus('loading');
+    getSentinelNdviAtPoint(farm.latitude, farm.longitude, controller.signal)
+      .then((observation) => {
+        setSentinelNdvi(observation);
+        setSentinelStatus(observation ? 'ready' : 'unavailable');
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+        setSentinelStatus('error');
+      });
+    return () => controller.abort();
+  }, [farmId]);
 
   const measured = useMemo(() => ({
     measuredPh: parseBounded(measuredPh, 3.5, 9),
@@ -135,8 +156,20 @@ export const SoilCertificate: React.FC<SoilCertificateProps> = ({ farmId, strate
             The preliminary score is the selected strategy’s FARI result, weighted at 80%. It uses NASA POWER gridded climate/wetness indices and SRTM slope context where available.
           </p>
           <ul className="mt-3 space-y-2 text-xs leading-5 text-[#3B4D41]">
-            <li className="rounded-lg bg-white p-2.5">Included: POWER wetness, rainfall and temperature context; SRTM slope context.</li>
-            <li className="rounded-lg border border-amber-200 bg-amber-50 p-2.5 text-amber-950">Sentinel-2 NDVI and SMAP stability are not ingested as verified site-level inputs; they are not scored as observed measurements.</li>
+            <li className="rounded-lg bg-white p-2.5">Scored context: NASA POWER gridded wetness, rainfall and temperature plus SRTM slope. The POWER values are static historical baselines.</li>
+            <li className="rounded-lg border border-sky-200 bg-sky-50 p-2.5 text-sky-950">
+              <strong>Live Sentinel-2 L2A point sample (10 m): </strong>
+              {sentinelStatus === 'loading' && 'Searching recent clear scenes…'}
+              {sentinelStatus === 'unavailable' && 'No clear, usable scene at this farm point in the last 90 days.'}
+              {sentinelStatus === 'error' && 'Live catalog or raster access failed; try again when online.'}
+              {sentinelNdvi && (
+                <>
+                  NDVI {sentinelNdvi.ndvi.toFixed(2)} · {sentinelNdvi.ndvi < 0.2 ? 'low vegetation signal at the sampled point' : 'vegetation signal at the sampled point'} · scene {new Date(sentinelNdvi.acquisitionDate).toLocaleDateString()} · {sentinelNdvi.cloudCoverPct.toFixed(1)}% scene cloud cover. This updates the bare-soil monitoring context; the point value is not included in the FARI certificate score or treated as a parcel average.
+                </>
+              )}
+              <span className="mt-1 block text-[10px]">Source: <a className="underline" href="https://earth-search.aws.element84.com/v1/collections/sentinel-2-c1-l2a" target="_blank" rel="noreferrer">Earth Search Sentinel-2 L2A catalog</a>; NDVI derived from red/NIR reflectance and screened with scene classification.</span>
+            </li>
+            <li className="rounded-lg border border-sky-200 bg-sky-50 p-2.5 text-sky-950">NASA SMAP L4 is now shown as a live 9 km surface-moisture map layer. It is a satellite/model product and remains regional context, not a farm-scale/root-zone reading used in the score.</li>
             <li className="rounded-lg bg-white p-2.5">Field tests are required for pH, available N-P-K, organic matter and soil texture.</li>
           </ul>
           <p className="mt-3 text-[10px] leading-4 text-[#65766A]">

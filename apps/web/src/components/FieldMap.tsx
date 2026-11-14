@@ -30,11 +30,11 @@ export const ENVIRONMENTAL_OVERLAYS: OverlayMetadata[] = [
   {
     id: 'water-stress',
     label: 'Water Stress & Drought Hotspots',
-    shortSensor: 'SMAP + ECOSTRESS proxy',
+    shortSensor: 'NASA SMAP L4 · 9 km surface moisture',
     color: '#D97706',
     fillColor: '#F59E0B',
     description:
-      'Modeled root-zone wetness deficit (GWETROOT/SMAP proxy) paired with canopy thermal stress.',
+      'NASA SMAP L4 surface-moisture visualization (9 km; satellite/model product). NASA POWER GWETROOT remains a separate gridded root-zone index.',
   },
   {
     id: 'erosion-corridors',
@@ -48,7 +48,7 @@ export const ENVIRONMENTAL_OVERLAYS: OverlayMetadata[] = [
   {
     id: 'bare-soil-ndvi',
     label: 'Bare-Soil Exposure Windows',
-    shortSensor: 'Sentinel-2 / Landsat NDVI < 0.20 proxy',
+    shortSensor: 'Sentinel-2 point NDVI available in Soil Certificate',
     color: '#92400E',
     fillColor: '#B45309',
     description:
@@ -83,6 +83,7 @@ export const FieldMap: React.FC<FieldMapProps> = ({
   const overlayGroupRef = useRef<L.LayerGroup | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
   const osmOverlayRef = useRef<L.TileLayer | null>(null);
+  const smapLayerRef = useRef<L.TileLayer.WMS | null>(null);
 
   const [activeOverlays, setActiveOverlays] = useState<EnvironmentalOverlayId[]>([
     'water-stress',
@@ -211,6 +212,36 @@ export const FieldMap: React.FC<FieldMapProps> = ({
 
   useEffect(() => {
     const map = mapInstanceRef.current;
+    if (!map) return;
+    smapLayerRef.current?.remove();
+    smapLayerRef.current = null;
+    if (!activeOverlays.includes('water-stress')) return;
+
+    // NASA GIBS serves the actual SMAP L4 analyzed surface-moisture map.
+    // This is a 9 km satellite/model visualization, not a farm point reading.
+    const smapLayer = L.tileLayer.wms(
+      'https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi',
+      {
+        layers: 'SMAP_L4_Analyzed_Surface_Soil_Moisture',
+        styles: 'default',
+        format: 'image/png',
+        transparent: true,
+        version: '1.1.1',
+        opacity: 0.58,
+        attribution: 'NASA GIBS / SMAP L4 (9 km)',
+      },
+    );
+    smapLayer.on('tileerror', () => setTileError(true));
+    smapLayer.addTo(map);
+    smapLayerRef.current = smapLayer;
+    return () => {
+      smapLayer.remove();
+      if (smapLayerRef.current === smapLayer) smapLayerRef.current = null;
+    };
+  }, [activeOverlays]);
+
+  useEffect(() => {
+    const map = mapInstanceRef.current;
     const overlayGroup = overlayGroupRef.current;
     if (!map || !overlayGroup) return;
 
@@ -275,6 +306,8 @@ export const FieldMap: React.FC<FieldMapProps> = ({
     activeOverlays.forEach((overlayId, idx) => {
       const meta = ENVIRONMENTAL_OVERLAYS.find((o) => o.id === overlayId);
       if (!meta) return;
+      // Water stress is rendered by the actual NASA SMAP WMS layer above.
+      if (overlayId === 'water-stress') return;
 
       const inset = 0.08 + idx * 0.05;
       const overlayBounds: L.LatLngBoundsExpression = [
