@@ -20,7 +20,12 @@ const steps = [
   },
 ];
 
-export const HomeView: React.FC = () => (
+interface HomeViewProps {
+  plannerStep: number;
+  onPlannerStepChange: (step: number) => void;
+}
+
+export const HomeView: React.FC<HomeViewProps> = ({ plannerStep, onPlannerStepChange }) => (
   <main>
     <section className="field-hero relative isolate overflow-hidden bg-[#11281D] text-white">
       <div aria-hidden="true" className="field-hero-photo absolute inset-0 -z-20" />
@@ -41,7 +46,7 @@ export const HomeView: React.FC = () => (
           </p>
           <div className="mt-7 flex flex-wrap items-center gap-3">
             <a href="#field-demo" className="inline-flex min-h-12 items-center gap-2 rounded-lg bg-[#D4E6A7] px-5 text-sm font-extrabold text-[#14271B] transition-colors hover:bg-[#E2F0C4] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
-              Open decision workspace <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              Start your field plan <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </a>
             <a href="#approach" className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-white/90 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
               How it works <ArrowDown className="h-4 w-4" aria-hidden="true" />
@@ -129,7 +134,7 @@ export const HomeView: React.FC = () => (
           <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#64756A]">NASA POWER · 2020–2025 static baseline</span>
         </div>
       </div>
-      <WorkspaceView />
+      <WorkspaceView plannerStep={plannerStep} onPlannerStepChange={onPlannerStepChange} />
     </section>
 
     <footer className="border-t border-[#30443A] bg-[#10251B] text-[#D1DDD4]">

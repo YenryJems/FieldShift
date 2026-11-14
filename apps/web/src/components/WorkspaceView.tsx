@@ -1,10 +1,13 @@
 import React, { Suspense, lazy, useState } from 'react';
 import {
+  ArrowLeft,
   ArrowDownToLine,
+  ArrowRight,
   CloudRain,
   Droplets,
   ExternalLink,
   MapPin,
+  Printer,
   ThermometerSun,
 } from 'lucide-react';
 import {
@@ -594,12 +597,35 @@ const PlanningComparison: React.FC<{
   );
 };
 
-export const WorkspaceView: React.FC = () => {
+interface WorkspaceViewProps {
+  plannerStep: number;
+  onPlannerStepChange: (step: number) => void;
+}
+
+const PLANNER_STEPS = [
+  { title: 'Choose a farm', prompt: 'Start with the field and its real context.' },
+  { title: 'Set priorities', prompt: 'Choose what matters, then test a climate scenario.' },
+  { title: 'Compare rotations', prompt: 'Inspect the scores and evidence for all three options.' },
+  { title: 'Explore evidence', prompt: 'Check maps, seasonal patterns, soil gaps, and data sources.' },
+  { title: 'Take your field brief', prompt: 'Review the leading option and prepare for a local conversation.' },
+];
+
+type EvidencePanel = 'climate' | 'seasonal' | 'agronomy' | 'sources';
+
+const EVIDENCE_PANELS: ReadonlyArray<{ id: EvidencePanel; title: string }> = [
+  { id: 'climate', title: 'Climate & map' },
+  { id: 'seasonal', title: 'Season outlook' },
+  { id: 'agronomy', title: 'Soil & crop checks' },
+  { id: 'sources', title: 'Sources & help' },
+];
+
+export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPlannerStepChange }) => {
   const [placeId, setPlaceId] = useState<PlaceId>('nueva-ecija');
   const [selectedMonth, setSelectedMonth] = useState(1);
   const [mapLayer, setMapLayer] = useState<MapLayer>('satellite');
   const [rainfallChange, setRainfallChange] = useState(false);
   const [heatChange, setHeatChange] = useState(false);
+  const [evidencePanel, setEvidencePanel] = useState<EvidencePanel>('climate');
   const place = PLACES_BY_ID[placeId];
   const farm = FARMS_BY_ID[placeId];
   const averageMonthlyTemperature = place.meanTemperatureC;
@@ -610,9 +636,40 @@ export const WorkspaceView: React.FC = () => {
   const scenarioTemperature = averageMonthlyTemperature === null
     ? null
     : averageMonthlyTemperature + (heatChange ? 2 : 0);
+  const goToStep = (nextStep: number) => {
+    onPlannerStepChange(nextStep);
+    document.getElementById('planner-progress')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
     <div className="mx-auto max-w-[1280px] space-y-8 px-4 py-8 sm:px-6 sm:py-10">
+      <section id="planner-progress" aria-label="Guided field planning progress" className="overflow-hidden rounded-2xl border border-[#D2DED0] bg-white shadow-sm">
+        <div className="grid gap-5 bg-[#10251B] p-5 text-white sm:p-6 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
+          <div>
+            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#C4D5B9]">Build a resilient season plan</p>
+            <h2 className="mt-2 text-xl font-semibold tracking-tight sm:text-2xl">Step {plannerStep + 1} <span className="text-white/50">/ {PLANNER_STEPS.length}</span> · {PLANNER_STEPS[plannerStep].title}</h2>
+            <p className="mt-1 text-xs leading-5 text-white/75 sm:text-sm">{PLANNER_STEPS[plannerStep].prompt}</p>
+          </div>
+          <ol className="grid grid-cols-5 gap-1.5" aria-label="Planning steps">
+            {PLANNER_STEPS.map((item, index) => {
+              const current = plannerStep === index;
+              const complete = plannerStep > index;
+              return (
+                <li key={item.title}>
+                  <button type="button" disabled={index > plannerStep} aria-current={current ? 'step' : undefined} onClick={() => goToStep(index)} className={`flex min-h-[58px] w-full flex-col items-start justify-center rounded-lg border px-2 py-2 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B9E3EE] disabled:cursor-not-allowed ${current ? 'border-[#B4DCE9] bg-[#D9EFF4] text-[#122A35]' : complete ? 'border-[#55806A] bg-[#1C3B2C] text-white' : 'border-white/10 bg-white/[0.04] text-white/45'}`}>
+                    <span className="font-mono text-[9px] font-bold">{complete ? '✓' : `0${index + 1}`}</span>
+                    <span className="mt-1 hidden text-[10px] font-bold leading-tight sm:block">{item.title}</span>
+                    <span className="mt-1 text-[9px] font-bold leading-tight sm:hidden">{item.title.split(' ')[0]}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+        <div className="h-1.5 bg-[#E5EDE3]" aria-hidden="true"><div className="h-full bg-[#9ACFAD] transition-[width] duration-500" style={{ width: `${((plannerStep + 1) / PLANNER_STEPS.length) * 100}%` }} /></div>
+      </section>
+
+      <div className={`planner-stage ${plannerStep === 0 ? 'planner-stage-active step-one space-y-5' : 'hidden'}`}>
       <section id="field-sites" className="scroll-mt-28 flex flex-col gap-5 border-b border-[#E2E8DF] pb-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E] sm:text-xs">
@@ -664,13 +721,27 @@ export const WorkspaceView: React.FC = () => {
           <p className="mt-1 text-xs font-semibold text-[#263B2E]">{farm.baselineFarmingSystem}</p>
         </div>
       </section>
+      </div>
 
+      <div className={`planner-stage ${plannerStep === 1 || plannerStep === 2 || plannerStep === 4 ? `planner-stage-active step-${plannerStep + 1}` : 'hidden'}`}>
       <StrategyComparisonSection
         farmId={placeId}
         selectedMonth={selectedMonth}
         onSelectMonth={setSelectedMonth}
+        displayMode={plannerStep === 1 ? 'controls' : plannerStep === 2 ? 'compare' : 'review'}
       />
+      </div>
 
+      <div className={`planner-stage ${plannerStep === 3 ? 'planner-stage-active step-four space-y-6' : 'hidden'}`}>
+      <nav aria-label="Evidence sections" className="flex gap-2 overflow-x-auto rounded-xl border border-[#D8E2D5] bg-white p-2">
+        {EVIDENCE_PANELS.map((panel) => (
+          <button key={panel.id} type="button" aria-pressed={evidencePanel === panel.id} onClick={() => setEvidencePanel(panel.id)} className={`min-h-10 shrink-0 rounded-lg px-3 text-xs font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332] ${evidencePanel === panel.id ? 'bg-[#1B4332] text-white' : 'text-[#516357] hover:bg-[#F1F5EF]'}`}>
+            {panel.title}
+          </button>
+        ))}
+      </nav>
+
+      <div className={evidencePanel === 'climate' ? 'space-y-5' : 'hidden'}>
       <div className="flex flex-col gap-1 border-b border-[#E2E8DF] pb-4">
         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E] sm:text-xs">
           NASA POWER · historical monthly point data · 2020–2025
@@ -739,11 +810,16 @@ export const WorkspaceView: React.FC = () => {
         />
       </div>
 
+      </div>
+
+      <div className={evidencePanel === 'agronomy' ? 'space-y-6' : 'hidden'}>
       <AnalyticalSuiteSection
         farmId={placeId}
         selectedMonth={selectedMonth}
       />
+      </div>
 
+      <div className={evidencePanel === 'seasonal' ? 'space-y-6' : 'hidden'}>
       <SeasonalChart
         place={place}
         rainfallChange={rainfallChange}
@@ -797,7 +873,9 @@ export const WorkspaceView: React.FC = () => {
       <PlaceInsights place={place} rainfallChange={rainfallChange} heatChange={heatChange} />
 
       <PlanningComparison place={place} heatChange={heatChange} />
+      </div>
 
+      <div className={evidencePanel === 'sources' ? 'space-y-6' : 'hidden'}>
       <section id="data-sources" className="scroll-mt-28 grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="rounded-xl border border-[#D4DDD0] bg-white p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4">
@@ -892,6 +970,25 @@ export const WorkspaceView: React.FC = () => {
         FieldShift is a planning aid prototype. Use NASA POWER alongside local forecasts,
         on-farm measurements, crop calendars, and farmer or extension expertise.
       </p>
+      </div>
+
+      </div>
+
+      <nav aria-label="Plan navigation" className="sticky bottom-2 z-30 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#CAD8C9] bg-[#F8FAF7]/95 p-3 shadow-lg backdrop-blur sm:bottom-4 sm:p-4">
+        <button type="button" disabled={plannerStep === 0} onClick={() => goToStep(plannerStep - 1)} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#C8D5C7] bg-white px-4 text-xs font-bold text-[#33493A] transition-colors hover:bg-[#F0F5EE] disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332]">
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back
+        </button>
+        <p className="hidden text-xs font-semibold text-[#5C6D60] sm:block">{plannerStep < 4 ? `Next: ${PLANNER_STEPS[plannerStep + 1].title}` : 'Your plan is ready for local review.'}</p>
+        {plannerStep < 4 ? (
+          <button type="button" onClick={() => goToStep(plannerStep + 1)} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#1B4332] px-5 text-xs font-extrabold text-white transition-colors hover:bg-[#2D6A4F] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B3D91]">
+            {plannerStep === 0 ? 'Set priorities' : plannerStep === 1 ? 'Compare rotations' : plannerStep === 2 ? 'Explore evidence' : 'Review my field plan'} <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </button>
+        ) : (
+          <button type="button" onClick={() => window.print()} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#1B4332] px-5 text-xs font-extrabold text-white transition-colors hover:bg-[#2D6A4F] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B3D91]">
+            <Printer className="h-4 w-4" aria-hidden="true" /> Print field brief
+          </button>
+        )}
+      </nav>
     </div>
   );
 };

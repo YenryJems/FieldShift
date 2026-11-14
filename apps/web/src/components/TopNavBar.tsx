@@ -1,43 +1,28 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Compass, Globe, Sprout } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 const navigation = [
-  { href: '#top', label: 'Mission' },
-  { href: '#approach', label: 'How it works' },
-  { href: '#field-sites', label: 'Field sites' },
-  { href: '#fari-engine', label: 'Strategy lab' },
-  { href: '#field-map', label: 'Climate & map' },
-  { href: '#seasonal-analysis', label: 'Seasonal outlook' },
-  { href: '#agronomic-suite', label: 'Insights' },
-  { href: '#data-sources', label: 'Data & trust' },
+  { label: 'Choose a farm' },
+  { label: 'Set priorities' },
+  { label: 'Compare rotations' },
+  { label: 'Explore evidence' },
+  { label: 'Take your field brief' },
 ];
 
-export const TopNavBar: React.FC = () => {
+interface TopNavBarProps {
+  plannerStep: number;
+  onPlannerStepChange: (step: number) => void;
+}
+
+export const TopNavBar: React.FC<TopNavBarProps> = ({ plannerStep, onPlannerStepChange }) => {
   const { t } = useLanguage();
-  const [activeHref, setActiveHref] = useState('#top');
 
-  useEffect(() => {
-    if (!('IntersectionObserver' in window)) return;
-    const targets = navigation
-      .map(({ href }) => document.querySelector<HTMLElement>(href))
-      .filter((element): element is HTMLElement => element !== null);
-    if (!targets.length) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((first, second) => second.intersectionRatio - first.intersectionRatio)[0];
-        if (visible?.target instanceof HTMLElement && visible.target.id) {
-          setActiveHref(`#${visible.target.id}`);
-        }
-      },
-      { rootMargin: '-15% 0px -70% 0px', threshold: [0, 0.15, 0.35, 0.6] },
-    );
-    targets.forEach((target) => observer.observe(target));
-    return () => observer.disconnect();
-  }, []);
+  const navigateToStep = (index: number) => {
+    if (index > plannerStep) return;
+    onPlannerStepChange(index);
+    document.getElementById('field-demo')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
     <>
@@ -47,24 +32,27 @@ export const TopNavBar: React.FC = () => {
           <span><span className="block text-base font-extrabold tracking-tight">FieldShift</span><span className="block font-mono text-[9px] uppercase tracking-[0.14em] text-[#A2ADB7]">Earth data · farm choices</span></span>
         </a>
 
-        <p className="mt-14 font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-[#8995A1]">Navigation</p>
+        <p className="mt-14 font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-[#8995A1]">Your planning path</p>
         <nav aria-label="Page navigation" className="relative mt-5 flex-1">
           <span aria-hidden="true" className="absolute bottom-5 left-[5px] top-5 w-px bg-[#26333E]" />
           <ol className="relative space-y-2">
             {navigation.map((item, index) => {
-              const active = activeHref === item.href;
+              const active = plannerStep === index;
+              const complete = index < plannerStep;
               return (
-                <li key={item.href}>
-                  <a
-                    href={item.href}
-                    aria-current={active ? 'location' : undefined}
-                    onClick={() => setActiveHref(item.href)}
-                    className={`group flex min-h-12 items-center gap-3 rounded-lg px-0.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9ED5E8] ${active ? 'text-white' : 'text-[#A6ADB4] hover:text-white'}`}
+                <li key={item.label}>
+                  <button
+                    type="button"
+                    disabled={index > plannerStep}
+                    aria-current={active ? 'step' : undefined}
+                    aria-disabled={index > plannerStep}
+                    onClick={() => navigateToStep(index)}
+                    className={`group flex min-h-12 w-full items-center gap-3 rounded-lg px-0.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9ED5E8] ${active ? 'text-white' : index > plannerStep ? 'cursor-not-allowed text-[#65717C]' : 'text-[#A6ADB4] hover:text-white'}`}
                   >
-                    <span className={`relative z-10 h-[7px] w-[7px] shrink-0 rounded-full ring-4 ring-[#080B0E] transition-colors ${active ? 'bg-[#A6DFF1]' : 'bg-[#45535F] group-hover:bg-[#98B1C0]'}`} />
-                    <span className={`font-mono text-[10px] tabular-nums ${active ? 'text-[#A6DFF1]' : 'text-[#77838E]'}`}>{String(index + 1).padStart(2, '0')}</span>
+                    <span className={`relative z-10 h-[7px] w-[7px] shrink-0 rounded-full ring-4 ring-[#080B0E] transition-colors ${active ? 'bg-[#A6DFF1]' : complete ? 'bg-[#79B88D]' : 'bg-[#45535F]'}`} />
+                    <span className={`font-mono text-[10px] tabular-nums ${active ? 'text-[#A6DFF1]' : complete ? 'text-[#8CCB9F]' : 'text-[#77838E]'}`}>{String(index + 1).padStart(2, '0')}</span>
                     <span className={`text-[13px] font-semibold ${active ? 'text-white' : ''}`}>{item.label}</span>
-                  </a>
+                  </button>
                 </li>
               );
             })}
@@ -72,8 +60,8 @@ export const TopNavBar: React.FC = () => {
         </nav>
 
         <div className="rounded-xl border border-white/10 bg-white/[0.04] p-3.5">
-          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.13em] text-[#9FB3BF]">The Next Frontier</p>
-          <p className="mt-1 text-xs leading-5 text-[#CCD2D7]">NASA Space Apps Challenge · 2026</p>
+          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.13em] text-[#9FB3BF]">Planning a resilient season</p>
+          <p className="mt-1 text-xs leading-5 text-[#CCD2D7]">{plannerStep + 1} of {navigation.length} steps</p>
         </div>
       </aside>
 
@@ -90,9 +78,9 @@ export const TopNavBar: React.FC = () => {
         </div>
         <nav aria-label="Section navigation" className="flex items-center gap-5 overflow-x-auto border-t border-[#E2E8DF] px-4 py-2 text-[11px] font-semibold text-[#465A4E] lg:hidden">
           {navigation.map((item, index) => (
-            <a key={item.href} href={item.href} aria-current={activeHref === item.href ? 'location' : undefined} onClick={() => setActiveHref(item.href)} className={`inline-flex min-h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded px-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332] ${activeHref === item.href ? 'text-[#1B4332]' : 'text-[#65766A]'}`}>
-              <span className="font-mono text-[9px] text-[#52715E]">{String(index + 1).padStart(2, '0')}</span>{item.label}
-            </a>
+            <button key={item.label} type="button" disabled={index > plannerStep} aria-current={plannerStep === index ? 'step' : undefined} onClick={() => navigateToStep(index)} className={`inline-flex min-h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded px-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332] disabled:cursor-not-allowed ${plannerStep === index ? 'font-extrabold text-[#1B4332]' : index < plannerStep ? 'text-[#477251]' : 'text-[#849087]'}`}>
+              <span className="font-mono text-[9px]">{String(index + 1).padStart(2, '0')}</span>{item.label}
+            </button>
           ))}
         </nav>
       </header>

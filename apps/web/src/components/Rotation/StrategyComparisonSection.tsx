@@ -56,6 +56,7 @@ interface StrategyComparisonSectionProps {
   farmId: FarmId;
   selectedMonth: number;
   onSelectMonth?: (month: number) => void;
+  displayMode?: 'all' | 'controls' | 'compare' | 'review';
 }
 
 const STAGE_STYLES: Record<
@@ -98,6 +99,7 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
   farmId,
   selectedMonth,
   onSelectMonth,
+  displayMode = 'all',
 }) => {
   const { t } = useLanguage();
   const [weights, setWeights] = useState<PriorityWeights>({
@@ -133,6 +135,9 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
   const topStrategyObj =
     farm.strategies.find((s) => s.id === topScore.strategyId) ??
     farm.strategies[0];
+  const showControls = displayMode === 'all' || displayMode === 'controls';
+  const showComparison = displayMode === 'all' || displayMode === 'compare';
+  const isReview = displayMode === 'review';
 
   const isDroughtCondition =
     stressScenario === 'drought' ||
@@ -285,15 +290,21 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
             id="fari-engine-heading"
             className="mt-2 text-2xl font-extrabold tracking-tight text-[#17271D] sm:text-3xl"
           >
-            {t.fariSectionTitle}
+            {displayMode === 'controls' ? 'Set priorities for this season' : displayMode === 'compare' ? 'Compare three crop strategies' : isReview ? 'Your draft field plan' : t.fariSectionTitle}
           </h2>
           <p className="mt-1 text-sm leading-6 text-[#536458]">
-            {t.fariSectionSubtitle}
+            {displayMode === 'controls'
+              ? 'Tell FieldShift what matters on this field, then test a climate scenario. Scores recalculate from these choices.'
+              : displayMode === 'compare'
+                ? 'See how each strategy performs under the priorities and scenario you selected. Expand the evidence before deciding what to review locally.'
+                : isReview
+                  ? 'A concise, printable summary based on the selected farm, priorities, and modeled scenario.'
+                  : t.fariSectionSubtitle}
           </p>
         </div>
 
         {/* Field Extension / Voice / SMS Actions */}
-        <div className="flex flex-wrap items-center gap-2">
+        {displayMode !== 'controls' && <div className="flex flex-wrap items-center gap-2">
           {isSpeechSynthesisSupported() && (
             <button
               type="button"
@@ -336,7 +347,7 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
             <Printer className="h-4 w-4" aria-hidden="true" />
             <span>{t.printBriefButton}</span>
           </button>
-        </div>
+        </div>}
         {copyFailed && (
           <span role="status" className="sr-only">Copy failed. Select and copy the brief from the printable version.</span>
         )}
@@ -380,7 +391,7 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
         </div>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-12">
+      {showControls && <div className="grid gap-5 lg:grid-cols-12">
         <ScenarioControls
           weights={weights}
           normalizedWeights={evaluation.normalizedWeights}
@@ -399,8 +410,36 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
           labels={t}
           onScenarioChange={setStressScenario}
         />
-      </div>
+      </div>}
+      {isReview && (
+        <section aria-labelledby="draft-plan-heading" className="overflow-hidden rounded-2xl border border-[#BCD3C2] bg-[#F3F7F0]">
+          <div className="grid lg:grid-cols-[1fr_0.72fr]">
+            <div className="p-5 sm:p-7">
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[#52715E]">Plan summary · {farm.name}</p>
+              <h3 id="draft-plan-heading" className="mt-2 max-w-2xl text-2xl font-semibold leading-tight tracking-tight text-[#17271D] sm:text-3xl">{topStrategyObj.name}</h3>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-[#465A4E]">This is the highest-scoring option for the priorities and scenario you set. Use it as a starting point for a local conversation, not as an automatic planting prescription.</p>
+              <div className="mt-5 flex flex-wrap gap-2">
+                {topStrategyObj.crops.map((crop) => <span key={crop} className="rounded-full border border-[#C8D7C7] bg-white px-3 py-1.5 text-xs font-semibold text-[#263B2E]">{crop}</span>)}
+              </div>
+            </div>
+            <div className="bg-[#10251B] p-5 text-white sm:p-7">
+              <div className="flex items-end justify-between gap-3 border-b border-white/15 pb-4">
+                <div><p className="font-mono text-[9px] font-bold uppercase tracking-wider text-[#C5D5C5]">FARI · 0–100</p><p className="mt-1 font-mono text-5xl font-semibold tabular-nums text-[#D4E6A7]">{topScore.fariScore.toFixed(1)}</p></div>
+                <span className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-bold">Highest in this run</span>
+              </div>
+              <p className="mt-4 text-sm font-semibold">{evaluation.climate.scenarioLabel} · {evaluation.climate.monthLabel}</p>
+              <p className="mt-1 text-xs leading-5 text-[#D0DAD1]">Historical NASA POWER / GPM IMERG baseline with the selected what-if adjustments.</p>
+              <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.06] p-3">
+                <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-[#D4E6A7]">Before planting, confirm locally</p>
+                <p className="mt-1.5 text-xs leading-5 text-white/85">Soil pH and N-P-K, seed access, water supply, drainage, labor, and current local advice.</p>
+              </div>
+            </div>
+          </div>
+          <p className="border-t border-[#D8E2D4] px-5 py-3 text-xs leading-5 text-[#526257] sm:px-7">The score ranks the options using your selected weights. It does not guarantee yield or account for every field condition.</p>
+        </section>
+      )}
       {/* 3-Strategy Side-by-Side Comparison Cards (S1, S2, S3) */}
+      {showComparison && <>
       <div>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-lg font-extrabold text-[#17271D]">
@@ -815,6 +854,7 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
           ))}
         </div>
       </div>
+      </>}
     </section>
   );
 };
