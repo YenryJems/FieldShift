@@ -5,18 +5,18 @@ import { WorkspaceView } from './WorkspaceView';
 const steps = [
   {
     number: '01',
-    title: 'Read the season',
-    description: 'Review historical heat, rainfall, and root-zone wetness patterns for the selected study location.',
+    title: 'Ground the decision',
+    description: 'Choose a representative farm and inspect the historical climate and terrain context relevant to its growing season.',
   },
   {
     number: '02',
-    title: 'Compare rotations',
-    description: 'See how three crop strategies score as you change priorities, field constraints, and climate scenarios.',
+    title: 'Compare real trade-offs',
+    description: 'Set farmer priorities, test a stress scenario, compare the current baseline with two adaptive rotations, and choose a draft.',
   },
   {
     number: '03',
-    title: 'Verify locally',
-    description: 'Bring the evidence and open questions to a farmer, soil laboratory, or agricultural extension officer.',
+    title: 'Verify before acting',
+    description: 'Carry the score, crop sequence, data gaps, and local checks into a conversation with a farmer or extension officer.',
   },
 ];
 
@@ -128,8 +128,8 @@ export const HomeView: React.FC<HomeViewProps> = ({ plannerStep, onPlannerStepCh
             <div className="inline-flex items-center gap-2 rounded-full bg-[#E5EDDF] px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[#315D3E]">
               <Leaf className="h-3 w-3" aria-hidden="true" /> Interactive decision workspace
             </div>
-            <h2 className="mt-4 text-2xl font-semibold tracking-tight text-[#17271D] sm:text-3xl">Start with the farm. Compare what could work.</h2>
-            <p className="mt-2 text-sm leading-6 text-[#536458]">Choose a study location, review the strategy scores, then explore historical climate patterns and modeled risks.</p>
+            <h2 className="mt-4 text-2xl font-semibold tracking-tight text-[#17271D] sm:text-3xl">Answer one practical question: what is worth trying here?</h2>
+            <p className="mt-2 text-sm leading-6 text-[#536458]">Move from field context, to historical climate evidence, to a farmer-chosen rotation draft that still needs local review.</p>
           </div>
           <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#64756A]">NASA POWER · 2020–2025 static baseline</span>
         </div>

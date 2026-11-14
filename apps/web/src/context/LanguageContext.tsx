@@ -88,7 +88,7 @@ export const TRANSLATIONS: Record<SupportedLanguage, TranslationStrings> = {
     readAloudButton: 'Read top strategy aloud',
     stopAudioButton: 'Stop audio',
     copySmsBriefButton: 'Copy SMS / Messenger field brief',
-    printBriefButton: 'Print 1-page MAO brief',
+    printBriefButton: 'Print detailed field report',
     glossaryTitle: 'Plain-Language Earth Science Glossary',
     glossaryItems: [
       {

@@ -232,29 +232,412 @@ input[type="range"].fieldshift-slider::-moz-range-thumb {
   }
 }
 
+.print-brief-root {
+  display: none;
+}
+
+@page {
+  size: A4 portrait;
+  margin: 13mm 12mm 14mm;
+}
+
 @media print {
-  header, .no-print {
+  html,
+  body {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    background: #FFFFFF !important;
+  }
+
+  body > *:not(#field-brief-print) {
     display: none !important;
   }
-  body * {
-    visibility: hidden !important;
+
+  body > #field-brief-print {
+    display: block !important;
   }
+
   #field-brief-print,
   #field-brief-print * {
-    visibility: visible !important;
+    box-sizing: border-box !important;
+    color-adjust: exact;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
+
   #field-brief-print {
-    display: block !important;
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    padding: 12mm;
-    color: #111C16 !important;
+    position: static !important;
+    inset: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #16231C !important;
     background: #FFFFFF !important;
-    font-size: 10pt;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 8.5pt !important;
+    line-height: 1.42 !important;
   }
-  body {
-    background: #FFFFFF !important;
-    color: #000000 !important;
+
+  #field-brief-print h1,
+  #field-brief-print h2,
+  #field-brief-print h3,
+  #field-brief-print h4,
+  #field-brief-print p,
+  #field-brief-print dl,
+  #field-brief-print ol {
+    margin-top: 0;
+  }
+
+  #field-brief-print h1 {
+    margin-bottom: 1.5mm;
+    color: #10251B !important;
+    font-size: 27pt !important;
+    line-height: 1.05 !important;
+    letter-spacing: -0.7pt;
+  }
+
+  #field-brief-print h2 {
+    margin-bottom: 1.5mm;
+    color: #173D2A !important;
+    font-size: 15pt !important;
+    line-height: 1.2 !important;
+  }
+
+  #field-brief-print h3 {
+    margin: 4mm 0 2mm;
+    color: #1B4332 !important;
+    font-size: 10pt !important;
+    line-height: 1.2 !important;
+  }
+
+  #field-brief-print h4 {
+    margin-bottom: 1mm;
+    color: #1B4332 !important;
+    font-size: 8.5pt !important;
+  }
+
+  #field-brief-print p {
+    margin-bottom: 2mm;
+  }
+
+  #field-brief-print .brief-cover {
+    margin-bottom: 6mm;
+    padding-bottom: 5mm;
+    border-bottom: 1.2mm solid #1B4332;
+    break-inside: avoid;
+  }
+
+  #field-brief-print .brief-brand-row,
+  #field-brief-print .brief-facts,
+  #field-brief-print .brief-highlight-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.5mm 4mm;
+  }
+
+  #field-brief-print .brief-brand-row {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    margin-bottom: 8mm;
+    padding-bottom: 2mm;
+    border-bottom: 0.3mm solid #CBD7CC;
+  }
+
+  #field-brief-print .brief-brand {
+    color: #173D2A !important;
+    font-size: 10pt;
+    font-weight: 800;
+    letter-spacing: 0.5pt;
+  }
+
+  #field-brief-print .brief-brand span,
+  #field-brief-print .brief-document-type,
+  #field-brief-print .brief-kicker {
+    color: #587163 !important;
+    font-size: 6.5pt;
+    font-weight: 700;
+    letter-spacing: 0.8pt;
+    text-transform: uppercase;
+  }
+
+  #field-brief-print .brief-location {
+    margin-bottom: 5mm;
+    color: #52645A !important;
+    font-size: 12pt;
+  }
+
+  #field-brief-print .brief-facts > div,
+  #field-brief-print .brief-highlight-grid > div {
+    padding: 2mm 2.5mm;
+    border: 0.25mm solid #D8E2D8;
+    border-radius: 1.2mm;
+    break-inside: avoid;
+  }
+
+  #field-brief-print .brief-facts span,
+  #field-brief-print .brief-highlight-grid span {
+    display: block;
+    margin-bottom: 1mm;
+    color: #68786E !important;
+    font-size: 6.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  #field-brief-print .brief-facts strong,
+  #field-brief-print .brief-highlight-grid strong {
+    color: #1A2C20 !important;
+    font-size: 8pt;
+  }
+
+  #field-brief-print .brief-callout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 52mm;
+    gap: 5mm;
+    align-items: center;
+    margin: 0 0 6mm;
+    padding: 4mm;
+    border: 0.5mm solid #9BB7A2;
+    border-left: 2mm solid #1B4332;
+    border-radius: 1.5mm;
+    background: #F4F8F3 !important;
+    break-inside: avoid;
+  }
+
+  #field-brief-print .brief-callout h2 {
+    font-size: 13pt !important;
+  }
+
+  #field-brief-print .brief-score {
+    padding-left: 4mm;
+    border-left: 0.3mm solid #C7D8C8;
+    text-align: right;
+  }
+
+  #field-brief-print .brief-score span,
+  #field-brief-print .brief-score b {
+    display: block;
+    color: #52645A !important;
+    font-size: 7pt;
+  }
+
+  #field-brief-print .brief-score strong {
+    display: block;
+    color: #173D2A !important;
+    font-size: 25pt;
+    line-height: 1.1;
+  }
+
+  #field-brief-print .brief-score small {
+    font-size: 9pt;
+  }
+
+  #field-brief-print .brief-section {
+    margin: 0 0 6mm;
+    break-inside: auto;
+  }
+
+  #field-brief-print .brief-section-heading {
+    display: flex;
+    gap: 3mm;
+    align-items: flex-start;
+    margin: 0 0 3mm;
+    padding-bottom: 2mm;
+    border-bottom: 0.4mm solid #C8D7C9;
+    break-after: avoid;
+  }
+
+  #field-brief-print .brief-section-heading > span {
+    color: #5E8B68 !important;
+    font-family: Consolas, monospace;
+    font-size: 9pt;
+    font-weight: 800;
+  }
+
+  #field-brief-print .brief-section-heading h2 {
+    margin: 0 0 0.7mm;
+  }
+
+  #field-brief-print .brief-section-heading p,
+  #field-brief-print .brief-small {
+    margin: 0;
+    color: #607066 !important;
+    font-size: 7pt;
+  }
+
+  #field-brief-print .brief-two-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6mm;
+  }
+
+  #field-brief-print .brief-definition-grid {
+    display: grid;
+    grid-template-columns: 37mm minmax(0, 1fr);
+    gap: 1.7mm 3mm;
+    margin: 0;
+  }
+
+  #field-brief-print .brief-definition-grid dt {
+    color: #53675A !important;
+    font-weight: 700;
+  }
+
+  #field-brief-print .brief-definition-grid dd {
+    margin: 0;
+  }
+
+  #field-brief-print .brief-table {
+    width: 100%;
+    margin: 2.5mm 0;
+    border-collapse: collapse;
+    font-size: 7.3pt;
+    line-height: 1.3;
+  }
+
+  #field-brief-print .brief-table thead {
+    display: table-header-group;
+  }
+
+  #field-brief-print .brief-table tr {
+    break-inside: avoid;
+  }
+
+  #field-brief-print .brief-table th,
+  #field-brief-print .brief-table td {
+    padding: 1.4mm 1.6mm;
+    border: 0.25mm solid #D3DDD3;
+    vertical-align: top;
+    text-align: left;
+  }
+
+  #field-brief-print .brief-table th {
+    background: #EAF1E9 !important;
+    color: #203C2B !important;
+    font-size: 6.5pt;
+    font-weight: 800;
+  }
+
+  #field-brief-print .brief-compact {
+    font-size: 7pt;
+  }
+
+  #field-brief-print .brief-score-table {
+    font-size: 6.6pt;
+  }
+
+  #field-brief-print .brief-score-table th,
+  #field-brief-print .brief-score-table td {
+    padding: 1.6mm 1.2mm;
+  }
+
+  #field-brief-print .brief-score-table td:nth-child(n+3) {
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  #field-brief-print .brief-selected-row td {
+    background: #F0F7EE !important;
+  }
+
+  #field-brief-print .brief-formula {
+    margin: 2mm 0 3mm;
+    padding: 2.5mm 3mm;
+    border: 0.3mm solid #CBD9CB;
+    background: #F6F8F4 !important;
+    font-family: Consolas, monospace;
+    font-size: 8pt;
+    break-inside: avoid;
+  }
+
+  #field-brief-print .brief-formula span {
+    color: #596A5E !important;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 7pt;
+  }
+
+  #field-brief-print .brief-note,
+  #field-brief-print .brief-alert {
+    margin: 2mm 0;
+    padding: 2mm 2.5mm;
+    border-left: 1mm solid #839A86;
+    background: #F5F7F2 !important;
+    font-size: 7.2pt;
+    break-inside: avoid;
+  }
+
+  #field-brief-print .brief-alert {
+    border-left-color: #AF6D19;
+    background: #FFF8E9 !important;
+  }
+
+  #field-brief-print .brief-explanation-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2mm 4mm;
+    margin-top: 3mm;
+  }
+
+  #field-brief-print .brief-explanation {
+    padding: 2.2mm 2.5mm;
+    border: 0.25mm solid #D6E0D6;
+    border-radius: 1mm;
+    break-inside: avoid;
+  }
+
+  #field-brief-print .brief-explanation p {
+    margin: 0;
+    font-size: 7.3pt;
+  }
+
+  #field-brief-print .brief-calendar {
+    margin: 3mm 0 4mm;
+    break-inside: avoid;
+  }
+
+  #field-brief-print .brief-calendar h3 {
+    margin-bottom: 1mm;
+  }
+
+  #field-brief-print .brief-calendar-table {
+    margin-top: 1mm;
+    font-size: 6.8pt;
+  }
+
+  #field-brief-print .brief-checklist {
+    margin: 0;
+    padding-left: 6mm;
+  }
+
+  #field-brief-print .brief-checklist li {
+    margin: 0 0 2.5mm;
+    padding-left: 1mm;
+    break-inside: avoid;
+  }
+
+  #field-brief-print .brief-source-link span {
+    color: #1D4E89 !important;
+    overflow-wrap: anywhere;
+  }
+
+  #field-brief-print .brief-disclaimer {
+    margin-top: 5mm;
+    padding: 3mm;
+    border: 0.5mm solid #526C58;
+    background: #F3F7F1 !important;
+    font-size: 7.5pt;
+    break-inside: avoid;
+  }
+
+  #field-brief-print .brief-footer {
+    margin-top: 3mm;
+    padding-top: 2mm;
+    border-top: 0.3mm solid #CBD7CC;
+    color: #627268 !important;
+    font-size: 6.5pt;
   }
 }

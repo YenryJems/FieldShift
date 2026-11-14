@@ -4,10 +4,10 @@ import { useLanguage } from '../context/LanguageContext';
 
 const navigation = [
   { label: 'Choose a farm' },
+  { label: 'Read the season' },
   { label: 'Set priorities' },
   { label: 'Compare rotations' },
-  { label: 'Explore evidence' },
-  { label: 'Take your field brief' },
+  { label: 'Review the plan' },
 ];
 
 interface TopNavBarProps {

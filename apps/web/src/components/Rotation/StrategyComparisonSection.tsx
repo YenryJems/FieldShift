@@ -19,13 +19,17 @@ import {
   FieldConstraints,
   getMonthlyTelemetry,
   getFarmById,
+  PLACES_BY_ID,
   PriorityWeights,
   rankFarmStrategies,
   StressScenarioId,
+  StrategyId,
+  CropStrategy,
 } from '@fieldshift/climate-data';
 import { useLanguage } from '../../context/LanguageContext';
 import { ScenarioControls } from '../Controls/ScenarioControls';
 import { StressToggles } from '../Controls/StressToggles';
+import { PrintableFieldBrief } from './PrintableFieldBrief';
 import { formatSmsFieldBrief } from '../../utils/exportBrief';
 import {
   isSpeechSynthesisSupported,
@@ -57,6 +61,8 @@ interface StrategyComparisonSectionProps {
   selectedMonth: number;
   onSelectMonth?: (month: number) => void;
   displayMode?: 'all' | 'controls' | 'compare' | 'review';
+  selectedStrategyId?: StrategyId | null;
+  onSelectStrategy?: (strategyId: StrategyId) => void;
 }
 
 const STAGE_STYLES: Record<
@@ -100,6 +106,8 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
   selectedMonth,
   onSelectMonth,
   displayMode = 'all',
+  selectedStrategyId = null,
+  onSelectStrategy,
 }) => {
   const { t } = useLanguage();
   const [weights, setWeights] = useState<PriorityWeights>({
@@ -132,12 +140,20 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
 
   const topScore = evaluation.topStrategy;
   const monthlyTelemetry = getMonthlyTelemetry(farmId, selectedMonth);
-  const topStrategyObj =
-    farm.strategies.find((s) => s.id === topScore.strategyId) ??
+  const planScore = selectedStrategyId
+    ? evaluation.strategies.find((score) => score.strategyId === selectedStrategyId) ?? topScore
+    : topScore;
+  const planStrategyObj =
+    farm.strategies.find((strategy) => strategy.id === planScore.strategyId) ??
     farm.strategies[0];
   const showControls = displayMode === 'all' || displayMode === 'controls';
   const showComparison = displayMode === 'all' || displayMode === 'compare';
   const isReview = displayMode === 'review';
+  const strategyById: Record<StrategyId, CropStrategy> = {
+    S1: farm.strategies.find((strategy) => strategy.id === 'S1') ?? farm.strategies[0],
+    S2: farm.strategies.find((strategy) => strategy.id === 'S2') ?? farm.strategies[0],
+    S3: farm.strategies.find((strategy) => strategy.id === 'S3') ?? farm.strategies[0],
+  };
 
   const isDroughtCondition =
     stressScenario === 'drought' ||
@@ -147,8 +163,8 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
   const fieldBrief = formatSmsFieldBrief({
     farm,
     climate: evaluation.climate,
-    topScore,
-    topStrategy: topStrategyObj,
+    topScore: planScore,
+    topStrategy: planStrategyObj,
     cfiWindow: cfiWindows[0],
     droughtAlert: isDroughtCondition ? t.droughtAlertBanner : undefined,
   });
@@ -177,7 +193,7 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
     const riskText = isDroughtCondition
       ? `Urgent water stress advisory: ${t.droughtAlertBanner}`
       : `Spray window status: ${cfiWindows[0].badgeText}. ${cfiWindows[0].farmerActionAdvisory}`;
-    const speechText = `${farm.name}, ${evaluation.climate.monthLabel}. ${riskText} Top recommended strategy: ${topStrategyObj.name}, scoring ${topScore.fariScore.toFixed(1)} out of 100. ${topStrategyObj.explanations.whySuggested} Local review alert: ${topStrategyObj.explanations.localReviewAlerts}`;
+    const speechText = `${farm.name}, ${evaluation.climate.monthLabel}. ${riskText} Draft strategy: ${planStrategyObj.name}, scoring ${planScore.fariScore.toFixed(1)} out of 100. ${planStrategyObj.explanations.whySuggested} Local review alert: ${planStrategyObj.explanations.localReviewAlerts}`;
     setIsSpeaking(true);
     speakFieldAdvisory(speechText, 'en', () => setIsSpeaking(false));
   };
@@ -222,7 +238,7 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
     {
       metric: '+35 to +80 kg N/ha',
       title: 'Biological Nitrogen Fixation',
-      detail: `Legume relay nodulation (${topStrategyObj.nFixKgHa} kg N/ha modeled for ${topStrategyObj.shortLabel}) replenishes root-zone nitrogen between main harvests.`,
+      detail: `Legume relay nodulation (${planStrategyObj.nFixKgHa} kg N/ha modeled for ${planStrategyObj.shortLabel}) replenishes root-zone nitrogen between main harvests.`,
       source: 'FAO / IRRI tropical grain-legume biological N-fixation range',
     },
     {
@@ -235,7 +251,7 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
     {
       metric: 'Up to 75%',
       title: 'Slope Soil Erosion Reduction',
-      detail: `Rapid-closing canopy (${topStrategyObj.canopyClosureDays} days) and contour hedgerow root binding protect sloping fields (${farm.slopePct}% slope at ${farm.name}) against monsoon rain bursts.`,
+      detail: `Rapid-closing canopy (${planStrategyObj.canopyClosureDays} days) and contour hedgerow root binding protect sloping fields (${farm.slopePct}% slope at ${farm.name}) against monsoon rain bursts.`,
       source: 'World Agroforestry (ICRAF) NVS contour trials in Bukidnon (8–15% slopes)',
     },
     {
@@ -253,25 +269,21 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
       aria-labelledby="fari-engine-heading"
       className="scroll-mt-28 space-y-6 rounded-2xl border border-[#D4DDD0] bg-white p-5 shadow-xs sm:p-7"
     >
-      <article id="field-brief-print" className="hidden" aria-label="Printable farm field brief">
-        <p className="font-mono text-xs font-bold uppercase tracking-wider">FieldShift · MAO / Extension Field Brief</p>
-        <h1 className="mt-2 text-2xl font-extrabold">{farm.name}</h1>
-        <p className="mt-1">{farm.locationLabel} · {Math.abs(farm.latitude).toFixed(3)}°{farm.latitude < 0 ? 'S' : 'N'}, {Math.abs(farm.longitude).toFixed(3)}°{farm.longitude < 0 ? 'W' : 'E'} · {farm.elevationM} m · {farm.slopePct}% slope</p>
-        <hr className="my-4" />
-        <h2 className="font-bold">Recommended rotation: {topStrategyObj.name}</h2>
-        <p className="mt-1">Crops: {topStrategyObj.crops.join(' + ')} · FARI {topScore.fariScore.toFixed(1)}/100</p>
-        <h2 className="mt-4 font-bold">Current risk signals · {evaluation.climate.monthLabel} · {evaluation.climate.scenarioLabel}</h2>
-        <p className="mt-1">NASA POWER: T2M {evaluation.climate.adjustedTempC.toFixed(1)}°C · Rain {evaluation.climate.adjustedDailyPrecipMm.toFixed(1)} mm/day · GWETROOT {evaluation.climate.adjustedGwetRoot.toFixed(2)} · GWETTOP {evaluation.climate.adjustedGwetTop.toFixed(2)}</p>
-        <p className="mt-1">90-day spray window: {cfiWindows[0].badgeText} — {cfiWindows[0].farmerActionAdvisory}</p>
-        {isDroughtCondition && <p className="mt-1 font-bold">Water stress alert: {t.droughtAlertBanner}</p>}
-        <h2 className="mt-4 font-bold">Before planting, review with your MAO or cooperative</h2>
-        <ul className="mt-1 list-disc pl-5">
-          <li>Confirm soil pH, texture, and N-P-K with a local soil test.</li>
-          <li>Check seed or cutting availability, market access, and planting dates.</li>
-          <li>Confirm water supply, field drainage, slope, and labor needs locally.</li>
-        </ul>
-        <p className="mt-4 text-xs">NASA data and modeled indicators support planning; they do not replace farmer judgment, local soil testing, or certified agricultural extension advice.</p>
-      </article>
+      <PrintableFieldBrief
+        farm={farm}
+        place={PLACES_BY_ID[farmId]}
+        climate={evaluation.climate}
+        monthlyTelemetry={monthlyTelemetry}
+        strategyScores={evaluation.rankedStrategies}
+        strategyById={strategyById}
+        selectedStrategy={planStrategyObj}
+        selectedScore={planScore}
+        hasFarmerChoice={selectedStrategyId !== null}
+        weights={evaluation.normalizedWeights}
+        constraints={evaluation.constraints}
+        cfiWindows={cfiWindows}
+        droughtAlert={isDroughtCondition ? t.droughtAlertBanner : undefined}
+      />
       {/* Section Header & Action Toolbar */}
       <div className="flex flex-col gap-4 border-b border-[#E2E8DF] pb-5 lg:flex-row lg:items-start lg:justify-between">
         <div className="max-w-3xl">
@@ -298,7 +310,7 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
               : displayMode === 'compare'
                 ? 'See how each strategy performs under the priorities and scenario you selected. Expand the evidence before deciding what to review locally.'
                 : isReview
-                  ? 'A concise, printable summary based on the selected farm, priorities, and modeled scenario.'
+                  ? 'A detailed, printable field-planning report with data, assumptions, all three strategy scores, the 90-day screen, and local verification steps.'
                   : t.fariSectionSubtitle}
           </p>
         </div>
@@ -415,17 +427,17 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
         <section aria-labelledby="draft-plan-heading" className="overflow-hidden rounded-2xl border border-[#BCD3C2] bg-[#F3F7F0]">
           <div className="grid lg:grid-cols-[1fr_0.72fr]">
             <div className="p-5 sm:p-7">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[#52715E]">Plan summary · {farm.name}</p>
-              <h3 id="draft-plan-heading" className="mt-2 max-w-2xl text-2xl font-semibold leading-tight tracking-tight text-[#17271D] sm:text-3xl">{topStrategyObj.name}</h3>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-[#465A4E]">This is the highest-scoring option for the priorities and scenario you set. Use it as a starting point for a local conversation, not as an automatic planting prescription.</p>
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[#52715E]">{selectedStrategyId ? 'Your draft choice' : 'Leading option to consider'} · {farm.name}</p>
+              <h3 id="draft-plan-heading" className="mt-2 max-w-2xl text-2xl font-semibold leading-tight tracking-tight text-[#17271D] sm:text-3xl">{planStrategyObj.name}</h3>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-[#465A4E]">{selectedStrategyId ? 'You selected this option as a starting point. Review its trade-offs and confirm it with a local farmer or extension officer before planting.' : 'This option currently ranks highest for your priorities and scenario. Return to Compare rotations to choose this or another option for your draft.'}</p>
               <div className="mt-5 flex flex-wrap gap-2">
-                {topStrategyObj.crops.map((crop) => <span key={crop} className="rounded-full border border-[#C8D7C7] bg-white px-3 py-1.5 text-xs font-semibold text-[#263B2E]">{crop}</span>)}
+                {planStrategyObj.crops.map((crop) => <span key={crop} className="rounded-full border border-[#C8D7C7] bg-white px-3 py-1.5 text-xs font-semibold text-[#263B2E]">{crop}</span>)}
               </div>
             </div>
             <div className="bg-[#10251B] p-5 text-white sm:p-7">
               <div className="flex items-end justify-between gap-3 border-b border-white/15 pb-4">
-                <div><p className="font-mono text-[9px] font-bold uppercase tracking-wider text-[#C5D5C5]">FARI · 0–100</p><p className="mt-1 font-mono text-5xl font-semibold tabular-nums text-[#D4E6A7]">{topScore.fariScore.toFixed(1)}</p></div>
-                <span className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-bold">Highest in this run</span>
+                <div><p className="font-mono text-[9px] font-bold uppercase tracking-wider text-[#C5D5C5]">FARI · 0–100</p><p className="mt-1 font-mono text-5xl font-semibold tabular-nums text-[#D4E6A7]">{planScore.fariScore.toFixed(1)}</p></div>
+                <span className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-bold">{selectedStrategyId ? `Rank #${planScore.rank} · your choice` : 'Highest score · not selected'}</span>
               </div>
               <p className="mt-4 text-sm font-semibold">{evaluation.climate.scenarioLabel} · {evaluation.climate.monthLabel}</p>
               <p className="mt-1 text-xs leading-5 text-[#D0DAD1]">Historical NASA POWER / GPM IMERG baseline with the selected what-if adjustments.</p>
@@ -462,7 +474,9 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
                 key={strategy.id}
                 aria-label={`Strategy ${strategy.id}: ${strategy.name}`}
                 className={`flex flex-col justify-between rounded-xl border p-5 transition-shadow ${
-                  isTopRanked
+                  selectedStrategyId === strategy.id
+                    ? 'border-2 border-[#1D6B46] bg-[#F3FAF5] shadow-md'
+                    : isTopRanked
                     ? 'border-2 border-[#1B4332] bg-[#F6FBF7] shadow-sm'
                     : 'border-[#D4DDD0] bg-white'
                 }`}
@@ -694,6 +708,16 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
                     </div>
                   </div>
                 </div>
+                {displayMode === 'compare' && (
+                  <button
+                    type="button"
+                    aria-pressed={selectedStrategyId === strategy.id}
+                    onClick={() => onSelectStrategy?.(strategy.id)}
+                    className={`mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 text-xs font-extrabold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332] ${selectedStrategyId === strategy.id ? 'bg-[#D8F3DC] text-[#1B4332]' : 'bg-[#1B4332] text-white hover:bg-[#2D6A4F]'}`}
+                  >
+                    {selectedStrategyId === strategy.id ? 'Selected for my draft' : 'Use as my draft plan'}
+                  </button>
+                )}
               </article>
             );
           })}

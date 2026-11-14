@@ -19,6 +19,7 @@ import {
   PlaceId,
   PLACES,
   PLACES_BY_ID,
+  StrategyId,
 } from '@fieldshift/climate-data';
 import { AnalyticalSuiteSection } from './Agronomics/AnalyticalSuiteSection';
 import { FooterAndAttributions } from './Common/FooterAndAttributions';
@@ -604,10 +605,10 @@ interface WorkspaceViewProps {
 
 const PLANNER_STEPS = [
   { title: 'Choose a farm', prompt: 'Start with the field and its real context.' },
-  { title: 'Set priorities', prompt: 'Choose what matters, then test a climate scenario.' },
-  { title: 'Compare rotations', prompt: 'Inspect the scores and evidence for all three options.' },
-  { title: 'Explore evidence', prompt: 'Check maps, seasonal patterns, soil gaps, and data sources.' },
-  { title: 'Take your field brief', prompt: 'Review the leading option and prepare for a local conversation.' },
+  { title: 'Read the season', prompt: 'See the historical climate signals behind this farm’s planning challenge.' },
+  { title: 'Set priorities', prompt: 'Tell FieldShift what matters and test a climate stress scenario.' },
+  { title: 'Compare rotations', prompt: 'Compare the baseline with two adaptive options, then choose a draft.' },
+  { title: 'Review the plan', prompt: 'Check the trade-offs and prepare a field brief for local review.' },
 ];
 
 type EvidencePanel = 'climate' | 'seasonal' | 'agronomy' | 'sources';
@@ -626,6 +627,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
   const [rainfallChange, setRainfallChange] = useState(false);
   const [heatChange, setHeatChange] = useState(false);
   const [evidencePanel, setEvidencePanel] = useState<EvidencePanel>('climate');
+  const [selectedStrategyId, setSelectedStrategyId] = useState<StrategyId | null>(null);
   const place = PLACES_BY_ID[placeId];
   const farm = FARMS_BY_ID[placeId];
   const averageMonthlyTemperature = place.meanTemperatureC;
@@ -639,6 +641,10 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
   const goToStep = (nextStep: number) => {
     onPlannerStepChange(nextStep);
     document.getElementById('planner-progress')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  const selectFarm = (nextPlaceId: PlaceId) => {
+    setPlaceId(nextPlaceId);
+    setSelectedStrategyId(null);
   };
 
   return (
@@ -694,7 +700,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
               type="button"
               role="tab"
               aria-selected={placeId === item.id}
-              onClick={() => setPlaceId(item.id)}
+              onClick={() => selectFarm(item.id)}
               className={`min-h-10 rounded-lg px-3 py-2 text-xs font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B3D91] sm:px-3.5 sm:text-sm ${
                 placeId === item.id
                   ? 'bg-white text-[#1B4332] shadow-sm'
@@ -723,16 +729,26 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
       </section>
       </div>
 
-      <div className={`planner-stage ${plannerStep === 1 || plannerStep === 2 || plannerStep === 4 ? `planner-stage-active step-${plannerStep + 1}` : 'hidden'}`}>
+      <div className={`planner-stage ${plannerStep === 2 || plannerStep === 3 || plannerStep === 4 ? `planner-stage-active step-${plannerStep + 1}` : 'hidden'}`}>
       <StrategyComparisonSection
         farmId={placeId}
         selectedMonth={selectedMonth}
         onSelectMonth={setSelectedMonth}
-        displayMode={plannerStep === 1 ? 'controls' : plannerStep === 2 ? 'compare' : 'review'}
+        displayMode={plannerStep === 2 ? 'controls' : plannerStep === 3 ? 'compare' : 'review'}
+        selectedStrategyId={selectedStrategyId}
+        onSelectStrategy={setSelectedStrategyId}
       />
       </div>
 
-      <div className={`planner-stage ${plannerStep === 3 ? 'planner-stage-active step-four space-y-6' : 'hidden'}`}>
+      <div className={`planner-stage ${plannerStep === 1 ? 'planner-stage-active step-two space-y-6' : 'hidden'}`}>
+      <section aria-label="Decision this demo supports" className="grid gap-3 rounded-2xl border border-[#223B30] bg-[#10251B] p-5 text-white sm:grid-cols-[1fr_auto] sm:items-center sm:p-6">
+        <div>
+          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-[#D4E6A7]">The farm decision</p>
+          <h2 className="mt-1 text-lg font-extrabold sm:text-xl">Which rotation is worth discussing for this field and season?</h2>
+          <p className="mt-1 max-w-3xl text-xs leading-5 text-white/75">Use the historical climate record to understand trade-offs, then compare crop options against the farmer’s priorities. This is planning context, not a forecast or planting order.</p>
+        </div>
+        <span className="inline-flex w-fit items-center rounded-full border border-[#D4E6A7]/30 bg-white/[0.06] px-3 py-2 font-mono text-[10px] font-bold text-[#E5F0DA]">OBSERVE → COMPARE → VERIFY</span>
+      </section>
       <nav aria-label="Evidence sections" className="flex gap-2 overflow-x-auto rounded-xl border border-[#D8E2D5] bg-white p-2">
         {EVIDENCE_PANELS.map((panel) => (
           <button key={panel.id} type="button" aria-pressed={evidencePanel === panel.id} onClick={() => setEvidencePanel(panel.id)} className={`min-h-10 shrink-0 rounded-lg px-3 text-xs font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332] ${evidencePanel === panel.id ? 'bg-[#1B4332] text-white' : 'text-[#516357] hover:bg-[#F1F5EF]'}`}>
@@ -800,14 +816,16 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
           <AdditionalSignalsPanel selectedPlot={place} selectedMonth={selectedMonth} />
         </section>
 
-        <FieldMapPanel
-          selectedPlot={place}
-          selectedMonth={selectedMonth}
-          onMonthChange={setSelectedMonth}
-          mapLayer={mapLayer}
-          onMapLayerChange={setMapLayer}
-          onSelectPlot={setPlaceId}
-        />
+        {plannerStep === 1 && evidencePanel === 'climate' && (
+          <FieldMapPanel
+            selectedPlot={place}
+            selectedMonth={selectedMonth}
+            onMonthChange={setSelectedMonth}
+            mapLayer={mapLayer}
+            onMapLayerChange={setMapLayer}
+            onSelectPlot={selectFarm}
+          />
+        )}
       </div>
 
       </div>
@@ -981,11 +999,11 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
         <p className="hidden text-xs font-semibold text-[#5C6D60] sm:block">{plannerStep < 4 ? `Next: ${PLANNER_STEPS[plannerStep + 1].title}` : 'Your plan is ready for local review.'}</p>
         {plannerStep < 4 ? (
           <button type="button" onClick={() => goToStep(plannerStep + 1)} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#1B4332] px-5 text-xs font-extrabold text-white transition-colors hover:bg-[#2D6A4F] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B3D91]">
-            {plannerStep === 0 ? 'Set priorities' : plannerStep === 1 ? 'Compare rotations' : plannerStep === 2 ? 'Explore evidence' : 'Review my field plan'} <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            {plannerStep === 0 ? 'Read this farm’s season' : plannerStep === 1 ? 'Set my priorities' : plannerStep === 2 ? 'Compare rotations' : 'Review my draft plan'} <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </button>
         ) : (
-          <button type="button" onClick={() => window.print()} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#1B4332] px-5 text-xs font-extrabold text-white transition-colors hover:bg-[#2D6A4F] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B3D91]">
-            <Printer className="h-4 w-4" aria-hidden="true" /> Print field brief
+          <button type="button" onClick={() => window.print()} title="Print the detailed A4 field-planning report" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#1B4332] px-5 text-xs font-extrabold text-white transition-colors hover:bg-[#2D6A4F] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B3D91]">
+            <Printer className="h-4 w-4" aria-hidden="true" /> Print detailed field report
           </button>
         )}
       </nav>

@@ -21,6 +21,7 @@ describe('guided FieldShift planning experience', () => {
     expect(markup).toContain('Step 1');
     expect(markup).toContain('Choose a study farm');
     expect(markup).toContain('Selected field context');
+    expect(markup).not.toContain('Satellite field view');
     for (const name of ['Nueva Ecija', 'Bukidnon', 'Isabela', 'Guimaras', 'USA Midwest']) {
       expect(markup).toContain(name);
     }
@@ -28,9 +29,15 @@ describe('guided FieldShift planning experience', () => {
     expect(markup).not.toContain('Create Account');
   });
 
-  it('shows priorities before comparison, then reveals the real strategy scores and explanations', () => {
-    const priorities = renderToStaticMarkup(
+  it('reads the seasonal evidence before priorities and rotation comparison', () => {
+    const season = renderToStaticMarkup(
       createElement(WorkspaceView, { plannerStep: 1, onPlannerStepChange }),
+    );
+    expect(season).toContain('Which rotation is worth discussing for this field and season?');
+    expect(season).toContain('Satellite field view');
+
+    const priorities = renderToStaticMarkup(
+      createElement(WorkspaceView, { plannerStep: 2, onPlannerStepChange }),
     );
     expect(priorities).toContain('Set priorities for this season');
     expect(priorities).toContain('Conserve Water (W)');
@@ -38,9 +45,10 @@ describe('guided FieldShift planning experience', () => {
     expect(priorities).not.toContain('Strategy S1:');
 
     const comparison = renderToStaticMarkup(
-      createElement(WorkspaceView, { plannerStep: 2, onPlannerStepChange }),
+      createElement(WorkspaceView, { plannerStep: 3, onPlannerStepChange }),
     );
     for (const id of ['S1', 'S2', 'S3']) expect(comparison).toContain(`Strategy ${id}:`);
+    expect(comparison).toContain('Use as my draft plan');
     for (const heading of [
       '1. Why Suggested',
       '2. Supporting NASA Evidence',
@@ -55,8 +63,23 @@ describe('guided FieldShift planning experience', () => {
       createElement(WorkspaceView, { plannerStep: 4, onPlannerStepChange }),
     );
     expect(review).toContain('Your draft field plan');
-    expect(review).toContain('Highest in this run');
-    expect(review).toContain('Print field brief');
+    expect(review).toContain('Highest score · not selected');
+    expect(review).toContain('Print detailed field report');
+    expect(review).toContain('Printable scientific field planning brief');
+    expect(review).toContain('Methods, sources &amp; limits');
+    expect(review).toContain('12-month crop sequence &amp; ground-cover schedule');
+    expect(review).toContain('FARI');
+
+    const chosenReview = renderToStaticMarkup(
+      createElement(StrategyComparisonSection, {
+        farmId: 'nueva-ecija',
+        selectedMonth: 1,
+        displayMode: 'review',
+        selectedStrategyId: 'S2',
+      }),
+    );
+    expect(chosenReview).toContain('Your draft choice');
+    expect(chosenReview).toContain('Rank #');
 
     const markup = renderToStaticMarkup(createElement(App));
     expect(markup).toContain('Projected estimate');
@@ -64,6 +87,13 @@ describe('guided FieldShift planning experience', () => {
     expect(markup).toContain('Rule-based suitability ensemble (RF-style)');
     expect(markup).toContain('Orbital Confidence 80% | Ground-Truth Testing Required 20%');
     expect(markup).toContain('NASA does not endorse any non-U.S. Government entity. FieldShift is an educational decision-support prototype designed to support, and never replace, farmer judgment, local soil testing, and certified agricultural extension expertise.');
+  });
+
+  it('mounts the Leaflet map only after the evidence step becomes visible', () => {
+    const evidence = renderToStaticMarkup(
+      createElement(WorkspaceView, { plannerStep: 1, onPlannerStepChange }),
+    );
+    expect(evidence).toContain('Satellite field view');
   });
 
   it('renders strategy and analytical views cleanly for every supported farm', () => {

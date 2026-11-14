@@ -9,27 +9,27 @@ export const FooterAndAttributions: React.FC = () => {
     {
       agency: 'NASA',
       datasets:
-        'POWER Agroclimatology Archive (2001–2025), GPM IMERG v07, SMAP L4 Root-Zone Soil Moisture, ECOSTRESS LST, GRACE-FO Terrestrial Water Storage, MODIS MOD13Q1',
+        'NASA POWER historical point baselines (2020-2025) and derived climatology; GPM IMERG precipitation included through POWER and available as a NASA GIBS map layer; NASA GIBS SMAP L4 surface-moisture map layer (about 9 km); NASA Terra MODIS rolling 8-day NDVI map layer (250 m). These three imagery layers provide regional context and do not enter FARI. ECOSTRESS, Landsat vegetation-index products, and GRACE-FO are not connected data inputs.',
     },
     {
       agency: 'ESA (Copernicus)',
       datasets:
-        'Sentinel-2 MSI 10m Multi-Spectral Surface Reflectance & NDVI Vegetation Cover Reference',
+        'Sentinel-2 L2A red/NIR point sample used to derive NDVI when a clear scene is available (10 m; not a parcel average or FARI input).',
     },
     {
       agency: 'UN FAO',
       datasets:
-        'CropWat 8.0 / AquaCrop Evapotranspiration Coefficients, EcoCrop Legume N-Fixation Benchmarks, & Harmonized World Soil Database (HWSD)',
+        'ECOCROP species climate-reference records (13 curated profiles shown in the app) and agronomic literature context; CropWat, AquaCrop, and HWSD are not connected data inputs.',
     },
     {
       agency: 'USDA',
       datasets:
-        'NASS Cropland Data Layer (CDL) Corn-Soybean Rotation Reference & NRCS Web Soil Survey (SSURGO) Mollisol Benchmark',
+        'USDA AMS Market News static Central Illinois corn/soybean price snapshot; CDL and SSURGO are regional benchmark references only, not connected data inputs.',
     },
     {
       agency: 'USGS & Philippine DA-BSWM',
       datasets:
-        'SRTM 30m Digital Elevation Model (Slope & Contour Analysis), Landsat 8/9 OLI/TIRS, & BSWM / PhilRice / BPI-NMRDC Regional Soil & Crop Guides',
+        'Configured farm elevation/slope context and regional soil/crop-guide references. No SRTM, Landsat, USGS, or BSWM raster or field-measurement feed is currently connected.',
     },
   ];
 

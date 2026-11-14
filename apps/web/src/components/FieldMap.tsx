@@ -13,6 +13,8 @@ type PlotId = PlaceId;
 export type MapBaseLayer = 'satellite' | 'street';
 export type EnvironmentalOverlayId =
   | 'water-stress'
+  | 'vegetation-ndvi'
+  | 'precipitation-imerg'
   | 'erosion-corridors'
   | 'bare-soil-ndvi'
   | 'groundwater-grace';
@@ -21,6 +23,7 @@ interface OverlayMetadata {
   id: EnvironmentalOverlayId;
   label: string;
   shortSensor: string;
+  statusLabel: string;
   color: string;
   fillColor: string;
   description: string;
@@ -31,33 +34,54 @@ export const ENVIRONMENTAL_OVERLAYS: OverlayMetadata[] = [
     id: 'water-stress',
     label: 'Water Stress & Drought Hotspots',
     shortSensor: 'NASA SMAP L4 · 9 km surface moisture',
+    statusLabel: 'NASA product · model-assimilated',
     color: '#D97706',
     fillColor: '#F59E0B',
-    description:
-      'NASA SMAP L4 surface-moisture visualization (9 km; satellite/model product). NASA POWER GWETROOT remains a separate gridded root-zone index.',
+    description: 'NASA GIBS SMAP L4 surface-moisture map layer (about 9 km). Regional model-assimilated context, not a field measurement and not used in FARI.',
+  },
+  {
+    id: 'vegetation-ndvi',
+    label: 'Vegetation Greenness (NDVI)',
+    shortSensor: 'NASA Terra MODIS - rolling 8-day - 250 m',
+    statusLabel: 'NASA satellite product',
+    color: '#15803D',
+    fillColor: '#22C55E',
+    description: 'NASA GIBS MODIS/Terra rolling 8-day NDVI imagery at 250 m. Regional vegetation context; not a crop classification, parcel average, or FARI input.',
+  },
+  {
+    id: 'precipitation-imerg',
+    label: 'Recent Precipitation Rate',
+    shortSensor: 'NASA GPM IMERG - 0.1 degree - 30-minute product',
+    statusLabel: 'NASA satellite product',
+    color: '#0369A1',
+    fillColor: '#38BDF8',
+    description: 'NASA GIBS IMERG precipitation-rate imagery combines Final and near-real-time Early products. Regional rainfall context, not a farm rain gauge or forecast.',
   },
   {
     id: 'erosion-corridors',
     label: 'Erosion & Topsoil Runoff Corridors',
-    shortSensor: 'SRTM slope + GPM rain bursts',
+    shortSensor: 'Configured slope + POWER rainfall summaries',
+    statusLabel: 'Illustrative / modeled',
     color: '#DC2626',
     fillColor: '#EF4444',
     description:
-      'Modeled slope-runoff susceptibility from SRTM terrain grade and 95th-percentile daily rainfall bursts.',
+      'Illustrative runoff susceptibility from configured study-area slope and summary rainfall bursts. No SRTM raster or spatial flow model is connected.',
   },
   {
     id: 'bare-soil-ndvi',
     label: 'Bare-Soil Exposure Windows',
-    shortSensor: 'Sentinel-2 point NDVI available in Soil Certificate',
+    shortSensor: 'Crop calendar x modeled cover period',
+    statusLabel: 'Illustrative / modeled',
     color: '#92400E',
     fillColor: '#B45309',
     description:
-      'Modeled low-canopy / fallow exposure window where bare topsoil is unshielded from sun or rain.',
+      'Illustrative low-canopy / fallow exposure window based on configured crop-calendar assumptions. Not derived from satellite imagery or mapped field boundaries.',
   },
   {
     id: 'groundwater-grace',
     label: 'Groundwater Depletion Trends',
     shortSensor: 'GRACE / GRACE-FO regional proxy',
+    statusLabel: 'Illustrative / modeled',
     color: '#2563EB',
     fillColor: '#3B82F6',
     description:
@@ -84,6 +108,8 @@ export const FieldMap: React.FC<FieldMapProps> = ({
   const tileLayerRef = useRef<L.TileLayer | null>(null);
   const osmOverlayRef = useRef<L.TileLayer | null>(null);
   const smapLayerRef = useRef<L.TileLayer.WMS | null>(null);
+  const modisNdviLayerRef = useRef<L.TileLayer.WMS | null>(null);
+  const imergLayerRef = useRef<L.TileLayer.WMS | null>(null);
 
   const [activeOverlays, setActiveOverlays] = useState<EnvironmentalOverlayId[]>([
     'water-stress',
@@ -242,6 +268,62 @@ export const FieldMap: React.FC<FieldMapProps> = ({
 
   useEffect(() => {
     const map = mapInstanceRef.current;
+    if (!map) return;
+    modisNdviLayerRef.current?.remove();
+    modisNdviLayerRef.current = null;
+    if (!activeOverlays.includes('vegetation-ndvi')) return;
+
+    const layer = L.tileLayer.wms(
+      'https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi',
+      {
+        layers: 'MODIS_Terra_NDVI_8Day',
+        styles: 'default',
+        format: 'image/png',
+        transparent: true,
+        version: '1.1.1',
+        opacity: 0.66,
+        attribution: 'NASA GIBS / MODIS Terra NDVI (250 m, rolling 8-day)',
+      },
+    );
+    layer.on('tileerror', () => setTileError(true));
+    layer.addTo(map);
+    modisNdviLayerRef.current = layer;
+    return () => {
+      layer.remove();
+      if (modisNdviLayerRef.current === layer) modisNdviLayerRef.current = null;
+    };
+  }, [activeOverlays]);
+
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+    imergLayerRef.current?.remove();
+    imergLayerRef.current = null;
+    if (!activeOverlays.includes('precipitation-imerg')) return;
+
+    const layer = L.tileLayer.wms(
+      'https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi',
+      {
+        layers: 'IMERG_Precipitation_Rate',
+        styles: 'default',
+        format: 'image/png',
+        transparent: true,
+        version: '1.1.1',
+        opacity: 0.62,
+        attribution: 'NASA GIBS / GPM IMERG precipitation rate',
+      },
+    );
+    layer.on('tileerror', () => setTileError(true));
+    layer.addTo(map);
+    imergLayerRef.current = layer;
+    return () => {
+      layer.remove();
+      if (imergLayerRef.current === layer) imergLayerRef.current = null;
+    };
+  }, [activeOverlays]);
+
+  useEffect(() => {
+    const map = mapInstanceRef.current;
     const overlayGroup = overlayGroupRef.current;
     if (!map || !overlayGroup) return;
 
@@ -306,8 +388,8 @@ export const FieldMap: React.FC<FieldMapProps> = ({
     activeOverlays.forEach((overlayId, idx) => {
       const meta = ENVIRONMENTAL_OVERLAYS.find((o) => o.id === overlayId);
       if (!meta) return;
-      // Water stress is rendered by the actual NASA SMAP WMS layer above.
-      if (overlayId === 'water-stress') return;
+      // NASA SMAP, MODIS NDVI, and GPM IMERG are rendered by GIBS WMS above.
+      if (['water-stress', 'vegetation-ndvi', 'precipitation-imerg'].includes(overlayId)) return;
 
       const inset = 0.08 + idx * 0.05;
       const overlayBounds: L.LatLngBoundsExpression = [
@@ -341,15 +423,15 @@ export const FieldMap: React.FC<FieldMapProps> = ({
 
   return (
     <div className="space-y-3">
-      {/* 4 Toggleable Environmental Overlays with Mandatory "Illustrative / modeled" Badges */}
+      {/* NASA raster products are identified separately from illustrative overlays. */}
       <div className="rounded-xl border border-[#D4DDD0] bg-[#F7FAF5] p-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#263B2E]">
-              Environmental Telemetry Overlays (4 Layers)
+              Environmental Telemetry Overlays (6 Layers)
             </span>
             <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 font-mono text-[10px] font-bold text-amber-900">
-              Illustrative / modeled
+              Three NASA data layers and three illustrative overlays
             </span>
           </div>
           <button
@@ -405,8 +487,8 @@ export const FieldMap: React.FC<FieldMapProps> = ({
                     />
                     {overlay.label}
                   </span>
-                  <span className="rounded bg-amber-100/90 px-1.5 py-0.5 font-mono text-[9px] font-semibold text-amber-900">
-                    Illustrative / modeled
+                  <span className={`rounded px-1.5 py-0.5 font-mono text-[9px] font-semibold ${overlay.statusLabel.startsWith('NASA') ? 'bg-sky-100 text-sky-950' : 'bg-amber-100/90 text-amber-900'}`}>
+                    {overlay.statusLabel}
                   </span>
                 </div>
                 <span className="mt-1 font-mono text-[10px] text-[#52715E]">
