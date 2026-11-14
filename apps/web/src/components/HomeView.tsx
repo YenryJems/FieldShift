@@ -1,147 +1,127 @@
 import React from 'react';
-import { ArrowDown, ArrowRight, Globe2, Leaf, Satellite } from 'lucide-react';
-import { WorkspaceView } from './WorkspaceView';
-
-const steps = [
-  {
-    number: '01',
-    title: 'Ground the decision',
-    description: 'Choose a representative farm and inspect the historical climate and terrain context relevant to its growing season.',
-  },
-  {
-    number: '02',
-    title: 'Compare real trade-offs',
-    description: 'Set farmer priorities, test a stress scenario, compare the current baseline with two adaptive rotations, and choose a draft.',
-  },
-  {
-    number: '03',
-    title: 'Verify before acting',
-    description: 'Carry the score, crop sequence, data gaps, and local checks into a conversation with a farmer or extension officer.',
-  },
-];
+import { ArrowDown, ArrowRight, ArrowUpRight, Compass, Leaf, Satellite } from 'lucide-react';
 
 interface HomeViewProps {
-  plannerStep: number;
-  onPlannerStepChange: (step: number) => void;
+  onEnterWorkspace: () => void;
 }
 
-export const HomeView: React.FC<HomeViewProps> = ({ plannerStep, onPlannerStepChange }) => (
-  <main>
-    <section className="field-hero relative isolate overflow-hidden bg-[#11281D] text-white">
-      <div aria-hidden="true" className="field-hero-photo absolute inset-0 -z-20" />
-      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-r from-[#10251B]/95 via-[#10251B]/78 to-[#10251B]/20" />
-      <div aria-hidden="true" className="absolute inset-x-0 bottom-0 -z-10 h-32 bg-gradient-to-t from-[#10251B]/70 to-transparent" />
+const overviewStats = [
+  { value: '05', label: 'study locations' },
+  { value: '15', label: 'crop rotation strategies' },
+  { value: '04', label: 'decision dimensions' },
+];
 
-      <div className="mx-auto grid max-w-[1280px] gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:min-h-[520px] lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:py-24">
-        <div className="max-w-2xl">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-[#10251B]/35 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#E2EBDD] sm:text-xs">
-            <Satellite className="h-3.5 w-3.5 text-[#AFCB82]" aria-hidden="true" />
-            Earth data · field decisions
-          </div>
-          <h1 className="mt-6 max-w-xl text-[2.65rem] font-semibold leading-[1.03] tracking-[-0.045em] sm:text-6xl lg:text-[4.4rem]">
-            Plan for a season that keeps changing.
+const planningSteps = [
+  { number: '01', title: 'Choose a field', description: 'Start with a study location, its soil context, and the farming system already in place.' },
+  { number: '02', title: 'Read the season', description: 'Explore historical NASA climate signals and the seasonal conditions that shape risk.' },
+  { number: '03', title: 'Compare and review', description: 'Set priorities, compare rotations, and prepare a plan to discuss locally.' },
+];
+
+export const HomeView: React.FC<HomeViewProps> = ({ onEnterWorkspace }) => (
+  <main id="top" className="min-h-screen overflow-hidden bg-[#F2F3F0] text-[#17231C]">
+    <div className="mx-auto min-h-screen max-w-[1440px] border-x border-[#E2E4DF] bg-[#FBFCFA] shadow-[0_18px_70px_rgba(34,46,37,0.08)]">
+      <header className="relative z-20 mx-auto flex min-h-[74px] max-w-[1280px] items-center justify-between gap-4 px-5 sm:px-8 lg:px-12">
+        <a href="#top" className="flex shrink-0 items-center gap-2.5 rounded-md text-[#1B4332] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1B4332]">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1B4332] text-white"><Compass className="h-[18px] w-[18px]" aria-hidden="true" /></span>
+          <span>
+            <span className="block text-[15px] font-extrabold tracking-tight">FieldShift</span>
+            <span className="hidden font-mono text-[8px] uppercase tracking-[0.16em] text-[#748178] sm:block">Earth data · farm choices</span>
+          </span>
+        </a>
+
+        <nav aria-label="Introduction sections" className="hidden items-center gap-1 rounded-full border border-[#E2E5DF] bg-white p-1 text-[11px] font-semibold text-[#5C685F] shadow-[0_2px_10px_rgba(31,45,35,0.04)] md:flex">
+          <a href="#overview" className="rounded-full bg-[#F1F4EF] px-4 py-2 text-[#25372B]">Overview</a>
+          <a href="#approach" className="rounded-full px-4 py-2 transition-colors hover:bg-[#F5F7F3] hover:text-[#1B4332]">How it works</a>
+          <a href="#data" className="rounded-full px-4 py-2 transition-colors hover:bg-[#F5F7F3] hover:text-[#1B4332]">Data</a>
+        </nav>
+
+        <button type="button" onClick={onEnterWorkspace} className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-full bg-[#1B4332] px-4 text-[11px] font-bold text-white shadow-sm transition-all hover:-translate-y-0.5 hover:bg-[#285A40] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#1B4332] sm:px-5 sm:text-xs">
+          Enter the field workspace <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
+        </button>
+      </header>
+
+      <section id="overview" className="landing-hero relative isolate flex min-h-[570px] flex-col items-center overflow-hidden px-5 pt-16 text-center sm:min-h-[640px] sm:px-8 sm:pt-20 lg:min-h-[700px] lg:pt-24">
+        <div aria-hidden="true" className="landing-hero-art absolute inset-0 -z-20" />
+        <div aria-hidden="true" className="landing-hero-wash absolute inset-0 -z-10" />
+        <div className="relative z-10 mx-auto flex max-w-3xl flex-col items-center">
+          <p className="inline-flex items-center gap-2 rounded-full border border-[#DCE4D9] bg-white/80 px-3 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.15em] text-[#48604E] shadow-sm backdrop-blur-sm sm:text-[10px]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#5D9163]" /> NASA Space Apps Challenge · The Next Frontier
+          </p>
+          <h1 className="mt-6 max-w-3xl text-[2.65rem] font-semibold leading-[1.02] tracking-[-0.055em] text-[#1C2820] sm:text-6xl lg:text-[4.75rem]">
+            A changing season.<br className="hidden sm:block" /> A clearer next step.
           </h1>
-          <p className="mt-5 max-w-xl text-sm leading-7 text-white/85 sm:text-base sm:leading-8">
-            Compare climate-resilient crop rotations with historical NASA Earth-observation data, farm priorities, and local field context.
+          <p className="mt-5 max-w-xl text-sm leading-7 text-[#536157] sm:text-base sm:leading-8">
+            Explore how historical climate patterns shape crop-rotation choices, then carry a grounded draft into a local conversation.
           </p>
-          <div className="mt-7 flex flex-wrap items-center gap-3">
-            <a href="#field-demo" className="inline-flex min-h-12 items-center gap-2 rounded-lg bg-[#D4E6A7] px-5 text-sm font-extrabold text-[#14271B] transition-colors hover:bg-[#E2F0C4] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
-              Start your field plan <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </a>
-            <a href="#approach" className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-white/90 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
-              How it works <ArrowDown className="h-4 w-4" aria-hidden="true" />
-            </a>
-          </div>
-          <p className="mt-7 max-w-xl text-xs leading-5 text-white/75">
-            An educational decision-support prototype. Historical point data and modeled scenarios support planning; they are not live field conditions or forecasts.
-          </p>
+          <button type="button" onClick={onEnterWorkspace} className="mt-7 inline-flex min-h-12 items-center gap-2.5 rounded-full bg-[#1C2820] px-6 text-sm font-bold text-white shadow-[0_8px_22px_rgba(22,38,27,0.16)] transition-all hover:-translate-y-0.5 hover:bg-[#31523B] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1B4332]">
+            Enter the field workspace <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </button>
+          <a href="#approach" className="mt-4 inline-flex min-h-9 items-center gap-1.5 rounded px-2 text-xs font-semibold text-[#526458] transition-colors hover:text-[#1B4332] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332]">
+            See the three-step journey <ArrowDown className="h-3.5 w-3.5" aria-hidden="true" />
+          </a>
         </div>
 
-        <aside className="rounded-2xl border border-white/20 bg-[#10251B]/75 p-5 shadow-2xl backdrop-blur-sm sm:p-6" aria-label="FieldShift data approach">
-          <div className="flex items-start justify-between gap-4 border-b border-white/15 pb-4">
-            <div>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#C6D8B9]">A clearer view of risk</p>
-              <h2 className="mt-1 text-xl font-semibold tracking-tight sm:text-2xl">From orbit to the field</h2>
-            </div>
-            <span className="rounded-full border border-[#D4E6A7]/45 bg-[#D4E6A7]/10 px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-wider text-[#E6F1D0]">2001–2025 context</span>
-          </div>
-          <div className="mt-5 grid grid-cols-3 gap-2">
-            {[
-              { value: '05', label: 'study locations' },
-              { value: '15', label: 'crop strategies' },
-              { value: '04', label: 'FARI pillars' },
-            ].map((item) => (
-              <div key={item.label} className="rounded-lg border border-white/10 bg-white/[0.06] px-3 py-3">
-                <p className="font-mono text-2xl font-semibold tabular-nums text-[#D4E6A7]">{item.value}</p>
-                <p className="mt-1 text-[10px] leading-4 text-white/75 sm:text-xs">{item.label}</p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 rounded-xl border border-white/10 bg-[#0B1C15]/75 p-4">
-            <div className="flex items-center gap-2 text-[#D8E7C6]">
-              <Globe2 className="h-4 w-4" aria-hidden="true" />
-              <span className="font-mono text-[10px] font-bold uppercase tracking-wider">Decision pathway</span>
-            </div>
-            <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-              {['Observe', 'Compare', 'Verify'].map((item, index) => (
-                <div key={item} className="relative rounded-lg bg-white/[0.07] px-2 py-3">
-                  <span className="mx-auto flex h-7 w-7 items-center justify-center rounded-full bg-[#D4E6A7] text-xs font-extrabold text-[#14271B]">{index + 1}</span>
-                  <p className="mt-2 text-xs font-bold">{item}</p>
-                </div>
-              ))}
-            </div>
-            <p className="mt-3 text-[11px] leading-5 text-white/70">NASA POWER and GPM IMERG historical baselines inform the comparison. Ground truth still matters.</p>
-          </div>
-          <div className="mt-4 flex items-center gap-2 text-xs text-white/70">
-            <Leaf className="h-4 w-4 text-[#D4E6A7]" aria-hidden="true" />
-            Farmer judgment and local soil testing stay at the center.
-          </div>
-        </aside>
-      </div>
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-white/20" />
-    </section>
-
-    <section id="approach" className="scroll-mt-28 bg-[#F3F5EF]">
-      <div className="mx-auto max-w-[1280px] px-4 py-12 sm:px-6 sm:py-16">
-        <div className="grid gap-7 lg:grid-cols-[0.72fr_1.28fr] lg:items-end">
+        <div className="relative z-10 mt-auto flex w-full max-w-[1120px] items-end justify-between gap-4 pb-5 pt-12 text-left text-white sm:pb-7 sm:pt-16">
           <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[#52715E] sm:text-xs">A practical planning sequence</p>
-            <h2 className="mt-3 max-w-md text-2xl font-semibold leading-tight tracking-tight text-[#17271D] sm:text-3xl">Useful climate context, connected to farm choices.</h2>
+            <p className="font-mono text-[8px] font-bold uppercase tracking-[0.16em] text-white/70">A planning companion for real fields</p>
+            <p className="mt-1 text-xs font-semibold sm:text-sm">From historical signals to farmer-reviewed choices.</p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {steps.map((step) => (
-              <article key={step.number} className="rounded-xl border border-[#DCE3D8] bg-white p-4 sm:p-5">
-                <span className="font-mono text-[11px] font-bold text-[#477251]">{step.number}</span>
-                <h3 className="mt-3 text-sm font-extrabold text-[#17271D] sm:text-base">{step.title}</h3>
-                <p className="mt-2 text-xs leading-5 text-[#536458] sm:text-sm">{step.description}</p>
-              </article>
-            ))}
-          </div>
+          <span className="hidden items-center gap-1.5 rounded-full border border-white/35 bg-black/15 px-3 py-1.5 font-mono text-[9px] font-semibold text-white/90 backdrop-blur-sm sm:inline-flex">
+            <Satellite className="h-3 w-3" aria-hidden="true" /> Regional context · not a forecast
+          </span>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section id="field-demo" className="scroll-mt-24 border-t border-[#E2E8DF] bg-[#F8FAF7]">
-      <div className="mx-auto max-w-[1280px] px-4 pb-2 pt-12 sm:px-6 sm:pt-16">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-[#E5EDDF] px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[#315D3E]">
-              <Leaf className="h-3 w-3" aria-hidden="true" /> Interactive decision workspace
+      <section aria-label="FieldShift at a glance" className="border-y border-[#E6E9E3] bg-white">
+        <div className="mx-auto grid max-w-[1120px] grid-cols-3 divide-x divide-[#E8EBE6] px-4 py-5 sm:px-8 sm:py-7">
+          {overviewStats.map((item) => (
+            <div key={item.label} className="px-3 text-center sm:px-6">
+              <p className="font-mono text-2xl font-semibold tracking-tight text-[#1D2D22] sm:text-3xl">{item.value}</p>
+              <p className="mt-1 text-[9px] font-medium text-[#738078] sm:text-xs">{item.label}</p>
             </div>
-            <h2 className="mt-4 text-2xl font-semibold tracking-tight text-[#17271D] sm:text-3xl">Answer one practical question: what is worth trying here?</h2>
-            <p className="mt-2 text-sm leading-6 text-[#536458]">Move from field context, to historical climate evidence, to a farmer-chosen rotation draft that still needs local review.</p>
-          </div>
-          <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#64756A]">NASA POWER · 2020–2025 static baseline</span>
+          ))}
         </div>
-      </div>
-      <WorkspaceView plannerStep={plannerStep} onPlannerStepChange={onPlannerStepChange} />
-    </section>
+      </section>
 
-    <footer className="border-t border-[#30443A] bg-[#10251B] text-[#D1DDD4]">
-      <div className="mx-auto flex max-w-[1280px] flex-col gap-3 px-4 py-8 text-xs sm:flex-row sm:items-center sm:justify-between sm:px-6">
-        <div className="flex items-center gap-2"><span className="font-extrabold text-white">FieldShift</span><span aria-hidden="true">·</span><span>Team Overachiever · NASA Space Apps Challenge</span></div>
-        <p className="max-w-xl leading-5 text-[#C1CEC4]">Educational decision support. Pair climate information with local forecasts, field observations, and farmer or extension expertise.</p>
-      </div>
-    </footer>
+      <section id="approach" className="scroll-mt-20 bg-[#FBFCFA] px-5 py-14 sm:px-8 sm:py-20 lg:px-12">
+        <div className="mx-auto grid max-w-[1120px] gap-8 lg:grid-cols-[0.75fr_1.25fr] lg:items-start">
+          <div className="max-w-sm">
+            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.17em] text-[#64806A]">A calm, guided workflow</p>
+            <h2 className="mt-3 text-2xl font-semibold leading-tight tracking-[-0.035em] text-[#1C2820] sm:text-3xl">One decision at a time.</h2>
+            <p className="mt-3 text-sm leading-6 text-[#667269]">The workspace walks from field context to a plan worth reviewing. You choose when to move to each step.</p>
+          </div>
+          <ol className="divide-y divide-[#E4E8E2] border-y border-[#E4E8E2]">
+            {planningSteps.map((step) => (
+              <li key={step.number} className="grid gap-2 py-4 sm:grid-cols-[52px_1fr] sm:gap-4 sm:py-5">
+                <span className="font-mono text-[10px] font-bold tracking-wider text-[#74917A]">{step.number}</span>
+                <div>
+                  <h3 className="text-sm font-bold text-[#26372B] sm:text-base">{step.title}</h3>
+                  <p className="mt-1 text-xs leading-5 text-[#69766D] sm:text-sm">{step.description}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section id="data" className="scroll-mt-20 border-t border-[#E6E9E3] bg-[#F5F7F3] px-5 py-10 sm:px-8 sm:py-12 lg:px-12">
+        <div className="mx-auto flex max-w-[1120px] flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="max-w-xl">
+            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-[#64806A]">Evidence with limits in view</p>
+            <p className="mt-2 text-sm leading-6 text-[#58675D]">NASA POWER historical climate baselines, GPM IMERG rainfall estimates, and satellite map context support discussion—not live farm measurement or a weather forecast.</p>
+          </div>
+          <div className="flex items-center gap-2 self-start rounded-full border border-[#DDE4DB] bg-white px-3 py-2 text-[10px] font-bold text-[#49604E] sm:self-auto">
+            <Leaf className="h-3.5 w-3.5" aria-hidden="true" /> Farmer judgment stays central
+          </div>
+        </div>
+      </section>
+
+      <footer className="border-t border-[#E6E9E3] bg-white px-5 py-6 text-[10px] leading-5 text-[#778179] sm:px-8 lg:px-12">
+        <div className="mx-auto flex max-w-[1120px] flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <span className="font-bold text-[#38513E]">FieldShift · Team Overachiever · NASA Space Apps Challenge</span>
+          <span>Educational decision support · pair climate information with local forecasts and extension expertise.</span>
+        </div>
+      </footer>
+    </div>
   </main>
 );

@@ -1,19 +1,23 @@
 import { useState } from 'react';
 import { TopNavBar } from './components/TopNavBar';
 import { HomeView } from './components/HomeView';
-import { IntroSequence } from './components/IntroSequence';
+import { WorkspaceView } from './components/WorkspaceView';
 import { LanguageProvider } from './context/LanguageContext';
 
 export default function App() {
   const [plannerStep, setPlannerStep] = useState(0);
+  const [hasEnteredWorkspace, setHasEnteredWorkspace] = useState(false);
 
   return (
     <LanguageProvider>
-      <div id="top" className="min-h-screen bg-[#F8FAF7] text-[#111C16] lg:pl-64">
-        <TopNavBar plannerStep={plannerStep} onPlannerStepChange={setPlannerStep} />
-        <HomeView plannerStep={plannerStep} onPlannerStepChange={setPlannerStep} />
-      </div>
-      <IntroSequence />
+      {hasEnteredWorkspace ? (
+        <div id="top" className="workspace-enter min-h-screen bg-[#F8FAF7] text-[#111C16]">
+          <TopNavBar plannerStep={plannerStep} onPlannerStepChange={setPlannerStep} />
+          <WorkspaceView plannerStep={plannerStep} onPlannerStepChange={setPlannerStep} />
+        </div>
+      ) : (
+        <HomeView onEnterWorkspace={() => setHasEnteredWorkspace(true)} />
+      )}
     </LanguageProvider>
   );
 }

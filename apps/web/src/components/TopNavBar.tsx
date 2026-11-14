@@ -1,13 +1,12 @@
 import React from 'react';
-import { Compass, Globe, Sprout } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
+import { Compass } from 'lucide-react';
 
 const navigation = [
-  { label: 'Choose a farm' },
-  { label: 'Read the season' },
-  { label: 'Set priorities' },
-  { label: 'Compare rotations' },
-  { label: 'Review the plan' },
+  { label: 'Farm' },
+  { label: 'Season' },
+  { label: 'Priorities' },
+  { label: 'Rotations' },
+  { label: 'Review' },
 ];
 
 interface TopNavBarProps {
@@ -16,74 +15,50 @@ interface TopNavBarProps {
 }
 
 export const TopNavBar: React.FC<TopNavBarProps> = ({ plannerStep, onPlannerStepChange }) => {
-  const { t } = useLanguage();
-
   const navigateToStep = (index: number) => {
     if (index > plannerStep) return;
     onPlannerStepChange(index);
-    document.getElementById('field-demo')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('workspace-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (
-    <>
-      <aside className="portfolio-rail fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-white/10 bg-[#080B0E] px-7 py-7 text-white lg:flex">
-        <a href="#top" className="flex items-center gap-3 rounded-md focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#9ED5E8]">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#174733] text-[#E5F0DA]"><Compass className="h-5 w-5" aria-hidden="true" /></span>
-          <span><span className="block text-base font-extrabold tracking-tight">FieldShift</span><span className="block font-mono text-[9px] uppercase tracking-[0.14em] text-[#A2ADB7]">Earth data · farm choices</span></span>
+    <header className="sticky top-0 z-40 border-b border-[#E2E8DF] bg-[#FBFCFA]/95 backdrop-blur-md">
+      <div className="mx-auto flex min-h-[68px] max-w-[1360px] items-center justify-between gap-3 px-4 sm:px-6 lg:px-10">
+        <a href="#top" className="flex shrink-0 items-center gap-2.5 rounded-md text-[#1B4332] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#1B4332]">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1B4332] text-white"><Compass className="h-[18px] w-[18px]" aria-hidden="true" /></span>
+          <span>
+            <span className="block text-[14px] font-extrabold tracking-tight">FieldShift</span>
+            <span className="hidden font-mono text-[8px] uppercase tracking-[0.14em] text-[#78867D] sm:block">Field workspace</span>
+          </span>
         </a>
 
-        <p className="mt-14 font-mono text-[9px] font-bold uppercase tracking-[0.24em] text-[#8995A1]">Your planning path</p>
-        <nav aria-label="Page navigation" className="relative mt-5 flex-1">
-          <span aria-hidden="true" className="absolute bottom-5 left-[5px] top-5 w-px bg-[#26333E]" />
-          <ol className="relative space-y-2">
-            {navigation.map((item, index) => {
-              const active = plannerStep === index;
-              const complete = index < plannerStep;
-              return (
-                <li key={item.label}>
-                  <button
-                    type="button"
-                    disabled={index > plannerStep}
-                    aria-current={active ? 'step' : undefined}
-                    aria-disabled={index > plannerStep}
-                    onClick={() => navigateToStep(index)}
-                    className={`group flex min-h-12 w-full items-center gap-3 rounded-lg px-0.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9ED5E8] ${active ? 'text-white' : index > plannerStep ? 'cursor-not-allowed text-[#65717C]' : 'text-[#A6ADB4] hover:text-white'}`}
-                  >
-                    <span className={`relative z-10 h-[7px] w-[7px] shrink-0 rounded-full ring-4 ring-[#080B0E] transition-colors ${active ? 'bg-[#A6DFF1]' : complete ? 'bg-[#79B88D]' : 'bg-[#45535F]'}`} />
-                    <span className={`font-mono text-[10px] tabular-nums ${active ? 'text-[#A6DFF1]' : complete ? 'text-[#8CCB9F]' : 'text-[#77838E]'}`}>{String(index + 1).padStart(2, '0')}</span>
-                    <span className={`text-[13px] font-semibold ${active ? 'text-white' : ''}`}>{item.label}</span>
-                  </button>
-                </li>
-              );
-            })}
-          </ol>
+        <nav aria-label="Planning steps" className="flex max-w-[690px] items-center gap-0.5 overflow-x-auto rounded-full border border-[#E0E5DE] bg-white p-1 shadow-[0_2px_12px_rgba(29,47,34,0.05)] sm:gap-1">
+          {navigation.map((item, index) => {
+            const active = plannerStep === index;
+            const complete = plannerStep > index;
+            return (
+              <button
+                key={item.label}
+                type="button"
+                disabled={index > plannerStep}
+                aria-current={active ? 'step' : undefined}
+                onClick={() => navigateToStep(index)}
+                className={`inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-[10px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#1B4332] sm:px-3.5 sm:text-[11px] ${active ? 'bg-[#1B4332] text-white' : complete ? 'text-[#496A50] hover:bg-[#F2F6F0]' : 'cursor-not-allowed text-[#ABB3AC]'}`}
+              >
+                <span className={`font-mono text-[8px] sm:text-[9px] ${active ? 'text-white/65' : ''}`}>{String(index + 1).padStart(2, '0')}</span>
+                {item.label}
+              </button>
+            );
+          })}
         </nav>
 
-        <div className="rounded-xl border border-white/10 bg-white/[0.04] p-3.5">
-          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.13em] text-[#9FB3BF]">Planning a resilient season</p>
-          <p className="mt-1 text-xs leading-5 text-[#CCD2D7]">{plannerStep + 1} of {navigation.length} steps</p>
-        </div>
-      </aside>
-
-      <header className="portfolio-mobile-header sticky top-0 z-40 border-b border-[#DCE3D8] bg-[#F8FAF7]/95 backdrop-blur-sm">
-        <div className="mx-auto flex h-[58px] max-w-[1280px] items-center justify-between gap-3 px-4 sm:h-16 sm:px-6">
-          <a href="#top" className="flex shrink-0 items-center gap-2.5 rounded-md text-[#1B4332] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B3D91]">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#1B4332] text-white"><Compass className="h-[18px] w-[18px]" aria-hidden="true" /></span>
-            <span className="text-lg font-extrabold tracking-tight">FieldShift</span>
-          </a>
-          <div className="flex items-center gap-2">
-            <div aria-label="Interface language" className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[#C7D5C5] bg-white px-2.5 text-xs font-bold text-[#465A4E]"><Globe className="h-3.5 w-3.5 text-[#52715E]" aria-hidden="true" /><span>{t.languageName}</span></div>
-            <a href="#field-sites" className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg bg-[#1B4332] px-3 text-xs font-bold text-white transition-colors hover:bg-[#2D6A4F] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B3D91] sm:px-4 sm:text-sm"><Sprout className="h-4 w-4" aria-hidden="true" /><span>Explore fields</span></a>
-          </div>
-        </div>
-        <nav aria-label="Section navigation" className="flex items-center gap-5 overflow-x-auto border-t border-[#E2E8DF] px-4 py-2 text-[11px] font-semibold text-[#465A4E] lg:hidden">
-          {navigation.map((item, index) => (
-            <button key={item.label} type="button" disabled={index > plannerStep} aria-current={plannerStep === index ? 'step' : undefined} onClick={() => navigateToStep(index)} className={`inline-flex min-h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded px-1 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332] disabled:cursor-not-allowed ${plannerStep === index ? 'font-extrabold text-[#1B4332]' : index < plannerStep ? 'text-[#477251]' : 'text-[#849087]'}`}>
-              <span className="font-mono text-[9px]">{String(index + 1).padStart(2, '0')}</span>{item.label}
-            </button>
-          ))}
-        </nav>
-      </header>
-    </>
+        <span className="hidden shrink-0 rounded-full border border-[#E0E5DE] bg-white px-3 py-2 font-mono text-[9px] font-semibold uppercase tracking-wider text-[#738078] lg:inline-flex">
+          Step {plannerStep + 1} of {navigation.length}
+        </span>
+      </div>
+      <div className="h-[2px] bg-[#EDF0EB]" aria-hidden="true">
+        <div className="h-full bg-[#789579] transition-[width] duration-500" style={{ width: `${((plannerStep + 1) / navigation.length) * 100}%` }} />
+      </div>
+    </header>
   );
 };

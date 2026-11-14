@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { FARMS } from '@fieldshift/climate-data';
 import App from './App';
 import { AnalyticalSuiteSection } from './components/Agronomics/AnalyticalSuiteSection';
+import { FooterAndAttributions } from './components/Common/FooterAndAttributions';
 import { WorkspaceView } from './components/WorkspaceView';
 import { StrategyComparisonSection } from './components/Rotation/StrategyComparisonSection';
 import { TRANSLATIONS } from './context/LanguageContext';
@@ -11,20 +12,18 @@ import { TRANSLATIONS } from './context/LanguageContext';
 describe('guided FieldShift planning experience', () => {
   const onPlannerStepChange = () => undefined;
 
-  it('opens with a clear mission, start action, and location-selection step', () => {
+  it('opens on a calm introduction and waits for the user to enter the workspace', () => {
     const markup = renderToStaticMarkup(createElement(App));
 
     expect(markup).toContain('The Next Frontier');
     expect(markup).toContain('NASA Space Apps Challenge');
-    expect(markup).toContain('Start your field plan');
-    expect(markup).toContain('Build a resilient season plan');
-    expect(markup).toContain('Step 1');
-    expect(markup).toContain('Choose a study farm');
-    expect(markup).toContain('Selected field context');
+    expect(markup).toContain('Enter the field workspace');
+    expect(markup).toContain('A changing season.');
+    expect(markup).toContain('One decision at a time.');
+    expect(markup).not.toContain('Choose a study farm');
+    expect(markup).not.toContain('Selected field context');
     expect(markup).not.toContain('Satellite field view');
-    for (const name of ['Nueva Ecija', 'Bukidnon', 'Isabela', 'Guimaras', 'USA Midwest']) {
-      expect(markup).toContain(name);
-    }
+    expect(markup).not.toContain('Your planning path');
     expect(markup).not.toContain('Sign in');
     expect(markup).not.toContain('Create Account');
   });
@@ -81,12 +80,13 @@ describe('guided FieldShift planning experience', () => {
     expect(chosenReview).toContain('Your draft choice');
     expect(chosenReview).toContain('Rank #');
 
-    const markup = renderToStaticMarkup(createElement(App));
-    expect(markup).toContain('Projected estimate');
-    expect(markup).toContain('Illustrative / modeled');
-    expect(markup).toContain('Rule-based suitability ensemble (RF-style)');
-    expect(markup).toContain('Orbital Confidence 80% | Ground-Truth Testing Required 20%');
-    expect(markup).toContain('NASA does not endorse any non-U.S. Government entity. FieldShift is an educational decision-support prototype designed to support, and never replace, farmer judgment, local soil testing, and certified agricultural extension expertise.');
+    const analyticalMarkup = renderToStaticMarkup(
+      createElement(AnalyticalSuiteSection, { farmId: 'nueva-ecija', selectedMonth: 1 }),
+    );
+    expect(analyticalMarkup).toContain('Rule-based suitability ensemble (RF-style)');
+    expect(analyticalMarkup).toContain('Orbital Confidence 80% | Ground-Truth Testing Required 20%');
+    const footerMarkup = renderToStaticMarkup(createElement(FooterAndAttributions));
+    expect(footerMarkup).toContain('NASA does not endorse any non-U.S. Government entity. FieldShift is an educational decision-support prototype designed to support, and never replace, farmer judgment, local soil testing, and certified agricultural extension expertise.');
   });
 
   it('mounts the Leaflet map only after the evidence step becomes visible', () => {

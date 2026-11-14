@@ -79,22 +79,22 @@ const AdditionalSignalsPanel: React.FC<{
     {
       label: 'Relative humidity',
       value: `${formatNumber(selectedMonthTelemetry.relativeHumidityPct)}%`,
-      detail: 'RH2M · 2 m',
+      detail: 'RH2M Â· 2 m',
     },
     {
       label: 'Solar radiation',
-      value: `${formatNumber(selectedMonthTelemetry.solarRadiationMjM2Day)} MJ/m²/day`,
-      detail: 'ALLSKY_SFC_SW_DWN · mean',
+      value: `${formatNumber(selectedMonthTelemetry.solarRadiationMjM2Day)} MJ/mÂ²/day`,
+      detail: 'ALLSKY_SFC_SW_DWN Â· mean',
     },
     {
       label: 'Surface wetness',
       value: formatNumber(selectedMonthTelemetry.gwetTop, 2),
-      detail: 'GWETTOP · unitless index',
+      detail: 'GWETTOP Â· unitless index',
     },
     {
       label: 'IMERG rainfall estimate',
       value: `${formatNumber(selectedMonthTelemetry.imergPrecipitationMmDay)} mm/day`,
-      detail: 'IMERG_PRECTOT · alternate product',
+      detail: 'IMERG_PRECTOT Â· alternate product',
     },
   ];
 
@@ -106,7 +106,7 @@ const AdditionalSignalsPanel: React.FC<{
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-[#52715E]">
-            NASA POWER · more signals
+            NASA POWER Â· more signals
           </p>
           <h4 className="mt-1 text-sm font-extrabold text-[#17271D]">
             {selectedMonthTelemetry.month} averages
@@ -133,7 +133,7 @@ const AdditionalSignalsPanel: React.FC<{
         ))}
       </div>
       <p className="mt-3 text-[9px] leading-3 text-[#65766A]">
-        Monthly means for {selectedPlot.years[0]}–{selectedPlot.years.at(-1)}. GWETTOP is a
+        Monthly means for {selectedPlot.years[0]}â€“{selectedPlot.years.at(-1)}. GWETTOP is a
         unitless surface-wetness index, not a soil-water percentage. IMERG is a separate
         precipitation product from PRECTOTCORR.
       </p>
@@ -163,7 +163,7 @@ const FieldMapPanel: React.FC<{
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E]">
-            Esri World Imagery · Leaflet
+            Esri World Imagery Â· Leaflet
           </p>
           <h3 className="mt-1 text-lg font-extrabold text-[#17271D]">Satellite field view</h3>
           <p className="mt-1 text-xs leading-5 text-[#65766A]">
@@ -216,7 +216,7 @@ const FieldMapPanel: React.FC<{
             className="flex h-[420px] items-center justify-center rounded-xl border border-[#D4DDD0] bg-[#F3F6F1] text-sm text-[#536458]"
             role="status"
           >
-            Loading interactive map…
+            Loading interactive mapâ€¦
           </div>
         }
       >
@@ -229,10 +229,10 @@ const FieldMapPanel: React.FC<{
       </Suspense>
       <p className="mt-3 text-xs leading-5 text-[#65766A]">
         The boundary marks the configured study extent, not a farm boundary. Its color is a
-        threshold-based cue for the selected monthly point summary—not a spatial stress map or
+        threshold-based cue for the selected monthly point summaryâ€”not a spatial stress map or
         calibrated crop-risk assessment. Display thresholds: GWETROOT &lt; 0.55, PRECTOTCORR
-        &gt; 14 mm/day, GWETROOT &gt; 0.93, or T2M &gt; 28.5°C. Satellite tiles © Esri; street
-        tiles © OpenStreetMap contributors.
+        &gt; 14 mm/day, GWETROOT &gt; 0.93, or T2M &gt; 28.5Â°C. Satellite tiles Â© Esri; street
+        tiles Â© OpenStreetMap contributors.
       </p>
     </section>
   );
@@ -297,7 +297,7 @@ const SeasonalChart: React.FC<{
         <div>
           <h3 className="font-bold text-[#17271D]">Monthly climate pattern</h3>
           <p className="mt-1 text-xs text-[#65766A]">
-            Mean for each calendar month across {place.years[0]}–{place.years.at(-1)}
+            Mean for each calendar month across {place.years[0]}â€“{place.years.at(-1)}
           </p>
         </div>
         {(rainfallChange || heatChange) && (
@@ -381,7 +381,7 @@ const SeasonalChart: React.FC<{
               )}
               {y !== null && (
                 <circle cx={x} cy={y} r="3.5" fill="#C45A37" stroke="white" strokeWidth="1.5">
-                  <title>{`${month}: ${formatNumber(temperatureValue, 1)}°C mean 2-meter temperature${heatChange ? ' in the +2°C scenario' : ''}`}</title>
+                  <title>{`${month}: ${formatNumber(temperatureValue, 1)}Â°C mean 2-meter temperature${heatChange ? ' in the +2Â°C scenario' : ''}`}</title>
                 </circle>
               )}
               <text
@@ -404,7 +404,7 @@ const SeasonalChart: React.FC<{
           fontFamily="JetBrains Mono, monospace"
           fontSize="9"
         >
-          {maximumTemperature}°
+          {maximumTemperature}Â°
         </text>
         <text
           x={width - right + 8}
@@ -413,7 +413,7 @@ const SeasonalChart: React.FC<{
           fontFamily="JetBrains Mono, monospace"
           fontSize="9"
         >
-          {minimumTemperature}°
+          {minimumTemperature}Â°
         </text>
       </svg>
 
@@ -426,9 +426,9 @@ const SeasonalChart: React.FC<{
         </span>
         <span className="inline-flex items-center gap-2">
           <span className="h-0.5 w-4 rounded bg-[#C45A37]" />
-          Mean T2M ({heatChange ? '+2°C scenario' : '°C'})
+          Mean T2M ({heatChange ? '+2Â°C scenario' : 'Â°C'})
         </span>
-        <span className="ml-auto text-[#77867B]">Temperature line uses right-side °C scale</span>
+        <span className="ml-auto text-[#77867B]">Temperature line uses right-side Â°C scale</span>
       </div>
     </div>
   );
@@ -481,7 +481,7 @@ const PlaceInsights: React.FC<{
             <p className="text-xs font-bold">Warmest monthly average</p>
           </div>
           <p className="mt-3 font-mono text-2xl font-extrabold tabular-nums text-[#17271D]">
-            {formatNumber(warmestTemperature)}°C
+            {formatNumber(warmestTemperature)}Â°C
           </p>
           <p className="mt-1 text-xs text-[#65766A]">{warmestMonth.label} mean T2M</p>
         </article>
@@ -539,7 +539,7 @@ const PlanningComparison: React.FC<{
   const comparisons = [
     {
       label: 'Baseline',
-      title: 'Farmer’s current rotation',
+      title: 'Farmerâ€™s current rotation',
       evidence: 'Bring the current crop sequence and planting dates; NASA POWER does not contain farm rotation records.',
       prompt: 'Which crop growth stages overlap the warmest or wettest months?',
     },
@@ -552,7 +552,7 @@ const PlanningComparison: React.FC<{
     {
       label: 'Heat response',
       title: 'Compare a heat-ready alternative',
-      evidence: `${warmestMonth.label} has the highest monthly mean temperature (${formatNumber(warmestTemperature)}°C${heatChange ? ' in the +2°C scenario' : ''}).`,
+      evidence: `${warmestMonth.label} has the highest monthly mean temperature (${formatNumber(warmestTemperature)}Â°C${heatChange ? ' in the +2Â°C scenario' : ''}).`,
       prompt: 'Ask local extension staff which adapted varieties or planting windows are worth comparing.',
     },
   ];
@@ -605,7 +605,7 @@ interface WorkspaceViewProps {
 
 const PLANNER_STEPS = [
   { title: 'Choose a farm', prompt: 'Start with the field and its real context.' },
-  { title: 'Read the season', prompt: 'See the historical climate signals behind this farm’s planning challenge.' },
+  { title: 'Read the season', prompt: 'See the historical climate signals behind this farmâ€™s planning challenge.' },
   { title: 'Set priorities', prompt: 'Tell FieldShift what matters and test a climate stress scenario.' },
   { title: 'Compare rotations', prompt: 'Compare the baseline with two adaptive options, then choose a draft.' },
   { title: 'Review the plan', prompt: 'Check the trade-offs and prepare a field brief for local review.' },
@@ -640,7 +640,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
     : averageMonthlyTemperature + (heatChange ? 2 : 0);
   const goToStep = (nextStep: number) => {
     onPlannerStepChange(nextStep);
-    document.getElementById('planner-progress')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('workspace-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
   const selectFarm = (nextPlaceId: PlaceId) => {
     setPlaceId(nextPlaceId);
@@ -648,38 +648,20 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
   };
 
   return (
-    <div className="mx-auto max-w-[1280px] space-y-8 px-4 py-8 sm:px-6 sm:py-10">
-      <section id="planner-progress" aria-label="Guided field planning progress" className="overflow-hidden rounded-2xl border border-[#D2DED0] bg-white shadow-sm">
-        <div className="grid gap-5 bg-[#10251B] p-5 text-white sm:p-6 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
-          <div>
-            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-[#C4D5B9]">Build a resilient season plan</p>
-            <h2 className="mt-2 text-xl font-semibold tracking-tight sm:text-2xl">Step {plannerStep + 1} <span className="text-white/50">/ {PLANNER_STEPS.length}</span> · {PLANNER_STEPS[plannerStep].title}</h2>
-            <p className="mt-1 text-xs leading-5 text-white/75 sm:text-sm">{PLANNER_STEPS[plannerStep].prompt}</p>
-          </div>
-          <ol className="grid grid-cols-5 gap-1.5" aria-label="Planning steps">
-            {PLANNER_STEPS.map((item, index) => {
-              const current = plannerStep === index;
-              const complete = plannerStep > index;
-              return (
-                <li key={item.title}>
-                  <button type="button" disabled={index > plannerStep} aria-current={current ? 'step' : undefined} onClick={() => goToStep(index)} className={`flex min-h-[58px] w-full flex-col items-start justify-center rounded-lg border px-2 py-2 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#B9E3EE] disabled:cursor-not-allowed ${current ? 'border-[#B4DCE9] bg-[#D9EFF4] text-[#122A35]' : complete ? 'border-[#55806A] bg-[#1C3B2C] text-white' : 'border-white/10 bg-white/[0.04] text-white/45'}`}>
-                    <span className="font-mono text-[9px] font-bold">{complete ? '✓' : `0${index + 1}`}</span>
-                    <span className="mt-1 hidden text-[10px] font-bold leading-tight sm:block">{item.title}</span>
-                    <span className="mt-1 text-[9px] font-bold leading-tight sm:hidden">{item.title.split(' ')[0]}</span>
-                  </button>
-                </li>
-              );
-            })}
-          </ol>
+    <main id="field-demo" className="mx-auto max-w-[1280px] space-y-7 px-4 py-7 sm:px-6 sm:py-9">
+      <section id="workspace-content" aria-live="polite" className="scroll-mt-24 flex flex-col gap-2 border-b border-[#E4E9E2] pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-[#698071]">Field workspace · Step {String(plannerStep + 1).padStart(2, '0')} of {PLANNER_STEPS.length}</p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-[-0.035em] text-[#1B2B20] sm:text-3xl">{PLANNER_STEPS[plannerStep].title}</h1>
+          <p className="mt-1 max-w-2xl text-xs leading-5 text-[#68766C] sm:text-sm">{PLANNER_STEPS[plannerStep].prompt}</p>
         </div>
-        <div className="h-1.5 bg-[#E5EDE3]" aria-hidden="true"><div className="h-full bg-[#9ACFAD] transition-[width] duration-500" style={{ width: `${((plannerStep + 1) / PLANNER_STEPS.length) * 100}%` }} /></div>
+        <span className="inline-flex w-fit items-center rounded-full border border-[#E2E8DF] bg-white px-3 py-1.5 text-[9px] font-semibold text-[#758178]">Historical context · farmer-reviewed decisions</span>
       </section>
-
       <div className={`planner-stage ${plannerStep === 0 ? 'planner-stage-active step-one space-y-5' : 'hidden'}`}>
       <section id="field-sites" className="scroll-mt-28 flex flex-col gap-5 border-b border-[#E2E8DF] pb-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E] sm:text-xs">
-            Farm context · select one of five representative locations
+            Farm context Â· select one of five representative locations
           </p>
           <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-[#17271D] sm:text-3xl">
             Choose a study farm
@@ -719,8 +701,8 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
           <h3 className="mt-1 text-lg font-extrabold text-[#17271D]">{farm.name}</h3>
           <p className="mt-0.5 text-xs text-[#536458]">{farm.locationLabel}</p>
         </div>
-        <FarmFact label="Coordinates" value={`${Math.abs(farm.latitude).toFixed(3)}°${farm.latitude < 0 ? 'S' : 'N'}, ${Math.abs(farm.longitude).toFixed(3)}°${farm.longitude < 0 ? 'W' : 'E'}`} />
-        <FarmFact label="Elevation · slope" value={`${farm.elevationM} m · ${farm.slopePct}%`} />
+        <FarmFact label="Coordinates" value={`${Math.abs(farm.latitude).toFixed(3)}Â°${farm.latitude < 0 ? 'S' : 'N'}, ${Math.abs(farm.longitude).toFixed(3)}Â°${farm.longitude < 0 ? 'W' : 'E'}`} />
+        <FarmFact label="Elevation Â· slope" value={`${farm.elevationM} m Â· ${farm.slopePct}%`} />
         <FarmFact label="Soil context" value={farm.soilType} />
         <div className="rounded-lg border border-[#DDE5D9] bg-white p-3 sm:col-span-2 lg:col-span-5">
           <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-[#698071]">Baseline practice</p>
@@ -745,9 +727,9 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
         <div>
           <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-[#D4E6A7]">The farm decision</p>
           <h2 className="mt-1 text-lg font-extrabold sm:text-xl">Which rotation is worth discussing for this field and season?</h2>
-          <p className="mt-1 max-w-3xl text-xs leading-5 text-white/75">Use the historical climate record to understand trade-offs, then compare crop options against the farmer’s priorities. This is planning context, not a forecast or planting order.</p>
+          <p className="mt-1 max-w-3xl text-xs leading-5 text-white/75">Use the historical climate record to understand trade-offs, then compare crop options against the farmerâ€™s priorities. This is planning context, not a forecast or planting order.</p>
         </div>
-        <span className="inline-flex w-fit items-center rounded-full border border-[#D4E6A7]/30 bg-white/[0.06] px-3 py-2 font-mono text-[10px] font-bold text-[#E5F0DA]">OBSERVE → COMPARE → VERIFY</span>
+        <span className="inline-flex w-fit items-center rounded-full border border-[#D4E6A7]/30 bg-white/[0.06] px-3 py-2 font-mono text-[10px] font-bold text-[#E5F0DA]">OBSERVE â†’ COMPARE â†’ VERIFY</span>
       </section>
       <nav aria-label="Evidence sections" className="flex gap-2 overflow-x-auto rounded-xl border border-[#D8E2D5] bg-white p-2">
         {EVIDENCE_PANELS.map((panel) => (
@@ -760,7 +742,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
       <div className={evidencePanel === 'climate' ? 'space-y-5' : 'hidden'}>
       <div className="flex flex-col gap-1 border-b border-[#E2E8DF] pb-4">
         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E] sm:text-xs">
-          NASA POWER · historical monthly point data · 2020–2025
+          NASA POWER Â· historical monthly point data Â· 2020â€“2025
         </p>
         <h2 className="text-2xl font-semibold tracking-tight text-[#17271D] sm:text-3xl">Seasonal climate profile</h2>
         <p className="text-sm text-[#536458]">Explore six years of historical monthly patterns for this study location.</p>
@@ -787,9 +769,9 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
                 Air temp
               </p>
               <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-[#17271D]">
-                {formatNumber(scenarioTemperature)}°
+                {formatNumber(scenarioTemperature)}Â°
               </p>
-              <p className="text-[10px] text-[#65766A]">T2M mean · °C</p>
+              <p className="text-[10px] text-[#65766A]">T2M mean Â· Â°C</p>
             </div>
             <div className="rounded-lg bg-[#F5F8F3] p-3">
               <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-[#738278]">
@@ -872,7 +854,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
                 onChange={(event) => setHeatChange(event.target.checked)}
                 className="h-4 w-4 accent-[#C45A37]"
               />
-              <span>2°C warmer</span>
+              <span>2Â°C warmer</span>
             </label>
           </div>
         </div>
@@ -917,23 +899,23 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
           </div>
           <p className="mt-3 text-sm leading-6 text-[#536458]">
             NASA Langley Research Center POWER Project, Monthly and Annual API;
-            point data for {place.latitude.toFixed(3)}° N, {place.longitude.toFixed(3)}° E,
-            January 2020–December 2025. Product groups listed in the source file:{' '}
+            point data for {place.latitude.toFixed(3)}Â° N, {place.longitude.toFixed(3)}Â° E,
+            January 2020â€“December 2025. Product groups listed in the source file:{' '}
             {place.dataSources.join(', ')}.
           </p>
           <dl className="mt-4 grid gap-3 border-t border-[#E6ECE4] pt-4 text-xs sm:grid-cols-3">
             <div>
-              <dt className="font-bold text-[#263B2E]">T2M · °C</dt>
+              <dt className="font-bold text-[#263B2E]">T2M Â· Â°C</dt>
               <dd className="mt-1 text-[#65766A]">Monthly mean air temperature at 2 m.</dd>
             </div>
             <div>
-              <dt className="font-bold text-[#263B2E]">PRECTOTCORR · mm/day</dt>
+              <dt className="font-bold text-[#263B2E]">PRECTOTCORR Â· mm/day</dt>
               <dd className="mt-1 text-[#65766A]">
                 Multiplied by calendar days, then averaged by month.
               </dd>
             </div>
             <div>
-              <dt className="font-bold text-[#263B2E]">GWETROOT · unitless</dt>
+              <dt className="font-bold text-[#263B2E]">GWETROOT Â· unitless</dt>
               <dd className="mt-1 text-[#65766A]">
                 NASA root-zone wetness index; not a field soil test.
               </dd>
@@ -961,7 +943,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
               className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-[#C7D5C5] bg-white px-3 text-xs font-bold text-[#1B4332] transition-colors hover:bg-[#EEF5EB] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332]"
             >
               <ArrowDownToLine className="h-4 w-4" aria-hidden="true" />
-              Raw JSON · {place.name}
+              Raw JSON Â· {place.name}
             </a>
             <button
               type="button"
@@ -969,11 +951,11 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
               className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-[#1B4332] px-3 text-xs font-bold text-white transition-colors hover:bg-[#2D6A4F] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332]"
             >
               <ArrowDownToLine className="h-4 w-4" aria-hidden="true" />
-              All places · CSV
+              All places Â· CSV
             </button>
           </div>
           <p className="mt-3 break-all font-mono text-[10px] leading-4 text-[#738278]">
-            NASA Langley Research Center POWER Project. Monthly and Annual API, 2020–2025.{' '}
+            NASA Langley Research Center POWER Project. Monthly and Annual API, 2020â€“2025.{' '}
             <a href={NASA_POWER_API_DOCS} target="_blank" rel="noreferrer" className="underline">
               API documentation
             </a>
@@ -999,7 +981,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
         <p className="hidden text-xs font-semibold text-[#5C6D60] sm:block">{plannerStep < 4 ? `Next: ${PLANNER_STEPS[plannerStep + 1].title}` : 'Your plan is ready for local review.'}</p>
         {plannerStep < 4 ? (
           <button type="button" onClick={() => goToStep(plannerStep + 1)} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#1B4332] px-5 text-xs font-extrabold text-white transition-colors hover:bg-[#2D6A4F] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B3D91]">
-            {plannerStep === 0 ? 'Read this farm’s season' : plannerStep === 1 ? 'Set my priorities' : plannerStep === 2 ? 'Compare rotations' : 'Review my draft plan'} <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            {plannerStep === 0 ? 'Read this farmâ€™s season' : plannerStep === 1 ? 'Set my priorities' : plannerStep === 2 ? 'Compare rotations' : 'Review my draft plan'} <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </button>
         ) : (
           <button type="button" onClick={() => window.print()} title="Print the detailed A4 field-planning report" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#1B4332] px-5 text-xs font-extrabold text-white transition-colors hover:bg-[#2D6A4F] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B3D91]">
@@ -1007,6 +989,6 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
           </button>
         )}
       </nav>
-    </div>
+    </main>
   );
 };
