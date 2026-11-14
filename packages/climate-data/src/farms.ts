@@ -44,8 +44,8 @@ export const FARMS_BY_ID: Record<FarmId, FarmProfile> = {
     marketAccess: 0.85,
     isBenchmarkPlot: false,
     referencedDatasets: [
-      'NASA POWER (MERRA-2, CERES SYN1deg, 2001–2025)',
-      'NASA GPM IMERG Final Precipitation (2020–2025)',
+      'NASA POWER point baseline (MERRA-2, CERES SYN1deg; monthly 2020–2025, with 2001–2025 climatological context)',
+      'NASA GPM IMERG Final Precipitation (2020–2025; daily event summaries)',
       'NASA SRTM 30m Digital Elevation',
     ],
     soilBaseline: {
@@ -275,8 +275,8 @@ export const FARMS_BY_ID: Record<FarmId, FarmProfile> = {
     marketAccess: 0.75,
     isBenchmarkPlot: false,
     referencedDatasets: [
-      'NASA POWER (MERRA-2, CERES SYN1deg, 2001–2025)',
-      'NASA GPM IMERG Final Precipitation (2020–2025)',
+      'NASA POWER point baseline (MERRA-2, CERES SYN1deg; monthly 2020–2025, with 2001–2025 climatological context)',
+      'NASA GPM IMERG Final Precipitation (2020–2025; daily event summaries)',
       'NASA SRTM 30m Slope & Elevation (889.49 m)',
     ],
     soilBaseline: {
@@ -506,8 +506,8 @@ export const FARMS_BY_ID: Record<FarmId, FarmProfile> = {
     marketAccess: 0.80,
     isBenchmarkPlot: false,
     referencedDatasets: [
-      'NASA POWER (MERRA-2, CERES SYN1deg, 2001–2025)',
-      'NASA GPM IMERG Final Precipitation (2020–2025)',
+      'NASA POWER point baseline (MERRA-2, CERES SYN1deg; monthly 2020–2025, with 2001–2025 climatological context)',
+      'NASA GPM IMERG Final Precipitation (2020–2025; daily event summaries)',
       'NASA SRTM 30m Elevation (133.80 m)',
     ],
     soilBaseline: {
@@ -731,14 +731,14 @@ export const FARMS_BY_ID: Record<FarmId, FarmProfile> = {
     baselineFarmingSystem: 'Clean-weeded Carabao mango orchard',
     primaryConcerns: [
       'Unseasonal rain bursts (≥14 mm/day) washing out costly KNO₃ flower-induction & fungicide sprays',
-      'Dry-season surface baking (March–April GWETTOP drops to 0.54–0.49; solar radiation 21.97–22.38 MJ/m²/day)',
+      'Pre-harvest dry spell and high solar loading (March–April GWETTOP 0.54–0.49; solar radiation 21.97–22.38 MJ/m²/day)',
       'Orchard alley sheet erosion and organic matter loss on 6% gravelly loam slopes during June–October rains',
     ],
     marketAccess: 0.80,
     isBenchmarkPlot: false,
     referencedDatasets: [
-      'NASA POWER (MERRA-2, CERES SYN1deg, 2001–2025)',
-      'NASA GPM IMERG Final Precipitation (2020–2025)',
+      'NASA POWER point baseline (MERRA-2, CERES SYN1deg; monthly 2020–2025, with 2001–2025 climatological context)',
+      'NASA GPM IMERG Final Precipitation (2020–2025; daily event summaries)',
       'NASA SRTM 30m Elevation & Slope',
     ],
     soilBaseline: {
@@ -948,7 +948,10 @@ export const FARMS_BY_ID: Record<FarmId, FarmProfile> = {
     referencedDatasets: [
       'NASA POWER (MERRA-2, CERES SYN1deg, 2001–2025)',
       'NASA GPM IMERG Final Precipitation (2020–2025)',
-      'USDA CropScape (CDL), SSURGO, OpenET, & PRISM (benchmark references)',
+      'USDA CropScape Cropland Data Layer (CDL; 30 m crop-history reference, not plot-level ground truth)',
+      'USDA NRCS SSURGO soil survey (soil drainage context; not a site-specific verified sample)',
+      'OpenET (evapotranspiration context; benchmark reference, not a farm-specific measurement)',
+      'PRISM regional climate context',
     ],
     soilBaseline: {
       nitrogenKgHa: 55,
