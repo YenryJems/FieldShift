@@ -3,7 +3,6 @@ import {
   Activity,
   Award,
   Beaker,
-  CalendarClock,
   CheckCircle2,
   Cpu,
   FlaskConical,
@@ -12,11 +11,9 @@ import {
   Satellite,
   ShieldAlert,
   Sparkles,
-  ThermometerSnowflake,
   Wheat,
 } from 'lucide-react';
 import {
-  calculateCfiSprayCalendar,
   calculateSiComparison,
   calculateTerroirAssessment,
   evaluateTwoTierSoilCertificate,
@@ -26,6 +23,8 @@ import {
   StrategyId,
 } from '@fieldshift/climate-data';
 import { useLanguage } from '../../context/LanguageContext';
+import { FrostIndicator } from './FrostIndicator';
+import { SprayValidator } from './SprayValidator';
 
 interface AnalyticalSuiteSectionProps {
   farmId: FarmId;
@@ -53,7 +52,6 @@ export const AnalyticalSuiteSection: React.FC<AnalyticalSuiteSectionProps> = ({
   );
   const [textureVerified, setTextureVerified] = useState<boolean>(true);
 
-  const cfiCalendar = calculateCfiSprayCalendar(farmId, selectedMonth, 'baseline');
   const terroir = calculateTerroirAssessment(
     farmId,
     selectedStrategyId,
@@ -128,105 +126,8 @@ export const AnalyticalSuiteSection: React.FC<AnalyticalSuiteSectionProps> = ({
         </div>
       </div>
 
-      {/* 1. 90-Day Climatological CFI & Spray Risk Validator + Thermal/Frost Shock */}
-      <section
-        aria-labelledby="cfi-spray-calendar-heading"
-        className="rounded-2xl border border-[#D4DDD0] bg-white p-5 sm:p-6"
-      >
-        <div className="flex flex-col gap-2 border-b border-[#E2E8DF] pb-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <CalendarClock className="h-4 w-4 text-[#1B4332]" aria-hidden="true" />
-              <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#52715E]">
-                NASA POWER Daily Climatology (2020–2025 UTC) · IMERG_PRECTOT &amp; T2M_MAX / T2M_MIN
-              </span>
-            </div>
-            <h3
-              id="cfi-spray-calendar-heading"
-              className="mt-1 text-xl font-extrabold text-[#17271D]"
-            >
-              90-Day Climatological Flower Induction (CFI) &amp; Foliar Spray Risk Validator
-            </h3>
-            <p className="mt-1 text-xs leading-5 text-[#536458]">
-              Screens 3 consecutive months starting in{' '}
-              <strong>{cfiCalendar[0].monthLabel}</strong> for heavy storm washout days
-              (&ge;14 mm/day), canopy heat-shock days (&ge;33&deg;C), and highland/temperate cold-shock days (&le;2&deg;C). Climatological risk window—always check your 24-hour local weather forecast before spraying.
-            </p>
-          </div>
-          <span
-            title={t.projectedEstimateTooltip}
-            className="shrink-0 rounded-full border border-[#D97706]/40 bg-[#FFFBEB] px-3 py-1 font-mono text-[10px] font-bold text-[#92400E]"
-          >
-            Avoided Spray Loss: PHP 15,000–35,000/ha ({t.projectedEstimateBadge})
-          </span>
-        </div>
-
-        <div className="mt-4 grid gap-4 lg:grid-cols-3">
-          {cfiCalendar.map((win, idx) => {
-            const badgeColors =
-              win.riskLevel === 'green'
-                ? 'border-[#2D6A4F] bg-[#EDF7F0] text-[#1B4332]'
-                : win.riskLevel === 'amber'
-                  ? 'border-[#D97706] bg-[#FFFBEB] text-[#92400E]'
-                  : 'border-[#DC2626] bg-[#FEF2F2] text-[#991B1B]';
-
-            return (
-              <article
-                key={win.month}
-                className="flex flex-col justify-between rounded-xl border border-[#D4DDD0] bg-[#FAFBF9] p-4"
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-mono text-xs font-bold text-[#52715E]">
-                      Window Month {idx + 1} · {win.monthLabel}
-                    </span>
-                    <span
-                      className={`rounded-full border px-2.5 py-0.5 font-mono text-[10px] font-bold ${badgeColors}`}
-                    >
-                      {win.badgeText}
-                    </span>
-                  </div>
-
-                  <dl className="mt-3 grid grid-cols-2 gap-2 font-mono text-xs">
-                    <div className="rounded border border-[#E2E8DF] bg-white p-2">
-                      <dt className="text-[10px] text-[#65766A]">Storm Days (&ge;14 mm)</dt>
-                      <dd className="mt-0.5 text-sm font-extrabold text-[#17271D]">
-                        {win.stormDaysGe14Mm.toFixed(1)} days/mo
-                      </dd>
-                    </div>
-                    <div className="rounded border border-[#E2E8DF] bg-white p-2">
-                      <dt className="text-[10px] text-[#65766A]">Dry Days (&lt;3 mm)</dt>
-                      <dd className="mt-0.5 text-sm font-extrabold text-[#17271D]">
-                        {win.dryDaysLt3Mm.toFixed(1)} days/mo
-                      </dd>
-                    </div>
-                    <div className="rounded border border-[#E2E8DF] bg-white p-2">
-                      <dt className="text-[10px] text-[#65766A]">Heat Days (&ge;33&deg;C)</dt>
-                      <dd className="mt-0.5 text-sm font-extrabold text-[#B45309]">
-                        {win.heatStressDaysGe33C.toFixed(1)} days (Tmax {win.t2mMaxC.toFixed(1)}&deg;C)
-                      </dd>
-                    </div>
-                    <div className="rounded border border-[#E2E8DF] bg-white p-2">
-                      <dt className="flex items-center gap-1 text-[10px] text-[#65766A]">
-                        <ThermometerSnowflake className="h-3 w-3 text-[#2563EB]" />
-                        Cold Days (&le;2&deg;C)
-                      </dt>
-                      <dd className="mt-0.5 text-sm font-extrabold text-[#1D4E89]">
-                        {win.coldDaysLe2C.toFixed(1)} days (Tmin {win.t2mMinC.toFixed(1)}&deg;C)
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
-
-                <p className="mt-3 border-t border-[#E2E8DF] pt-2.5 text-xs leading-5 text-[#3B4D41]">
-                  <strong className="text-[#17271D]">Field Action: </strong>
-                  {win.farmerActionAdvisory}
-                </p>
-              </article>
-            );
-          })}
-        </div>
-      </section>
+      <SprayValidator farmId={farmId} startMonth={selectedMonth} />
+      <FrostIndicator farmId={farmId} month={selectedMonth} />
 
       {/* 2. Precision Terroir & Guimaras Mango Sugar-Loading Index + Nutrient Gap Table */}
       <section
