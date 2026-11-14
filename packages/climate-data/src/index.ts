@@ -14,6 +14,8 @@ export { default as plotLocations } from './plotLocations.json';
 export { default as nasaExtendedTelemetry } from './nasaExtendedTelemetry.json';
 
 export { FARMS, FARMS_BY_ID, getFarmById } from './farms';
+export { ECOCROP_CLIMATE_PROFILES, getEcoCropReferencesForCrops } from './ecocrop';
+export type { EcoCropClimateProfile } from './ecocrop';
 
 export type {
   AdjustedClimateContext,

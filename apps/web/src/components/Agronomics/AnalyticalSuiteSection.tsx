@@ -20,6 +20,7 @@ import {
   calculateSiComparison,
   calculateTerroirAssessment,
   evaluateTwoTierSoilCertificate,
+  getEcoCropReferencesForCrops,
   FarmId,
   getFarmById,
   StrategyId,
@@ -90,6 +91,7 @@ export const AnalyticalSuiteSection: React.FC<AnalyticalSuiteSectionProps> = ({
   const filteredCultivars = activeStrategy.cultivars.filter((item) =>
     seedFilter === 'all' ? true : item.type === seedFilter,
   );
+  const ecoCropReferences = getEcoCropReferencesForCrops(activeStrategy.crops);
 
   return (
     <div id="agronomic-suite" className="space-y-8">
@@ -520,6 +522,7 @@ export const AnalyticalSuiteSection: React.FC<AnalyticalSuiteSectionProps> = ({
             </div>
           </div>
         </div>
+
       </section>
 
       {/* 4. Two-Tier Soil Resilience Certificate + Satellite vs Ground-Truth Matrix */}
@@ -781,6 +784,64 @@ export const AnalyticalSuiteSection: React.FC<AnalyticalSuiteSectionProps> = ({
               <strong>{Math.round(activeStrategy.residueMulch * 100)}/100</strong>
             </div>
           </div>
+        </div>
+        <div className="mt-4 rounded-xl border border-[#C7D5C5] bg-[#F7FAF5] p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <h4 className="text-sm font-extrabold text-[#17271D]">
+                EcoCrop climate reference ranges
+              </h4>
+              <p className="mt-1 text-xs leading-5 text-[#536458]">
+                Global species-level reference envelopes from the committed EcoCrop database,
+                matched to this strategy’s crops. These are screening references, not farm
+                measurements or cultivar guarantees; confirm local performance with MAO or
+                extension staff.
+              </p>
+            </div>
+            <span className="rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 font-mono text-[10px] font-bold text-amber-900">
+              Reference data · not site-specific
+            </span>
+          </div>
+          {ecoCropReferences.length > 0 ? (
+            <div className="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+              {ecoCropReferences.map((profile) => (
+                <article
+                  key={profile.ecoPortCode}
+                  className="rounded-lg border border-[#E2E8DF] bg-white p-3"
+                >
+                  <h5 className="text-xs font-extrabold text-[#1B4332]">
+                    {profile.scientificName}
+                  </h5>
+                  <p className="mt-0.5 line-clamp-2 text-[10px] text-[#536458]">
+                    {profile.commonNames.split(',').slice(0, 4).join(', ')}
+                  </p>
+                  <dl className="mt-2 grid grid-cols-2 gap-x-2 gap-y-1 font-mono text-[10px] text-[#3B4D41]">
+                    <dt>Optimum temp.</dt>
+                    <dd>
+                      {profile.optimumTemperatureMinC ?? '—'}–{profile.optimumTemperatureMaxC ?? '—'}°C
+                    </dd>
+                    <dt>Optimum rain</dt>
+                    <dd>
+                      {profile.optimumRainfallMinMmYr ?? '—'}–{profile.optimumRainfallMaxMmYr ?? '—'} mm/yr
+                    </dd>
+                    <dt>Soil pH range</dt>
+                    <dd>{profile.soilPhMin ?? '—'}–{profile.soilPhMax ?? '—'}</dd>
+                    <dt>Reported cycle</dt>
+                    <dd>
+                      {profile.cycleDaysMin ?? '—'}–{profile.cycleDaysMax ?? '—'} days
+                    </dd>
+                  </dl>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-3 rounded-lg bg-white p-3 text-xs text-[#536458]">
+              No matching species profile is included for this strategy’s crop names.
+            </p>
+          )}
+          <p className="mt-2 text-[10px] text-[#68786D]">
+            Source: EcoCrop_DB.csv, EcoPortCode records {ecoCropReferences.map((profile) => profile.ecoPortCode).join(', ') || '—'}.
+          </p>
         </div>
       </section>
     </div>
