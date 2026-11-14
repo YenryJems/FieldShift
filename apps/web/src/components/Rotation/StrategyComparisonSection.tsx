@@ -22,6 +22,7 @@ import {
   DEFAULT_FIELD_CONSTRAINTS,
   FarmId,
   FieldConstraints,
+  getMonthlyTelemetry,
   getFarmById,
   PriorityWeights,
   rankFarmStrategies,
@@ -35,6 +36,25 @@ import {
   speakFieldAdvisory,
   stopFieldAdvisorySpeech,
 } from '../../utils/speech';
+
+const STRATEGY_ROLE_LABELS: Record<'S1' | 'S2' | 'S3', string> = {
+  S1: 'Existing baseline practice',
+  S2: 'Nitrogen-fixing soil regenerator',
+  S3: 'Climate-resilient cash crop / stress armor',
+};
+
+const PEST_DISRUPTION_NOTES: Record<FarmId, string> = {
+  'nueva-ecija':
+    'The non-rice relay periods indicate a planned host break for rice-associated pests such as brown planthopper and stemborer; scout locally because this calendar does not measure pest populations.',
+  bukidnon:
+    'Legume and camote phases indicate planned non-corn intervals that can disrupt corn pest carryover; this calendar does not measure field pest populations.',
+  isabela:
+    'Mungbean and sorghum relay periods indicate planned non-corn intervals that can disrupt corn pest carryover; this calendar does not measure field pest populations.',
+  guimaras:
+    'Mango remains present in every strategy. Living cover and mulch can reduce soil splash associated with anthracnose spread, but do not break the mango host cycle.',
+  'usa-midwest':
+    'Soybean and cover-crop phases indicate planned non-corn intervals that can disrupt corn pest carryover; this calendar does not measure field pest populations.',
+};
 
 interface StrategyComparisonSectionProps {
   farmId: FarmId;
@@ -112,6 +132,7 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
   );
 
   const topScore = evaluation.topStrategy;
+  const monthlyTelemetry = getMonthlyTelemetry(farmId, selectedMonth);
   const topStrategyObj =
     farm.strategies.find((s) => s.id === topScore.strategyId) ??
     farm.strategies[0];
@@ -580,6 +601,9 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
                       Rank #{scoreData.rank} · {strategy.id}{' '}
                       {strategy.isBaseline ? '(Baseline Practice)' : '(Adaptive Rotation)'}
                     </span>
+                    <span className="rounded-full border border-[#DCE5D8] bg-white px-2 py-1 text-[10px] font-semibold text-[#536458]">
+                      {STRATEGY_ROLE_LABELS[strategy.id]}
+                    </span>
 
                     {!strategy.isBaseline && (
                       <span
@@ -682,6 +706,14 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
                       <dt className="text-[9px] uppercase text-[#65766A]">N-Fixation</dt>
                       <dd className="font-bold text-[#17271D]">
                         +{strategy.nFixKgHa} kg N/ha
+                        {strategy.nFixKgHa > 0 && (
+                          <span
+                            title="Projected estimate: modeled biological nitrogen fixation, not a measured field result."
+                            className="ml-1 rounded bg-[#FFF3CD] px-1 py-0.5 text-[8px] font-bold text-[#856404]"
+                          >
+                            Projected estimate
+                          </span>
+                        )}
                       </dd>
                     </div>
                     <div className="rounded bg-[#F5F8F3] px-2.5 py-1.5">
@@ -714,6 +746,44 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
                       </p>
                       <p className="text-[#3B4D41]">
                         {strategy.explanations.supportingEvidence}
+                      </p>
+                      <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 rounded-lg border border-[#DCE5D8] bg-[#F8FAF7] p-2 font-mono text-[10px] text-[#3B4D41] sm:grid-cols-3">
+                        <div>
+                          <dt>NASA POWER T2M</dt>
+                          <dd className="font-bold">{monthlyTelemetry.t2m.toFixed(1)}°C</dd>
+                        </div>
+                        <div>
+                          <dt>NASA POWER PRECTOTCORR</dt>
+                          <dd className="font-bold">{monthlyTelemetry.precCorr.toFixed(2)} mm/day</dd>
+                        </div>
+                        <div>
+                          <dt>GPM IMERG precipitation</dt>
+                          <dd className="font-bold">{monthlyTelemetry.imergPrecipitationMmDay.toFixed(2)} mm/day</dd>
+                        </div>
+                        <div>
+                          <dt>POWER GWETROOT index</dt>
+                          <dd className="font-bold">{monthlyTelemetry.gwetRoot.toFixed(2)}</dd>
+                        </div>
+                        <div>
+                          <dt>POWER GWETTOP index</dt>
+                          <dd className="font-bold">{monthlyTelemetry.gwetTop.toFixed(2)}</dd>
+                        </div>
+                        <div>
+                          <dt>SRTM terrain context</dt>
+                          <dd className="font-bold">{farm.slopePct}% slope</dd>
+                        </div>
+                      </dl>
+                      {stressScenario !== 'baseline' && (
+                        <p className="mt-1 text-[10px] text-[#92400E]">
+                          Scenario-adjusted inputs: T2M {evaluation.climate.adjustedTempC.toFixed(1)}°C, rain{' '}
+                          {evaluation.climate.adjustedDailyPrecipMm.toFixed(2)} mm/day, GWETROOT{' '}
+                          {evaluation.climate.adjustedGwetRoot.toFixed(2)}.
+                          <span className="ml-1 rounded bg-amber-100 px-1 font-bold">Illustrative / modeled</span>
+                        </p>
+                      )}
+                      <p className="mt-1 text-[10px] text-[#65766A]">
+                        SMAP, ECOSTRESS, and Sentinel-2/Landsat values are not ingested as farm-point observations here; related map overlays are{' '}
+                        <span className="rounded bg-amber-100 px-1 font-bold text-amber-900">Illustrative / modeled</span>.
                       </p>
                     </div>
                     <div>
@@ -759,8 +829,9 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
               </h3>
             </div>
             <p className="mt-0.5 text-xs text-[#536458]">
-              Continuous relay cover shields topsoil during peak heat/monsoon months and breaks host-specific pest &amp; disease life cycles (marked with <ShieldCheck className="inline h-3.5 w-3.5 text-[#1B4332]" />). Click any month column to inspect its telemetry.
+              Ground-cover estimates show bare-field exposure; the shield marks a planned pest/disease management interval. Click a month to inspect its telemetry.
             </p>
+            <p className="mt-1 text-[11px] leading-5 text-[#536458]">{PEST_DISRUPTION_NOTES[farmId]}</p>
           </div>
           <div className="flex flex-wrap gap-1.5 text-[10px] font-semibold">
             {Object.entries(STAGE_STYLES).map(([key, style]) => (
@@ -824,10 +895,12 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
                             <span>{cell.groundCoverPct}% cov</span>
                             {cell.pestBreakActive && (
                               <span
-                                title="Non-host family breaks pest/disease buildup"
+                                title={farmId === 'guimaras'
+                                  ? 'Living cover and mulch reduce soil splash; mango remains the host crop'
+                                  : 'Scheduled non-host phase; pest populations are not measured'}
                                 className="inline-flex items-center rounded bg-white/25 px-1 font-bold"
                               >
-                                Pest Break
+                                {farmId === 'guimaras' ? 'Splash Control' : 'Host Break'}
                               </span>
                             )}
                           </div>
