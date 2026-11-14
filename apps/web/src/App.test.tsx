@@ -18,6 +18,10 @@ describe('home view and full FieldShift specification suite', () => {
     expect(markup).toContain('Choose a study farm');
     expect(markup).toContain('Selected field context');
     expect(markup).toContain('Seasonal climate profile');
+    expect(markup).toContain('NASA Space Apps Challenge');
+    expect(markup).toContain('The Next Frontier');
+    expect(markup).toContain('aria-label="Page navigation"');
+    expect(markup).toContain('Seasonal outlook');
     expect(markup).toContain('NASA POWER · historical monthly point data · 2020–2025');
     expect(markup).toContain('Nueva Ecija');
     expect(markup).toContain('Bukidnon');

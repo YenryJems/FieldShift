@@ -288,7 +288,7 @@ const SeasonalChart: React.FC<{
     .join(' ');
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-[#D4DDD0] bg-white p-4 sm:p-5">
+    <div id="seasonal-analysis" className="scroll-mt-28 overflow-x-auto rounded-xl border border-[#D4DDD0] bg-white p-4 sm:p-5">
       <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
         <div>
           <h3 className="font-bold text-[#17271D]">Monthly climate pattern</h3>
@@ -613,7 +613,7 @@ export const WorkspaceView: React.FC = () => {
 
   return (
     <div className="mx-auto max-w-[1280px] space-y-8 px-4 py-8 sm:px-6 sm:py-10">
-      <div className="flex flex-col gap-5 border-b border-[#E2E8DF] pb-6 lg:flex-row lg:items-end lg:justify-between">
+      <section id="field-sites" className="scroll-mt-28 flex flex-col gap-5 border-b border-[#E2E8DF] pb-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E] sm:text-xs">
             Farm context · select one of five representative locations
@@ -648,7 +648,7 @@ export const WorkspaceView: React.FC = () => {
             </button>
           ))}
         </div>
-      </div>
+      </section>
 
       <section aria-label={`Field context for ${farm.name}`} className="grid gap-3 rounded-2xl border border-[#D5DED2] bg-white p-4 shadow-sm sm:grid-cols-2 sm:p-5 lg:grid-cols-5">
         <div className="rounded-lg bg-[#F4F7F1] p-3 lg:col-span-2">
@@ -679,7 +679,7 @@ export const WorkspaceView: React.FC = () => {
         <p className="text-sm text-[#536458]">Explore six years of historical monthly patterns for this study location.</p>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
+      <div id="field-map" className="scroll-mt-28 grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
         <section className="rounded-xl border border-[#D4DDD0] bg-white p-5 sm:p-6">
           <div className="flex items-start gap-3">
             <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E3EFDF] text-[#2D6A4F]">
@@ -798,7 +798,7 @@ export const WorkspaceView: React.FC = () => {
 
       <PlanningComparison place={place} heatChange={heatChange} />
 
-      <section className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+      <section id="data-sources" className="scroll-mt-28 grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="rounded-xl border border-[#D4DDD0] bg-white p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4">
             <div>

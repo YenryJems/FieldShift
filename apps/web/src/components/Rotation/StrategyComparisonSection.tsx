@@ -246,7 +246,7 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
     <section
       id="fari-engine"
       aria-labelledby="fari-engine-heading"
-      className="space-y-6 rounded-2xl border border-[#D4DDD0] bg-white p-5 shadow-xs sm:p-7"
+      className="scroll-mt-28 space-y-6 rounded-2xl border border-[#D4DDD0] bg-white p-5 shadow-xs sm:p-7"
     >
       <article id="field-brief-print" className="hidden" aria-label="Printable farm field brief">
         <p className="font-mono text-xs font-bold uppercase tracking-wider">FieldShift · MAO / Extension Field Brief</p>
