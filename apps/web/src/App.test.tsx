@@ -11,10 +11,13 @@ describe('home view and full FieldShift specification suite', () => {
   it('presents the climate-planning story and interactive field demo without account flows', () => {
     const markup = renderToStaticMarkup(createElement(App));
 
-    expect(markup).toContain('Weather shifts.');
-    expect(markup).toContain('Explore the field demo');
-    expect(markup).toContain('Interactive field demo');
-    expect(markup).toContain('Try a different climate scenario.');
+    expect(markup).toContain('Plan for a season that keeps changing.');
+    expect(markup).toContain('Open decision workspace');
+    expect(markup).toContain('Interactive decision workspace');
+    expect(markup).toContain('Compare rotations');
+    expect(markup).toContain('Choose a study farm');
+    expect(markup).toContain('Selected field context');
+    expect(markup).toContain('Seasonal climate profile');
     expect(markup).toContain('NASA POWER · historical monthly point data · 2020–2025');
     expect(markup).toContain('Nueva Ecija');
     expect(markup).toContain('Bukidnon');

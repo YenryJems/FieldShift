@@ -16,6 +16,34 @@
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
+
+  body {
+    min-width: 320px;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: #D4E6A7;
+    color: #14271B;
+  }
+
+  :focus-visible {
+    outline-color: #0B3D91;
+  }
+}
+
+.field-hero-photo {
+  background-color: #203C2A;
+  background-image: url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=2200&q=85");
+  background-position: center;
+  background-size: cover;
+  transform: scale(1.015);
+}
+
+@media (max-width: 640px) {
+  .field-hero-photo {
+    background-position: 58% center;
+  }
 }
 
 /* Custom outdoor-legible range slider */

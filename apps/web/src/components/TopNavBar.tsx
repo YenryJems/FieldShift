@@ -14,8 +14,8 @@ export const TopNavBar: React.FC = () => {
   const { t } = useLanguage();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[#E2E8DF] bg-[#F8FAF7]/95 backdrop-blur-sm">
-      <div className="mx-auto flex h-16 max-w-[1280px] items-center justify-between gap-3 px-4 sm:px-6">
+    <header className="sticky top-0 z-40 border-b border-[#DCE3D8] bg-[#F8FAF7]/95 backdrop-blur-sm">
+      <div className="mx-auto flex h-[58px] max-w-[1280px] items-center justify-between gap-3 px-4 sm:h-16 sm:px-6">
         <a
           href="#top"
           className="flex shrink-0 items-center gap-2.5 rounded-md text-[#1B4332] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B3D91]"
@@ -62,7 +62,7 @@ export const TopNavBar: React.FC = () => {
 
       <nav
         aria-label="Mobile navigation"
-        className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 border-t border-[#E2E8DF] px-4 py-2 text-xs font-semibold text-[#465A4E] lg:hidden"
+          className="flex items-center justify-start gap-5 overflow-x-auto border-t border-[#E2E8DF] px-4 py-1.5 text-[11px] font-semibold text-[#465A4E] lg:hidden"
       >
         {navigation.map((item) => (
           <a

@@ -11,6 +11,7 @@ import {
   buildMonthlySummaryCsv,
   getMonthlyTelemetry,
   MONTHLY_SUMMARY_CSV_FILE_NAME,
+  FARMS_BY_ID,
   PlaceClimate,
   PlaceId,
   PLACES,
@@ -57,6 +58,13 @@ const downloadMonthlySummaryCsv = () => {
   link.remove();
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
+
+const FarmFact: React.FC<{ label: string; value: string }> = ({ label, value }) => (
+  <div className="min-w-0 rounded-lg border border-[#DDE5D9] bg-[#FBFCFA] p-3">
+    <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-[#698071]">{label}</p>
+    <p className="mt-1 break-words text-xs font-semibold leading-5 text-[#263B2E]">{value}</p>
+  </div>
+);
 
 const AdditionalSignalsPanel: React.FC<{
   selectedPlot: PlaceClimate;
@@ -593,6 +601,7 @@ export const WorkspaceView: React.FC = () => {
   const [rainfallChange, setRainfallChange] = useState(false);
   const [heatChange, setHeatChange] = useState(false);
   const place = PLACES_BY_ID[placeId];
+  const farm = FARMS_BY_ID[placeId];
   const averageMonthlyTemperature = place.meanTemperatureC;
   const averageRootWetness = place.meanRootWetnessIndex;
   const annualPrecipitation = place.meanAnnualPrecipitationMm === null
@@ -607,19 +616,19 @@ export const WorkspaceView: React.FC = () => {
       <div className="flex flex-col gap-5 border-b border-[#E2E8DF] pb-6 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E] sm:text-xs">
-            NASA POWER · historical monthly point data · 2020–2025
+            Farm context · select one of five representative locations
           </p>
           <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-[#17271D] sm:text-3xl">
-            Seasonal climate profile
+            Choose a study farm
           </h2>
           <p className="mt-1 text-sm text-[#536458]">
-            Explore six years of monthly history for a selected Philippine location.
+            Selection updates strategy scores, climate context, and the map.
           </p>
         </div>
 
         <div
           role="tablist"
-          aria-label="Select a NASA POWER location"
+          aria-label="Select a farm location"
           className="grid grid-cols-2 gap-1 rounded-xl border border-[#D7E0D5] bg-[#F3F6F1] p-1 sm:grid-cols-5"
         >
           {PLACES.map((item) => (
@@ -629,7 +638,7 @@ export const WorkspaceView: React.FC = () => {
               role="tab"
               aria-selected={placeId === item.id}
               onClick={() => setPlaceId(item.id)}
-              className={`rounded-lg px-3 py-2 text-xs font-bold transition-colors sm:px-3.5 sm:text-sm ${
+              className={`min-h-10 rounded-lg px-3 py-2 text-xs font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B3D91] sm:px-3.5 sm:text-sm ${
                 placeId === item.id
                   ? 'bg-white text-[#1B4332] shadow-sm'
                   : 'text-[#536458] hover:text-[#1B4332]'
@@ -639,6 +648,35 @@ export const WorkspaceView: React.FC = () => {
             </button>
           ))}
         </div>
+      </div>
+
+      <section aria-label={`Field context for ${farm.name}`} className="grid gap-3 rounded-2xl border border-[#D5DED2] bg-white p-4 shadow-sm sm:grid-cols-2 sm:p-5 lg:grid-cols-5">
+        <div className="rounded-lg bg-[#F4F7F1] p-3 lg:col-span-2">
+          <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-[#698071]">Selected field context</p>
+          <h3 className="mt-1 text-lg font-extrabold text-[#17271D]">{farm.name}</h3>
+          <p className="mt-0.5 text-xs text-[#536458]">{farm.locationLabel}</p>
+        </div>
+        <FarmFact label="Coordinates" value={`${Math.abs(farm.latitude).toFixed(3)}°${farm.latitude < 0 ? 'S' : 'N'}, ${Math.abs(farm.longitude).toFixed(3)}°${farm.longitude < 0 ? 'W' : 'E'}`} />
+        <FarmFact label="Elevation · slope" value={`${farm.elevationM} m · ${farm.slopePct}%`} />
+        <FarmFact label="Soil context" value={farm.soilType} />
+        <div className="rounded-lg border border-[#DDE5D9] bg-white p-3 sm:col-span-2 lg:col-span-5">
+          <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-[#698071]">Baseline practice</p>
+          <p className="mt-1 text-xs font-semibold text-[#263B2E]">{farm.baselineFarmingSystem}</p>
+        </div>
+      </section>
+
+      <StrategyComparisonSection
+        farmId={placeId}
+        selectedMonth={selectedMonth}
+        onSelectMonth={setSelectedMonth}
+      />
+
+      <div className="flex flex-col gap-1 border-b border-[#E2E8DF] pb-4">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E] sm:text-xs">
+          NASA POWER · historical monthly point data · 2020–2025
+        </p>
+        <h2 className="text-2xl font-semibold tracking-tight text-[#17271D] sm:text-3xl">Seasonal climate profile</h2>
+        <p className="text-sm text-[#536458]">Explore six years of historical monthly patterns for this study location.</p>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
@@ -700,12 +738,6 @@ export const WorkspaceView: React.FC = () => {
           onSelectPlot={setPlaceId}
         />
       </div>
-
-      <StrategyComparisonSection
-        farmId={placeId}
-        selectedMonth={selectedMonth}
-        onSelectMonth={setSelectedMonth}
-      />
 
       <AnalyticalSuiteSection
         farmId={placeId}

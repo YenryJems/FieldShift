@@ -1,272 +1,114 @@
 import React from 'react';
-import {
-  ArrowDown,
-  ArrowRight,
-  CloudRain,
-  Droplets,
-  Leaf,
-  ThermometerSun,
-} from 'lucide-react';
+import { ArrowDown, ArrowRight, Globe2, Leaf, Satellite } from 'lucide-react';
 import { WorkspaceView } from './WorkspaceView';
-
-const planningSignals = [
-  {
-    icon: ThermometerSun,
-    title: 'Heat',
-    description: 'Spot hotter stretches that can stress crops and shift field work.',
-    color: 'bg-[#FDE8D6] text-[#A7471B]',
-  },
-  {
-    icon: CloudRain,
-    title: 'Rain',
-    description: 'See wet and dry windows before choosing when to sow or protect soil.',
-    color: 'bg-[#DCEBFA] text-[#245A8D]',
-  },
-  {
-    icon: Droplets,
-    title: 'Soil moisture',
-    description: 'Connect changing conditions to practical water and ground cover choices.',
-    color: 'bg-[#E3EFDF] text-[#2D6A4F]',
-  },
-];
 
 const steps = [
   {
     number: '01',
     title: 'Read the season',
-    description:
-      'Bring temperature, rainfall, and soil signals together in one view instead of hunting across separate charts.',
+    description: 'Review historical heat, rainfall, and root-zone wetness patterns for the selected study location.',
   },
   {
     number: '02',
-    title: 'Explore a what-if',
-    description:
-      'Try a hotter or drier season and see how the outlook changes before committing to a planting plan.',
+    title: 'Compare rotations',
+    description: 'See how three crop strategies score as you change priorities, field constraints, and climate scenarios.',
   },
   {
     number: '03',
-    title: 'Plan with local knowledge',
-    description:
-      'Use the patterns as a conversation starter with farmers and extension experts—not a replacement for their judgment.',
+    title: 'Verify locally',
+    description: 'Bring the evidence and open questions to a farmer, soil laboratory, or agricultural extension officer.',
   },
 ];
 
 export const HomeView: React.FC = () => (
   <main>
-    <section className="relative overflow-hidden bg-[#10251B] text-white">
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-36 -top-56 h-[36rem] w-[36rem] rounded-full border border-white/10"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -right-20 -top-40 h-[28rem] w-[28rem] rounded-full border border-white/10"
-      />
+    <section className="field-hero relative isolate overflow-hidden bg-[#11281D] text-white">
+      <div aria-hidden="true" className="field-hero-photo absolute inset-0 -z-20" />
+      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-to-r from-[#10251B]/95 via-[#10251B]/78 to-[#10251B]/20" />
+      <div aria-hidden="true" className="absolute inset-x-0 bottom-0 -z-10 h-32 bg-gradient-to-t from-[#10251B]/70 to-transparent" />
 
-      <div className="relative mx-auto grid max-w-[1280px] gap-12 px-4 pb-16 pt-16 sm:px-6 sm:pb-20 sm:pt-24 lg:grid-cols-[1fr_0.92fr] lg:items-center lg:gap-16 lg:pb-24 lg:pt-28">
-        <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-[#C9DBCE] sm:text-xs">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#B6D68A]" />
-            NASA Space Apps Challenge · Team Overachiever
+      <div className="mx-auto grid max-w-[1280px] gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:min-h-[520px] lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:py-24">
+        <div className="max-w-2xl">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-[#10251B]/35 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#E2EBDD] sm:text-xs">
+            <Satellite className="h-3.5 w-3.5 text-[#AFCB82]" aria-hidden="true" />
+            Earth data · field decisions
           </div>
-
-          <h1 className="mt-7 max-w-2xl text-4xl font-extrabold leading-[1.05] tracking-[-0.04em] sm:text-5xl lg:text-6xl">
-            Weather shifts.
-            <span className="block text-[#B6D68A]">Plans can, too.</span>
+          <h1 className="mt-6 max-w-xl text-[2.65rem] font-semibold leading-[1.03] tracking-[-0.045em] sm:text-6xl lg:text-[4.4rem]">
+            Plan for a season that keeps changing.
           </h1>
-          <p className="mt-6 max-w-xl text-base leading-7 text-[#D1DDD4] sm:text-lg sm:leading-8">
-            FieldShift turns Earth-observation signals into a clearer picture of
-            what changing heat, rainfall, and soil moisture could mean for the
-            next planting season.
+          <p className="mt-5 max-w-xl text-sm leading-7 text-white/85 sm:text-base sm:leading-8">
+            Compare climate-resilient crop rotations with historical NASA Earth-observation data, farm priorities, and local field context.
           </p>
-
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <a
-              href="#field-demo"
-              className="inline-flex h-12 items-center gap-2 rounded-lg bg-[#B6D68A] px-5 text-sm font-bold text-[#10251B] transition-colors hover:bg-[#C9E5A4] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-            >
-              Explore the field demo
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          <div className="mt-7 flex flex-wrap items-center gap-3">
+            <a href="#field-demo" className="inline-flex min-h-12 items-center gap-2 rounded-lg bg-[#D4E6A7] px-5 text-sm font-extrabold text-[#14271B] transition-colors hover:bg-[#E2F0C4] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+              Open decision workspace <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </a>
-            <a
-              href="#approach"
-              className="inline-flex h-12 items-center gap-2 rounded-lg px-4 text-sm font-semibold text-white/85 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-            >
-              How it works
-              <ArrowDown className="h-4 w-4" aria-hidden="true" />
+            <a href="#approach" className="inline-flex min-h-11 items-center gap-2 rounded-lg px-3 text-sm font-semibold text-white/90 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+              How it works <ArrowDown className="h-4 w-4" aria-hidden="true" />
             </a>
           </div>
-
-          <p className="mt-8 max-w-lg text-xs leading-5 text-[#ADC0B3]">
-            The dashboard uses NASA POWER monthly data from 2020–2025. The
-            sample graphic above and what-if scenarios are not forecasts or
-            farm-specific advice.
+          <p className="mt-7 max-w-xl text-xs leading-5 text-white/75">
+            An educational decision-support prototype. Historical point data and modeled scenarios support planning; they are not live field conditions or forecasts.
           </p>
         </div>
 
-        <div className="relative mx-auto w-full max-w-[600px]">
-          <div className="overflow-hidden rounded-2xl border border-white/15 bg-[#F8FAF7] p-4 text-[#111C16] shadow-2xl shadow-black/25 sm:p-5">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E]">
-                  FieldShift · seasonal view
-                </p>
-                <h2 className="mt-1 text-base font-extrabold sm:text-lg">
-                  Plan for the pattern, not the average
-                </h2>
-              </div>
-              <span className="shrink-0 rounded-full bg-[#E4F0DC] px-2.5 py-1 font-mono text-[10px] font-bold text-[#315D3E]">
-                SAMPLE
-              </span>
+        <aside className="rounded-2xl border border-white/20 bg-[#10251B]/75 p-5 shadow-2xl backdrop-blur-sm sm:p-6" aria-label="FieldShift data approach">
+          <div className="flex items-start justify-between gap-4 border-b border-white/15 pb-4">
+            <div>
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#C6D8B9]">A clearer view of risk</p>
+              <h2 className="mt-1 text-xl font-semibold tracking-tight sm:text-2xl">From orbit to the field</h2>
             </div>
-
-            <div className="mt-4 grid grid-cols-3 gap-2">
-              {[
-                { label: 'HEAT', value: 'Rising', color: 'text-[#B4532A]' },
-                { label: 'RAINFALL', value: 'Shifting', color: 'text-[#32658E]' },
-                { label: 'SOIL', value: 'Monitor', color: 'text-[#376B49]' },
-              ].map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-lg border border-[#E2E8DF] bg-white px-2.5 py-2.5 sm:px-3"
-                >
-                  <p className="font-mono text-[9px] font-bold tracking-wider text-[#738278]">
-                    {item.label}
-                  </p>
-                  <p className={`mt-1 text-xs font-extrabold sm:text-sm ${item.color}`}>
-                    {item.value}
-                  </p>
+            <span className="rounded-full border border-[#D4E6A7]/45 bg-[#D4E6A7]/10 px-2.5 py-1 font-mono text-[9px] font-bold uppercase tracking-wider text-[#E6F1D0]">2001–2025 context</span>
+          </div>
+          <div className="mt-5 grid grid-cols-3 gap-2">
+            {[
+              { value: '05', label: 'study locations' },
+              { value: '15', label: 'crop strategies' },
+              { value: '04', label: 'FARI pillars' },
+            ].map((item) => (
+              <div key={item.label} className="rounded-lg border border-white/10 bg-white/[0.06] px-3 py-3">
+                <p className="font-mono text-2xl font-semibold tabular-nums text-[#D4E6A7]">{item.value}</p>
+                <p className="mt-1 text-[10px] leading-4 text-white/75 sm:text-xs">{item.label}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 rounded-xl border border-white/10 bg-[#0B1C15]/75 p-4">
+            <div className="flex items-center gap-2 text-[#D8E7C6]">
+              <Globe2 className="h-4 w-4" aria-hidden="true" />
+              <span className="font-mono text-[10px] font-bold uppercase tracking-wider">Decision pathway</span>
+            </div>
+            <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+              {['Observe', 'Compare', 'Verify'].map((item, index) => (
+                <div key={item} className="relative rounded-lg bg-white/[0.07] px-2 py-3">
+                  <span className="mx-auto flex h-7 w-7 items-center justify-center rounded-full bg-[#D4E6A7] text-xs font-extrabold text-[#14271B]">{index + 1}</span>
+                  <p className="mt-2 text-xs font-bold">{item}</p>
                 </div>
               ))}
             </div>
-
-            <div className="mt-3 rounded-xl border border-[#E2E8DF] bg-white p-3 sm:p-4">
-              <div className="flex items-center justify-between gap-2">
-                <p className="text-xs font-bold text-[#263B2E]">Season signals</p>
-                <p className="font-mono text-[9px] text-[#78877D]">ILLUSTRATIVE</p>
-              </div>
-              <svg
-                viewBox="0 0 520 156"
-                className="mt-2 block h-auto w-full"
-                role="img"
-                aria-label="Illustrative seasonal chart showing rainfall bars and a temperature trend line"
-              >
-                <path d="M32 20H508M32 58H508M32 96H508M32 134H508" stroke="#E9EEE9" />
-                <g fill="#B7D7E9">
-                  <rect x="48" y="106" width="17" height="28" rx="3" />
-                  <rect x="84" y="112" width="17" height="22" rx="3" />
-                  <rect x="120" y="100" width="17" height="34" rx="3" />
-                  <rect x="156" y="84" width="17" height="50" rx="3" />
-                  <rect x="192" y="62" width="17" height="72" rx="3" />
-                  <rect x="228" y="45" width="17" height="89" rx="3" />
-                  <rect x="264" y="32" width="17" height="102" rx="3" />
-                  <rect x="300" y="38" width="17" height="96" rx="3" />
-                  <rect x="336" y="50" width="17" height="84" rx="3" />
-                  <rect x="372" y="67" width="17" height="67" rx="3" />
-                  <rect x="408" y="88" width="17" height="46" rx="3" />
-                  <rect x="444" y="104" width="17" height="30" rx="3" />
-                </g>
-                <path
-                  d="M56 96C80 92 88 88 128 84S184 75 200 70 240 65 272 60 320 56 344 60 392 70 416 74 448 78 452 78"
-                  fill="none"
-                  stroke="#D16B47"
-                  strokeLinecap="round"
-                  strokeWidth="3"
-                />
-                <g fill="#D16B47" stroke="white" strokeWidth="2">
-                  <circle cx="56" cy="96" r="4" />
-                  <circle cx="128" cy="84" r="4" />
-                  <circle cx="200" cy="70" r="4" />
-                  <circle cx="272" cy="60" r="4" />
-                  <circle cx="344" cy="60" r="4" />
-                  <circle cx="416" cy="74" r="4" />
-                </g>
-                <g fill="#78877D" fontFamily="JetBrains Mono, monospace" fontSize="9">
-                  <text x="46" y="150">JAN</text>
-                  <text x="154" y="150">APR</text>
-                  <text x="262" y="150">JUL</text>
-                  <text x="370" y="150">OCT</text>
-                  <text x="440" y="150">DEC</text>
-                </g>
-              </svg>
-              <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-[10px] text-[#637267]">
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-sm bg-[#B7D7E9]" />
-                  Rainfall pattern
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="h-0.5 w-3 rounded bg-[#D16B47]" />
-                  Temperature trend
-                </span>
-              </div>
-            </div>
+            <p className="mt-3 text-[11px] leading-5 text-white/70">NASA POWER and GPM IMERG historical baselines inform the comparison. Ground truth still matters.</p>
           </div>
-          <div
-            aria-hidden="true"
-            className="absolute -bottom-5 -left-4 -z-10 h-24 w-24 rounded-full bg-[#B6D68A]/20 blur-2xl"
-          />
-        </div>
+          <div className="mt-4 flex items-center gap-2 text-xs text-white/70">
+            <Leaf className="h-4 w-4 text-[#D4E6A7]" aria-hidden="true" />
+            Farmer judgment and local soil testing stay at the center.
+          </div>
+        </aside>
       </div>
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-white/20" />
     </section>
 
-    <section className="border-b border-[#E2E8DF] bg-white">
+    <section id="approach" className="scroll-mt-28 bg-[#F3F5EF]">
       <div className="mx-auto max-w-[1280px] px-4 py-12 sm:px-6 sm:py-16">
-        <div className="max-w-2xl">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[#52715E] sm:text-xs">
-            The signals that shape a season
-          </p>
-          <h2 className="mt-3 text-2xl font-extrabold tracking-tight text-[#17271D] sm:text-3xl">
-            Make climate information easier to act on.
-          </h2>
-        </div>
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
-          {planningSignals.map(({ icon: Icon, title, description, color }) => (
-            <article
-              key={title}
-              className="flex gap-4 rounded-xl border border-[#E2E8DF] bg-[#FAFCF9] p-5"
-            >
-              <span
-                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${color}`}
-              >
-                <Icon className="h-5 w-5" aria-hidden="true" />
-              </span>
-              <div>
-                <h3 className="font-bold text-[#17271D]">{title}</h3>
-                <p className="mt-1.5 text-sm leading-6 text-[#536458]">{description}</p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-
-    <section id="approach" className="scroll-mt-24 bg-[#F3F6F1]">
-      <div className="mx-auto max-w-[1280px] px-4 py-14 sm:px-6 sm:py-20">
-        <div className="grid gap-10 lg:grid-cols-[0.7fr_1.3fr] lg:gap-16">
+        <div className="grid gap-7 lg:grid-cols-[0.72fr_1.28fr] lg:items-end">
           <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[#52715E] sm:text-xs">
-              From observation to preparation
-            </p>
-            <h2 className="mt-3 text-2xl font-extrabold leading-tight tracking-tight text-[#17271D] sm:text-3xl">
-              A clearer starting point for the next season.
-            </h2>
-            <a
-              href="#field-demo"
-              className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-[#1B4332] hover:text-[#2D6A4F] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1B4332]"
-            >
-              Try the interactive demo
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </a>
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[#52715E] sm:text-xs">A practical planning sequence</p>
+            <h2 className="mt-3 max-w-md text-2xl font-semibold leading-tight tracking-tight text-[#17271D] sm:text-3xl">Useful climate context, connected to farm choices.</h2>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             {steps.map((step) => (
-              <article
-                key={step.number}
-                className="rounded-xl border border-[#DFE7DD] bg-white p-5"
-              >
-                <span className="font-mono text-xs font-bold text-[#5C8969]">{step.number}</span>
-                <h3 className="mt-4 text-base font-extrabold text-[#17271D]">{step.title}</h3>
-                <p className="mt-2 text-sm leading-6 text-[#536458]">{step.description}</p>
+              <article key={step.number} className="rounded-xl border border-[#DCE3D8] bg-white p-4 sm:p-5">
+                <span className="font-mono text-[11px] font-bold text-[#477251]">{step.number}</span>
+                <h3 className="mt-3 text-sm font-extrabold text-[#17271D] sm:text-base">{step.title}</h3>
+                <p className="mt-2 text-xs leading-5 text-[#536458] sm:text-sm">{step.description}</p>
               </article>
             ))}
           </div>
@@ -274,41 +116,26 @@ export const HomeView: React.FC = () => (
       </div>
     </section>
 
-    <section id="field-demo" className="scroll-mt-24 border-t border-[#E2E8DF] bg-white">
-      <div className="mx-auto max-w-[1280px] px-4 pb-3 pt-14 sm:px-6 sm:pt-20">
+    <section id="field-demo" className="scroll-mt-24 border-t border-[#E2E8DF] bg-[#F8FAF7]">
+      <div className="mx-auto max-w-[1280px] px-4 pb-2 pt-12 sm:px-6 sm:pt-16">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-full bg-[#E7F0E2] px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[#315D3E]">
-              <Leaf className="h-3 w-3" aria-hidden="true" />
-              Interactive field demo
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#E5EDDF] px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[#315D3E]">
+              <Leaf className="h-3 w-3" aria-hidden="true" /> Interactive decision workspace
             </div>
-            <h2 className="mt-4 text-2xl font-extrabold tracking-tight text-[#17271D] sm:text-3xl">
-              Explore a season.               Try a different climate scenario.
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-[#536458] sm:text-base">
-              Switch locations, inspect six years of seasonal patterns, then
-              test how less rain or more heat could change the historical baseline.
-            </p>
+            <h2 className="mt-4 text-2xl font-semibold tracking-tight text-[#17271D] sm:text-3xl">Start with the farm. Compare what could work.</h2>
+            <p className="mt-2 text-sm leading-6 text-[#536458]">Choose a study location, review the strategy scores, then explore historical climate patterns and modeled risks.</p>
           </div>
-          <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#738278]">
-            NASA POWER · 2020–2025
-          </span>
+          <span className="font-mono text-[10px] font-semibold uppercase tracking-wider text-[#64756A]">NASA POWER · 2020–2025 static baseline</span>
         </div>
       </div>
       <WorkspaceView />
     </section>
 
-    <footer className="border-t border-[#E2E8DF] bg-[#10251B] text-[#D1DDD4]">
+    <footer className="border-t border-[#30443A] bg-[#10251B] text-[#D1DDD4]">
       <div className="mx-auto flex max-w-[1280px] flex-col gap-3 px-4 py-8 text-xs sm:flex-row sm:items-center sm:justify-between sm:px-6">
-        <div className="flex items-center gap-2">
-          <span className="font-extrabold text-white">FieldShift</span>
-          <span aria-hidden="true">·</span>
-          <span>Team Overachiever · NASA Space Apps Challenge</span>
-        </div>
-        <p className="max-w-xl leading-5 text-[#ADC0B3]">
-          Demonstration only. Always pair climate information with local
-          forecasts, field observations, and farmer or extension expertise.
-        </p>
+        <div className="flex items-center gap-2"><span className="font-extrabold text-white">FieldShift</span><span aria-hidden="true">·</span><span>Team Overachiever · NASA Space Apps Challenge</span></div>
+        <p className="max-w-xl leading-5 text-[#C1CEC4]">Educational decision support. Pair climate information with local forecasts, field observations, and farmer or extension expertise.</p>
       </div>
     </footer>
   </main>
