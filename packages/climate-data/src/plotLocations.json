@@ -50,6 +50,40 @@
         [17.05, 121.88]
       ],
       "zoom": 12
+    },
+    {
+      "id": "guimaras",
+      "name": "Plot D: Buenavista Mango Terroir Orchard",
+      "region": "Guimaras Island, Western Visayas, Philippines",
+      "agroZone": "Coastal Upland Carabao Mango Terroir & Dry-Spell Induction Zone",
+      "center": {
+        "lat": 10.583,
+        "lon": 122.617,
+        "elevationM": 46.55
+      },
+      "bbox": [122.55, 10.51, 122.69, 10.66],
+      "bounds": [
+        [10.51, 122.55],
+        [10.66, 122.69]
+      ],
+      "zoom": 12
+    },
+    {
+      "id": "usa-midwest",
+      "name": "Plot E: Central Illinois Benchmark Farm",
+      "region": "Central Illinois, U.S. Midwest Corn Belt, USA",
+      "agroZone": "Temperate Silt-Loam Corn-Soybean & Winter Cover Benchmark",
+      "center": {
+        "lat": 40.1,
+        "lon": -88.2,
+        "elevationM": 208.77
+      },
+      "bbox": [-88.28, 40.02, -88.12, 40.18],
+      "bounds": [
+        [40.02, -88.28],
+        [40.18, -88.12]
+      ],
+      "zoom": 12
     }
   ]
 }

@@ -16,6 +16,9 @@ import {
   PLACES,
   PLACES_BY_ID,
 } from '@fieldshift/climate-data';
+import { AnalyticalSuiteSection } from './Agronomics/AnalyticalSuiteSection';
+import { FooterAndAttributions } from './Common/FooterAndAttributions';
+import { StrategyComparisonSection } from './Rotation/StrategyComparisonSection';
 
 const MONTHS = [
   'Jan',
@@ -132,7 +135,15 @@ const FieldMapPanel: React.FC<{
   onMonthChange: (month: number) => void;
   mapLayer: MapLayer;
   onMapLayerChange: (layer: MapLayer) => void;
-}> = ({ selectedPlot, selectedMonth, onMonthChange, mapLayer, onMapLayerChange }) => {
+  onSelectPlot: (id: PlaceId) => void;
+}> = ({
+  selectedPlot,
+  selectedMonth,
+  onMonthChange,
+  mapLayer,
+  onMapLayerChange,
+  onSelectPlot,
+}) => {
   const selectedMonthTelemetry = getMonthlyTelemetry(selectedPlot.id, selectedMonth);
 
   return (
@@ -201,6 +212,7 @@ const FieldMapPanel: React.FC<{
           activeMonthData={selectedMonthTelemetry}
           mapLayer={mapLayer}
           selectedPlotId={selectedPlot.id}
+          onSelectPlot={onSelectPlot}
         />
       </Suspense>
       <p className="mt-3 text-xs leading-5 text-[#65766A]">
@@ -608,7 +620,7 @@ export const WorkspaceView: React.FC = () => {
         <div
           role="tablist"
           aria-label="Select a NASA POWER location"
-          className="grid grid-cols-3 rounded-xl border border-[#D7E0D5] bg-[#F3F6F1] p-1"
+          className="grid grid-cols-2 gap-1 rounded-xl border border-[#D7E0D5] bg-[#F3F6F1] p-1 sm:grid-cols-5"
         >
           {PLACES.map((item) => (
             <button
@@ -617,7 +629,7 @@ export const WorkspaceView: React.FC = () => {
               role="tab"
               aria-selected={placeId === item.id}
               onClick={() => setPlaceId(item.id)}
-              className={`rounded-lg px-3 py-2 text-xs font-bold transition-colors sm:px-4 sm:text-sm ${
+              className={`rounded-lg px-3 py-2 text-xs font-bold transition-colors sm:px-3.5 sm:text-sm ${
                 placeId === item.id
                   ? 'bg-white text-[#1B4332] shadow-sm'
                   : 'text-[#536458] hover:text-[#1B4332]'
@@ -685,8 +697,20 @@ export const WorkspaceView: React.FC = () => {
           onMonthChange={setSelectedMonth}
           mapLayer={mapLayer}
           onMapLayerChange={setMapLayer}
+          onSelectPlot={setPlaceId}
         />
       </div>
+
+      <StrategyComparisonSection
+        farmId={placeId}
+        selectedMonth={selectedMonth}
+        onSelectMonth={setSelectedMonth}
+      />
+
+      <AnalyticalSuiteSection
+        farmId={placeId}
+        selectedMonth={selectedMonth}
+      />
 
       <SeasonalChart
         place={place}
@@ -829,6 +853,8 @@ export const WorkspaceView: React.FC = () => {
           </p>
         </div>
       </section>
+
+      <FooterAndAttributions />
 
       <p className="border-t border-[#E2E8DF] pt-5 text-xs leading-5 text-[#65766A]">
         FieldShift is a planning aid prototype. Use NASA POWER alongside local forecasts,

@@ -1,9 +1,13 @@
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
+import { FARMS } from '@fieldshift/climate-data';
 import App from './App';
+import { AnalyticalSuiteSection } from './components/Agronomics/AnalyticalSuiteSection';
+import { StrategyComparisonSection } from './components/Rotation/StrategyComparisonSection';
+import { TRANSLATIONS } from './context/LanguageContext';
 
-describe('home view', () => {
+describe('home view and full FieldShift specification suite', () => {
   it('presents the climate-planning story and interactive field demo without account flows', () => {
     const markup = renderToStaticMarkup(createElement(App));
 
@@ -15,6 +19,8 @@ describe('home view', () => {
     expect(markup).toContain('Nueva Ecija');
     expect(markup).toContain('Bukidnon');
     expect(markup).toContain('Isabela');
+    expect(markup).toContain('Guimaras');
+    expect(markup).toContain('USA Midwest');
     expect(markup).toContain('Satellite');
     expect(markup).toContain('Street');
     expect(markup).toContain('Historical month');
@@ -34,5 +40,79 @@ describe('home view', () => {
     expect(markup).not.toContain('Sign in');
     expect(markup).not.toContain('Create Account');
     expect(markup).not.toContain('Smallholder Free');
+  });
+
+  it('renders FARI 3-strategy comparison, 5 rubric explanations, projected estimate badges, and mandatory NASA disclaimer', () => {
+    const markup = renderToStaticMarkup(createElement(App));
+
+    // 3 strategies for default farm (Nueva Ecija)
+    expect(markup).toContain('Strategy S1:');
+    expect(markup).toContain('Strategy S2:');
+    expect(markup).toContain('Strategy S3:');
+
+    // 5 mandatory rubric explanation headings
+    expect(markup).toContain('1. Why Suggested');
+    expect(markup).toContain('2. Supporting NASA Evidence');
+    expect(markup).toContain('3. Expected Benefits &amp; Crop Science');
+    expect(markup).toContain('4. Information &amp; Data Gaps');
+    expect(markup).toContain('5. Risks Requiring Local Review (MAO / Extension)');
+
+    // Priority sliders & stress presets
+    expect(markup).toContain('Water Suitability (W)');
+    expect(markup).toContain('Erosion Protection (E)');
+    expect(markup).toContain('Nutrient Regeneration (N)');
+    expect(markup).toContain('Market &amp; Cash Viability (M)');
+    expect(markup).toContain('Drought (−30% Rain)');
+    expect(markup).toContain('Heatwave (+2.5°C)');
+    expect(markup).toContain('Deluge (+40% Rain)');
+
+    // Mandatory labeling badges
+    expect(markup).toContain('Projected estimate');
+    expect(markup).toContain('Illustrative / modeled');
+    expect(markup).toContain('Rule-based suitability ensemble (RF-style)');
+    expect(markup).toContain('Orbital Confidence 80% | Ground-Truth Testing Required 20%');
+
+    // Exact Binisaya drought alert string and mandatory verbatim NASA disclaimer
+    expect(markup).toContain(
+      'Uga kaayo ang yuta—ayaw una pag-spray og pampabulak; pagtanom og munggo o kamote aron mapanalipdan ang kaumog.',
+    );
+    expect(markup).toContain(
+      'NASA does not endorse any non-U.S. Government entity. FieldShift is an educational decision-support prototype designed to support, and never replace, farmer judgment, local soil testing, and certified agricultural extension expertise.',
+    );
+  });
+
+  it('renders StrategyComparisonSection and AnalyticalSuiteSection cleanly across all 5 farms', () => {
+    for (const farm of FARMS) {
+      const stratMarkup = renderToStaticMarkup(
+        createElement(StrategyComparisonSection, {
+          farmId: farm.id,
+          selectedMonth: 3,
+        }),
+      );
+      expect(stratMarkup).toContain(farm.name);
+      for (const strategy of farm.strategies) {
+        expect(stratMarkup).toContain(strategy.name);
+      }
+
+      const analyticalMarkup = renderToStaticMarkup(
+        createElement(AnalyticalSuiteSection, {
+          farmId: farm.id,
+          selectedMonth: 3,
+        }),
+      );
+      expect(analyticalMarkup).toContain('90-Day Climatological Flower Induction');
+      expect(analyticalMarkup).toContain('Terroir Nutrient Balance');
+      expect(analyticalMarkup).toContain('Rule-based suitability ensemble (RF-style)');
+      expect(analyticalMarkup).toContain('Tier 1 Orbital Assessment (80%)');
+    }
+  });
+
+  it('includes English, Binisaya, and Tagalog translations with native-speaker review notice and 4 glossary terms', () => {
+    expect(TRANSLATIONS.en.glossaryItems).toHaveLength(4);
+    expect(TRANSLATIONS.ceb.glossaryItems).toHaveLength(4);
+    expect(TRANSLATIONS.tl.glossaryItems).toHaveLength(4);
+    expect(TRANSLATIONS.ceb.droughtAlertBanner).toBe(
+      'Uga kaayo ang yuta—ayaw una pag-spray og pampabulak; pagtanom og munggo o kamote aron mapanalipdan ang kaumog.',
+    );
   });
 });

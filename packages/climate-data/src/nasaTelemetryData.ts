@@ -71,6 +71,8 @@ export const NASA_TELEMETRY_BY_PLOT: Record<PlaceId, MonthlyTelemetry[]> = {
   'nueva-ecija': buildMonthlyTelemetry('nueva-ecija'),
   bukidnon: buildMonthlyTelemetry('bukidnon'),
   isabela: buildMonthlyTelemetry('isabela'),
+  guimaras: buildMonthlyTelemetry('guimaras'),
+  'usa-midwest': buildMonthlyTelemetry('usa-midwest'),
 };
 
 export const getMonthlyTelemetry = (

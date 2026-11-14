@@ -1,11 +1,15 @@
 import bukidnonData from './POWER_Point_Monthly_20200101_20251231_008d15N_125d12E_UTC.json';
 import bukidnonDataUrl from './POWER_Point_Monthly_20200101_20251231_008d15N_125d12E_UTC.json?url';
+import guimarasData from './POWER_Point_Monthly_20200101_20251231_010d58N_122d62E_UTC.json';
+import guimarasDataUrl from './POWER_Point_Monthly_20200101_20251231_010d58N_122d62E_UTC.json?url';
 import nuevaEcijaData from './POWER_Point_Monthly_20200101_20251231_015d68N_120d89E_UTC.json';
 import nuevaEcijaDataUrl from './POWER_Point_Monthly_20200101_20251231_015d68N_120d89E_UTC.json?url';
 import isabelaData from './POWER_Point_Monthly_20200101_20251231_016d98N_121d81E_UTC.json';
 import isabelaDataUrl from './POWER_Point_Monthly_20200101_20251231_016d98N_121d81E_UTC.json?url';
+import usaMidwestData from './POWER_Point_Monthly_20200101_20251231_040d10N_088d20W_UTC.json';
+import usaMidwestDataUrl from './POWER_Point_Monthly_20200101_20251231_040d10N_088d20W_UTC.json?url';
 
-export type PlaceId = 'nueva-ecija' | 'bukidnon' | 'isabela';
+export type PlaceId = 'nueva-ecija' | 'bukidnon' | 'isabela' | 'guimaras' | 'usa-midwest';
 
 type PowerPointData = {
   geometry: { coordinates: number[] };
@@ -96,6 +100,18 @@ export const PLOT_MAP_EXTENTS: Record<PlaceId, MapExtent> = {
     bounds: [[16.9, 121.74], [17.05, 121.88]],
     zoom: 12,
   },
+  guimaras: {
+    center: [10.583, 122.617],
+    bbox: [122.55, 10.51, 122.69, 10.66],
+    bounds: [[10.51, 122.55], [10.66, 122.69]],
+    zoom: 12,
+  },
+  'usa-midwest': {
+    center: [40.1, -88.2],
+    bbox: [-88.28, 40.02, -88.12, 40.18],
+    bounds: [[40.02, -88.28], [40.18, -88.12]],
+    zoom: 12,
+  },
 };
 
 const MONTH_LABELS = [
@@ -140,6 +156,24 @@ const PLACE_SOURCES: Record<PlaceId, PlaceSource> = {
     dataUrl: isabelaDataUrl,
     extent: PLOT_MAP_EXTENTS.isabela,
     data: isabelaData,
+  },
+  guimaras: {
+    id: 'guimaras',
+    name: 'Guimaras',
+    region: 'Western Visayas, Philippines',
+    fileName: 'POWER_Point_Monthly_20200101_20251231_010d58N_122d62E_UTC.json',
+    dataUrl: guimarasDataUrl,
+    extent: PLOT_MAP_EXTENTS.guimaras,
+    data: guimarasData,
+  },
+  'usa-midwest': {
+    id: 'usa-midwest',
+    name: 'USA Midwest',
+    region: 'Central Illinois Benchmark, USA',
+    fileName: 'POWER_Point_Monthly_20200101_20251231_040d10N_088d20W_UTC.json',
+    dataUrl: usaMidwestDataUrl,
+    extent: PLOT_MAP_EXTENTS['usa-midwest'],
+    data: usaMidwestData,
   },
 };
 
@@ -282,6 +316,8 @@ export const PLACES_BY_ID: Record<PlaceId, PlaceClimate> = {
   'nueva-ecija': createPlaceClimate(PLACE_SOURCES['nueva-ecija']),
   bukidnon: createPlaceClimate(PLACE_SOURCES.bukidnon),
   isabela: createPlaceClimate(PLACE_SOURCES.isabela),
+  guimaras: createPlaceClimate(PLACE_SOURCES.guimaras),
+  'usa-midwest': createPlaceClimate(PLACE_SOURCES['usa-midwest']),
 };
 
 export const PLACES: PlaceClimate[] = Object.values(PLACES_BY_ID);

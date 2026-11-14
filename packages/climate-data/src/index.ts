@@ -11,3 +11,78 @@ export { getMonthlyTelemetry, NASA_TELEMETRY_BY_PLOT } from './nasaTelemetryData
 export type { MonthlyTelemetry } from './nasaTelemetryData';
 
 export { default as plotLocations } from './plotLocations.json';
+export { default as nasaExtendedTelemetry } from './nasaExtendedTelemetry.json';
+
+export { FARMS, FARMS_BY_ID, getFarmById } from './farms';
+
+export type {
+  AdjustedClimateContext,
+  CfiMonthWindow,
+  CfiWindowRiskLevel,
+  CropStageType,
+  CropStrategy,
+  CultivarOption,
+  DatasetMetadata,
+  DataStatus,
+  FarmId,
+  FarmProfile,
+  FariPillarScores,
+  FariScoreBreakdown,
+  FieldConstraints,
+  GroundTruthFieldInput,
+  MonthlyCropStage,
+  MonthlyZScoreAnomaly,
+  NutrientGapItem,
+  PriorityWeights,
+  SiComparisonResult,
+  SoilCertificateEvaluation,
+  SoilNutrientProfile,
+  StrategyExplanations,
+  StrategyId,
+  StressScenarioId,
+  StressSensitivity,
+  TerroirAssessment,
+} from './types/agritech';
+
+export {
+  clamp,
+  DEFAULT_PRIORITY_WEIGHTS,
+  interpolateCashScore,
+  normalizeWeights,
+  roundTo,
+} from './engine/normalization';
+
+export {
+  applyClimateStress,
+  getExtendedMonthlyRecord,
+  STRESS_PRESETS,
+} from './engine/stress';
+export type { StressPresetDefinition } from './engine/stress';
+
+export {
+  calculateErosionPillar,
+  calculateFariScore,
+  calculateMarketPillar,
+  calculateNutrientPillar,
+  calculateWaterPillar,
+  DEFAULT_FIELD_CONSTRAINTS,
+  rankFarmStrategies,
+} from './engine/fari';
+export type {
+  ErosionPillarResult,
+  FarmFariEvaluation,
+  MarketPillarResult,
+  WaterPillarResult,
+} from './engine/fari';
+
+export {
+  calculateMangoSugarLoadingIndex,
+  calculateTerroirAssessment,
+  calculateUreaReductionPct,
+} from './engine/terroir';
+
+export {
+  calculateCfiSprayCalendar,
+  calculateSiComparison,
+  evaluateTwoTierSoilCertificate,
+} from './engine/siComparison';

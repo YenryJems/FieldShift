@@ -7,3 +7,9 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Local-only agent instructions and internal documentation
+/AGENTS.md
+/.agents/
+/docs/
+packages/climate-data/raw/
