@@ -6,12 +6,13 @@ import type {
   FarmId,
   GroundTruthFieldInput,
   MonthlyZScoreAnomaly,
+  PriorityWeights,
   SiComparisonResult,
   SoilCertificateEvaluation,
   StressScenarioId,
 } from '../types/agritech';
 import { rankFarmStrategies } from './fari';
-import { clamp, roundTo } from './normalization';
+import { clamp, DEFAULT_PRIORITY_WEIGHTS, roundTo } from './normalization';
 import { applyClimateStress, getExtendedMonthlyRecord } from './stress';
 
 const classifyZScore = (
@@ -29,6 +30,7 @@ export const calculateSiComparison = (
   monthNumber: number,
   scenarioId: StressScenarioId = 'baseline',
   strategyId: CropStrategy['id'] = 'S2',
+  rawWeights: Partial<PriorityWeights> = DEFAULT_PRIORITY_WEIGHTS,
 ): SiComparisonResult => {
   const m = clamp(Math.round(monthNumber), 1, 12);
   const climate = applyClimateStress(farmId, m, scenarioId);
@@ -127,7 +129,7 @@ export const calculateSiComparison = (
   ];
 
   // Approach B: Rule-based suitability ensemble (RF-style)
-  const fariEval = rankFarmStrategies(farmId, m, scenarioId);
+  const fariEval = rankFarmStrategies(farmId, m, scenarioId, rawWeights);
   const stratBreakdown =
     fariEval.strategies.find((item) => item.strategyId === strategyId) ??
     fariEval.topStrategy;
@@ -151,20 +153,16 @@ export const calculateSiComparison = (
   const thermalWindowScore = Math.round((1 - stratBreakdown.diagnostics.heatPenalty) * 100);
   const nutrientRegenScore = Math.round(stratBreakdown.pillars.nutrients * 100);
 
-  const suitabilityScore = Math.round(
-    0.3 * moistureStabilityScore +
-      0.25 * erosionControlScore +
-      0.25 * thermalWindowScore +
-      0.2 * nutrientRegenScore,
-  );
+  // FARI applies the farmer's normalized W/E/N/M weights to the suitability pillars.
+  const suitabilityScore = Math.round(stratBreakdown.fariScore);
 
   return {
     farmId,
     month: m,
     monthLabel: climate.monthLabel,
     approachA: {
-      name: 'Rolling Z-Score Anomaly Decomposition (2001–2025 NASA POWER Baseline)',
-      baselinePeriod: '2001–2025 (25 years)',
+      name: 'Monthly Z-Score Anomaly Decomposition (2001–2025 NASA POWER Baseline)',
+      baselinePeriod: '2001–2025 (25-year monthly climatology)',
       sampleYears: b25.yearsSampled,
       anomalies,
       bareFieldRiskDetected: climate.adjustedGwetTop < 0.6 || zTop <= -0.8,

@@ -198,6 +198,16 @@ describe('Phase 5 & 4 — Terroir, SI Comparison, CFI Spray Validator & Soil Cer
     expect(si.approachB.confidenceBanner).toBe(
       'Orbital Confidence 80% | Ground-Truth Testing Required 20%',
     );
+
+    const waterPrioritySi = calculateSiComparison('guimaras', 3, 'baseline', 'S3', {
+      water: 1,
+      erosion: 0,
+      nutrients: 0,
+      market: 0,
+    });
+    expect(waterPrioritySi.approachB.suitabilityScore).toBe(
+      Math.round(waterPrioritySi.approachB.ruleBreakdown.moistureStabilityScore),
+    );
   });
 
   it('classifies 90-day CFI spray windows into Green/Amber (dry season) and Red (monsoon storm season)', () => {
