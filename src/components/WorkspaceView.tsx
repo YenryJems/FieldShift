@@ -1,410 +1,838 @@
-import React, { useState } from 'react';
-import { CheckCircle2, AlertTriangle, OctagonAlert } from 'lucide-react';
+import React, { Suspense, lazy, useState } from 'react';
+import {
+  ArrowDownToLine,
+  CloudRain,
+  Droplets,
+  ExternalLink,
+  MapPin,
+  ThermometerSun,
+} from 'lucide-react';
+import {
+  buildMonthlySummaryCsv,
+  MONTHLY_SUMMARY_CSV_FILE_NAME,
+  PlaceClimate,
+  PlaceId,
+  PLACES,
+  PLACES_BY_ID,
+} from '../data/places';
+import { getMonthlyTelemetry } from '../data/nasaTelemetryData';
 
-type SamplePlotKey = 'plot-a' | 'plot-b';
-type OverlayKey = 'smap' | 'ndvi' | 'gpm' | 'srtm';
+const MONTHS = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
+const NASA_POWER_API_DOCS = 'https://power.larc.nasa.gov/docs/services/api/temporal/monthly/';
+type MapLayer = 'satellite' | 'street';
 
-interface SamplePlot {
-  id: SamplePlotKey;
-  label: string;
-  title: string;
-  meta: string;
-  metrics: Array<{ label: string; value: string }>;
-  monthlyRain: number[];
-  monthlyNdvi: number[];
-}
+const LazyFieldMap = lazy(() =>
+  import('./FieldMap').then(({ FieldMap }) => ({ default: FieldMap })),
+);
 
-const SAMPLE_PLOTS: Record<SamplePlotKey, SamplePlot> = {
-  'plot-a': {
-    id: 'plot-a',
-    label: 'Plot A · Lowland Basin',
-    title: 'Rain-Fed Corn & Rice Basin',
-    meta: '15.482° N, 120.712° E · 4.2 ha · 1.8% slope · Silty Clay Loam',
-    metrics: [
-      { label: 'SMAP Moisture Low', value: '15% vol.' },
-      { label: 'MODIS Mean NDVI', value: '0.45' },
-      { label: 'GPM Peak Rain', value: '365 mm' },
-      { label: 'ECOSTRESS Peak Heat', value: '39.1°C' },
-    ],
-    monthlyRain: [22, 14, 18, 36, 165, 268, 342, 365, 295, 210, 88, 38],
-    monthlyNdvi: [0.32, 0.22, 0.19, 0.21, 0.29, 0.48, 0.71, 0.79, 0.76, 0.54, 0.44, 0.37],
-  },
-  'plot-b': {
-    id: 'plot-b',
-    label: 'Plot B · Sloped Upland',
-    title: 'Volcanic Foothill Upland Farm',
-    meta: '15.614° N, 120.438° E · 2.8 ha · 13.4% slope · Sandy Clay Loam',
-    metrics: [
-      { label: 'SMAP Moisture Low', value: '13% vol.' },
-      { label: 'MODIS Mean NDVI', value: '0.39' },
-      { label: 'GPM Peak Rain', value: '410 mm' },
-      { label: 'ECOSTRESS Peak Heat', value: '39.8°C' },
-    ],
-    monthlyRain: [16, 11, 15, 42, 215, 318, 395, 410, 310, 175, 64, 28],
-    monthlyNdvi: [0.28, 0.21, 0.17, 0.20, 0.26, 0.44, 0.66, 0.73, 0.68, 0.42, 0.31, 0.29],
-  },
+const formatNumber = (value: number | null, digits = 1): string =>
+  value === null
+    ? 'No data'
+    : new Intl.NumberFormat('en', { maximumFractionDigits: digits, minimumFractionDigits: digits }).format(value);
+
+const downloadMonthlySummaryCsv = () => {
+  const file = new Blob([buildMonthlySummaryCsv()], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(file);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = MONTHLY_SUMMARY_CSV_FILE_NAME;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
 
-const OVERLAYS: Array<{ id: OverlayKey; label: string; tint: string }> = [
-  { id: 'smap', label: 'SMAP Moisture', tint: 'rgba(11, 61, 145, 0.16)' },
-  { id: 'ndvi', label: 'MODIS Cover', tint: 'rgba(27, 67, 50, 0.20)' },
-  { id: 'gpm', label: 'GPM Rainfall', tint: 'rgba(2, 132, 199, 0.18)' },
-  { id: 'srtm', label: 'SRTM Slope', tint: 'rgba(217, 119, 6, 0.18)' },
-];
+const AdditionalSignalsPanel: React.FC<{
+  selectedPlot: PlaceClimate;
+  selectedMonth: number;
+}> = ({ selectedPlot, selectedMonth }) => {
+  const selectedMonthTelemetry = getMonthlyTelemetry(selectedPlot.id, selectedMonth);
+  const supplementalSignals = [
+    {
+      label: 'Relative humidity',
+      value: `${formatNumber(selectedMonthTelemetry.relativeHumidityPct)}%`,
+      detail: 'RH2M · 2 m',
+    },
+    {
+      label: 'Solar radiation',
+      value: `${formatNumber(selectedMonthTelemetry.solarRadiationMjM2Day)} MJ/m²/day`,
+      detail: 'ALLSKY_SFC_SW_DWN · mean',
+    },
+    {
+      label: 'Surface wetness',
+      value: formatNumber(selectedMonthTelemetry.gwetTop, 2),
+      detail: 'GWETTOP · unitless index',
+    },
+    {
+      label: 'IMERG rainfall estimate',
+      value: `${formatNumber(selectedMonthTelemetry.imergPrecipitationMmDay)} mm/day`,
+      detail: 'IMERG_PRECTOT · alternate product',
+    },
+  ];
 
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return (
+    <section
+      aria-label={`Additional ${selectedMonthTelemetry.month} climate data for ${selectedPlot.name}`}
+      className="mt-5 rounded-xl border border-[#D4DDD0] bg-[#F7FAF5] p-4"
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-[#52715E]">
+            NASA POWER · more signals
+          </p>
+          <h4 className="mt-1 text-sm font-extrabold text-[#17271D]">
+            {selectedMonthTelemetry.month} averages
+          </h4>
+        </div>
+        <span className="shrink-0 rounded-full bg-white px-2 py-1 font-mono text-[9px] font-bold text-[#52715E]">
+          {selectedPlot.years.length} years
+        </span>
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        {supplementalSignals.map((signal) => (
+          <article
+            key={signal.label}
+            className="min-w-0 rounded-lg border border-[#E2E8DF] bg-white px-3 py-2"
+          >
+            <p className="text-[9px] font-bold text-[#65766A]">{signal.label}</p>
+            <p className="mt-0.5 break-words font-mono text-[13px] font-extrabold tabular-nums text-[#17271D]">
+              {signal.value}
+            </p>
+            <p className="mt-0.5 break-words text-[8px] leading-3 text-[#738278]">
+              {signal.detail}
+            </p>
+          </article>
+        ))}
+      </div>
+      <p className="mt-3 text-[9px] leading-3 text-[#65766A]">
+        Monthly means for {selectedPlot.years[0]}–{selectedPlot.years.at(-1)}. GWETTOP is a
+        unitless surface-wetness index, not a soil-water percentage. IMERG is a separate
+        precipitation product from PRECTOTCORR.
+      </p>
+    </section>
+  );
+};
 
-const REPRESENTATIVE_STRATEGIES = [
-  {
-    rank: '#1 Best Fit',
-    title: 'Soil & Water Regenerator',
-    crop: 'Monsoon Rice → Mungbean / Cowpea Cover',
-    score: 91,
-    water: 'Low Water',
-    soil: 'Rebuilds Nitrogen',
-    cost: 'Low–Moderate Cost',
-    windowStatus: 'optimal' as const,
-    windowText: 'Plant cover into Nov residual moisture; hold urea before Jul storms.',
-    coverBar: ['cover', 'cover', 'mulch', 'mulch', 'mulch', 'main', 'main', 'main', 'main', 'main', 'cover', 'cover'],
-  },
-  {
-    rank: '#2 Alternative',
-    title: 'Climate-Resilient Cash Crop',
-    crop: 'Monsoon Rice → Sorghum / Sweet Potato',
-    score: 84,
-    water: 'Low Water',
-    soil: 'Deep Root Structure',
-    cost: 'Moderate Cost',
-    windowStatus: 'caution' as const,
-    windowText: 'Sow deep-rooting crop before Feb dry-down below 18% moisture.',
-    coverBar: ['cash', 'cash', 'cash', 'cash', 'mulch', 'main', 'main', 'main', 'main', 'main', 'cash', 'cash'],
-  },
-  {
-    rank: '#3 Baseline',
-    title: 'Current Practice (Unadapted)',
-    crop: 'Monsoon Rice → Unprotected Bare Fallow',
-    score: 42,
-    water: 'High Demand',
-    soil: 'Depleting Topsoil',
-    cost: 'Moderate Cost',
-    windowStatus: 'hold' as const,
-    windowText: 'Bare-field erosion window in May–Jun; high fertilizer runoff risk.',
-    coverBar: ['bare', 'bare', 'bare', 'bare', 'bare', 'main', 'main', 'main', 'main', 'main', 'bare', 'bare'],
-  },
-];
+const FieldMapPanel: React.FC<{
+  selectedPlot: PlaceClimate;
+  selectedMonth: number;
+  onMonthChange: (month: number) => void;
+  mapLayer: MapLayer;
+  onMapLayerChange: (layer: MapLayer) => void;
+}> = ({ selectedPlot, selectedMonth, onMonthChange, mapLayer, onMapLayerChange }) => {
+  const selectedMonthTelemetry = getMonthlyTelemetry(selectedPlot.id, selectedMonth);
 
-export const WorkspaceView: React.FC = () => {
-  const [plotKey, setPlotKey] = useState<SamplePlotKey>('plot-a');
-  const [overlay, setOverlay] = useState<OverlayKey>('smap');
-  const [droughtOn, setDroughtOn] = useState(false);
-  const [heatOn, setHeatOn] = useState(false);
+  return (
+    <section className="rounded-xl border border-[#D4DDD0] bg-white p-4 sm:p-5">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E]">
+            Esri World Imagery · Leaflet
+          </p>
+          <h3 className="mt-1 text-lg font-extrabold text-[#17271D]">Satellite field view</h3>
+          <p className="mt-1 text-xs leading-5 text-[#65766A]">
+            NASA POWER point and configured study-area extent for {selectedPlot.name}.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-end gap-2">
+          <label className="grid gap-1 text-[10px] font-bold uppercase tracking-wider text-[#65766A]">
+            Historical month
+            <select
+              aria-label="Select month for map telemetry"
+              value={selectedMonth}
+              onChange={(event) => onMonthChange(Number(event.target.value))}
+              className="h-10 rounded-lg border border-[#C7D5C5] bg-white px-3 text-xs font-semibold normal-case tracking-normal text-[#263B2E] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332]"
+            >
+              {selectedPlot.monthly.map((month) => (
+                <option key={month.month} value={month.month}>
+                  {month.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div
+            role="group"
+            aria-label="Map layer"
+            className="inline-flex h-10 rounded-lg border border-[#C7D5C5] bg-[#F3F6F1] p-1"
+          >
+            {(['satellite', 'street'] as const).map((layer) => (
+              <button
+                key={layer}
+                type="button"
+                aria-pressed={mapLayer === layer}
+                onClick={() => onMapLayerChange(layer)}
+                className={`rounded-md px-3 text-xs font-bold capitalize transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332] ${
+                  mapLayer === layer
+                    ? 'bg-white text-[#1B4332] shadow-sm'
+                    : 'text-[#536458] hover:text-[#1B4332]'
+                }`}
+              >
+                {layer}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
 
-  const plot = SAMPLE_PLOTS[plotKey];
-  const overlayTint = OVERLAYS.find((o) => o.id === overlay)?.tint ?? 'rgba(11, 61, 145, 0.16)';
+      <Suspense
+        fallback={
+          <div
+            className="flex h-[420px] items-center justify-center rounded-xl border border-[#D4DDD0] bg-[#F3F6F1] text-sm text-[#536458]"
+            role="status"
+          >
+            Loading interactive map…
+          </div>
+        }
+      >
+        <LazyFieldMap
+          activeMonthData={selectedMonthTelemetry}
+          mapLayer={mapLayer}
+          selectedPlotId={selectedPlot.id}
+        />
+      </Suspense>
+      <p className="mt-3 text-xs leading-5 text-[#65766A]">
+        The boundary marks the configured study extent, not a farm boundary. Its color is a
+        threshold-based cue for the selected monthly point summary—not a spatial stress map or
+        calibrated crop-risk assessment. Display thresholds: GWETROOT &lt; 0.55, PRECTOTCORR
+        &gt; 14 mm/day, GWETROOT &gt; 0.93, or T2M &gt; 28.5°C. Satellite tiles © Esri; street
+        tiles © OpenStreetMap contributors.
+      </p>
+    </section>
+  );
+};
 
-  // SVG Timeline path
-  const W = 840;
-  const H = 200;
-  const padX = 36;
-  const padY = 24;
-  const chartW = W - padX * 2;
-  const chartH = H - padY * 2;
-  const colW = chartW / 12;
+const SeasonalChart: React.FC<{
+  place: PlaceClimate;
+  rainfallChange: boolean;
+  heatChange: boolean;
+}> = ({ place, rainfallChange, heatChange }) => {
+  const width = 900;
+  const height = 320;
+  const left = 58;
+  const right = 54;
+  const top = 26;
+  const bottom = 44;
+  const chartWidth = width - left - right;
+  const chartHeight = height - top - bottom;
+  const columnWidth = chartWidth / 12;
 
-  const ndviPoints = plot.monthlyNdvi
-    .map((val, i) => {
-      const x = padX + i * colW + colW / 2;
-      const y = padY + chartH - val * chartH;
-      return `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+  const baselinePrecipitation = place.monthly.map((month) => month.meanPrecipitationMm);
+  const precipitation = baselinePrecipitation.map((value) =>
+    value === null
+      ? null
+      : value * (rainfallChange ? 0.8 : 1),
+  );
+  const baselineTemperature = place.monthly.map((month) => month.meanTemperatureC);
+  const temperature = baselineTemperature.map((value) =>
+    value === null
+      ? null
+      : value + (heatChange ? 2 : 0),
+  );
+  const validRain = baselinePrecipitation.filter((value): value is number => value !== null);
+  const validTemperature = baselineTemperature.filter((value): value is number => value !== null);
+  const rainAxisMax = Math.max(100, Math.ceil(Math.max(...validRain, 0) / 100) * 100);
+  const minimumTemperature = validTemperature.length
+    ? Math.floor(Math.min(...validTemperature) / 2) * 2
+    : 0;
+  const maximumTemperature = validTemperature.length
+    ? Math.ceil((Math.max(...validTemperature) + 2) / 2) * 2
+    : 2;
+  const temperatureRange = Math.max(maximumTemperature - minimumTemperature, 1);
+  let hasPreviousTemperature = false;
+  const temperaturePath = temperature
+    .map((value, index) => {
+      if (value === null) {
+        hasPreviousTemperature = false;
+        return '';
+      }
+      const x = left + index * columnWidth + columnWidth / 2;
+      const y = top + chartHeight - ((value - minimumTemperature) / temperatureRange) * chartHeight;
+      const command = hasPreviousTemperature ? 'L' : 'M';
+      hasPreviousTemperature = true;
+      return `${command} ${x.toFixed(1)} ${y.toFixed(1)}`;
     })
+    .filter(Boolean)
     .join(' ');
 
   return (
-    <div className="mx-auto max-w-[1160px] px-4 py-10 sm:px-6 space-y-12">
-      {/* Header & Plot Selector */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between border-b border-[#E2E8DF] pb-6">
+    <div className="overflow-x-auto rounded-xl border border-[#D4DDD0] bg-white p-4 sm:p-5">
+      <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
         <div>
-          <p className="font-mono text-xs text-[#465A4E]">{plot.meta}</p>
-          <h1 className="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight text-[#111C16]">
-            {plot.title}
-          </h1>
+          <h3 className="font-bold text-[#17271D]">Monthly climate pattern</h3>
+          <p className="mt-1 text-xs text-[#65766A]">
+            Mean for each calendar month across {place.years[0]}–{place.years.at(-1)}
+          </p>
+        </div>
+        {(rainfallChange || heatChange) && (
+          <span className="rounded-full bg-[#FFF2DA] px-2.5 py-1 font-mono text-[10px] font-bold text-[#815B18]">
+            WHAT-IF SCENARIO
+          </span>
+        )}
+      </div>
+
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        className="block h-auto min-w-[660px] w-full"
+        role="img"
+        aria-label={`Monthly NASA POWER historical summary for ${place.name}: precipitation columns in millimeters and 2-meter temperature line in degrees Celsius${rainfallChange ? ', with rainfall reduced by 20 percent' : ''}${heatChange ? ', with temperature increased by 2 degrees Celsius' : ''}`}
+      >
+        {[0, 0.5, 1].map((fraction) => {
+          const y = top + chartHeight * fraction;
+          const value = Math.round(rainAxisMax * (1 - fraction));
+          return (
+            <g key={fraction}>
+              <line x1={left} y1={y} x2={width - right} y2={y} stroke="#E8EEE7" />
+              <text
+                x={left - 10}
+                y={y + 3}
+                textAnchor="end"
+                fill="#77867B"
+                fontFamily="JetBrains Mono, monospace"
+                fontSize="10"
+              >
+                {value}
+              </text>
+            </g>
+          );
+        })}
+        <text
+          x="15"
+          y={top + chartHeight / 2}
+          transform={`rotate(-90 15 ${top + chartHeight / 2})`}
+          textAnchor="middle"
+          fill="#65766A"
+          fontFamily="JetBrains Mono, monospace"
+          fontSize="9"
+        >
+          mm / month
+        </text>
+        {temperaturePath && (
+          <path
+            d={temperaturePath}
+            fill="none"
+            stroke="#C45A37"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        )}
+        {MONTHS.map((month, index) => {
+          const x = left + index * columnWidth + columnWidth / 2;
+          const value = precipitation[index];
+          const barHeight = value === null ? 0 : (value / rainAxisMax) * chartHeight;
+          const temperatureValue = temperature[index];
+          const y =
+            temperatureValue === null
+              ? null
+              : top +
+                chartHeight -
+                ((temperatureValue - minimumTemperature) / temperatureRange) * chartHeight;
+
+          return (
+            <g key={month}>
+              {value !== null && (
+                <rect
+                  x={x - 13}
+                  y={top + chartHeight - barHeight}
+                  width="26"
+                  height={barHeight}
+                  rx="3"
+                  fill={rainfallChange ? '#D8A24C' : '#81B4D3'}
+                >
+                  <title>{`${month}: ${formatNumber(value, 0)} mm mean monthly precipitation${rainfallChange ? ' in the 20% less rainfall scenario' : ''}`}</title>
+                </rect>
+              )}
+              {y !== null && (
+                <circle cx={x} cy={y} r="3.5" fill="#C45A37" stroke="white" strokeWidth="1.5">
+                  <title>{`${month}: ${formatNumber(temperatureValue, 1)}°C mean 2-meter temperature${heatChange ? ' in the +2°C scenario' : ''}`}</title>
+                </circle>
+              )}
+              <text
+                x={x}
+                y={height - 13}
+                textAnchor="middle"
+                fill="#65766A"
+                fontFamily="Plus Jakarta Sans, sans-serif"
+                fontSize="10"
+              >
+                {month}
+              </text>
+            </g>
+          );
+        })}
+        <text
+          x={width - right + 8}
+          y={top + 8}
+          fill="#A64A31"
+          fontFamily="JetBrains Mono, monospace"
+          fontSize="9"
+        >
+          {maximumTemperature}°
+        </text>
+        <text
+          x={width - right + 8}
+          y={top + chartHeight}
+          fill="#A64A31"
+          fontFamily="JetBrains Mono, monospace"
+          fontSize="9"
+        >
+          {minimumTemperature}°
+        </text>
+      </svg>
+
+      <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 px-2 text-xs text-[#536458]">
+        <span className="inline-flex items-center gap-2">
+          <span
+            className={`h-2.5 w-2.5 rounded-sm ${rainfallChange ? 'bg-[#D8A24C]' : 'bg-[#81B4D3]'}`}
+          />
+          Mean monthly precipitation (mm)
+        </span>
+        <span className="inline-flex items-center gap-2">
+          <span className="h-0.5 w-4 rounded bg-[#C45A37]" />
+          Mean T2M ({heatChange ? '+2°C scenario' : '°C'})
+        </span>
+        <span className="ml-auto text-[#77867B]">Temperature line uses right-side °C scale</span>
+      </div>
+    </div>
+  );
+};
+
+const PlaceInsights: React.FC<{
+  place: PlaceClimate;
+  rainfallChange: boolean;
+  heatChange: boolean;
+}> = ({ place, rainfallChange, heatChange }) => {
+  const warmestMonth = place.monthly.reduce((warmest, month) =>
+    (month.meanTemperatureC ?? -Infinity) > (warmest.meanTemperatureC ?? -Infinity)
+      ? month
+      : warmest,
+  );
+  const wettestMonth = place.monthly.reduce((wettest, month) =>
+    (month.meanPrecipitationMm ?? -Infinity) > (wettest.meanPrecipitationMm ?? -Infinity)
+      ? month
+      : wettest,
+  );
+  const driestRootMonth = place.monthly.reduce((driest, month) =>
+    (month.meanRootWetnessIndex ?? Infinity) < (driest.meanRootWetnessIndex ?? Infinity)
+      ? month
+      : driest,
+  );
+  const warmestTemperature = warmestMonth.meanTemperatureC === null
+    ? null
+    : warmestMonth.meanTemperatureC + (heatChange ? 2 : 0);
+  const scenarioRain = wettestMonth.meanPrecipitationMm === null
+    ? null
+    : wettestMonth.meanPrecipitationMm * (rainfallChange ? 0.8 : 1);
+
+  return (
+    <section aria-labelledby="season-readout-title">
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E]">
+            Season readout
+          </p>
+          <h3 id="season-readout-title" className="mt-1 text-lg font-extrabold text-[#17271D]">
+            What stands out for {place.name}?
+          </h3>
+        </div>
+        <span className="hidden text-xs text-[#77867B] sm:block">Historical pattern, not a forecast</span>
+      </div>
+      <div className="mt-4 grid gap-3 md:grid-cols-3">
+        <article className="rounded-xl border border-[#E2E8DF] bg-white p-4">
+          <div className="flex items-center gap-2 text-[#A64A31]">
+            <ThermometerSun className="h-4 w-4" aria-hidden="true" />
+            <p className="text-xs font-bold">Warmest monthly average</p>
+          </div>
+          <p className="mt-3 font-mono text-2xl font-extrabold tabular-nums text-[#17271D]">
+            {formatNumber(warmestTemperature)}°C
+          </p>
+          <p className="mt-1 text-xs text-[#65766A]">{warmestMonth.label} mean T2M</p>
+        </article>
+        <article className="rounded-xl border border-[#E2E8DF] bg-white p-4">
+          <div className="flex items-center gap-2 text-[#32658E]">
+            <CloudRain className="h-4 w-4" aria-hidden="true" />
+            <p className="text-xs font-bold">Wettest month</p>
+          </div>
+          <p className="mt-3 font-mono text-2xl font-extrabold tabular-nums text-[#17271D]">
+            {formatNumber(scenarioRain, 0)} mm
+          </p>
+          <p className="mt-1 text-xs text-[#65766A]">
+            {wettestMonth.label} average monthly precipitation
+          </p>
+        </article>
+        <article className="rounded-xl border border-[#E2E8DF] bg-white p-4">
+          <div className="flex items-center gap-2 text-[#39734A]">
+            <Droplets className="h-4 w-4" aria-hidden="true" />
+            <p className="text-xs font-bold">Lowest root-zone wetness</p>
+          </div>
+          <p className="mt-3 font-mono text-2xl font-extrabold tabular-nums text-[#17271D]">
+            {formatNumber(driestRootMonth.meanRootWetnessIndex, 2)}
+          </p>
+          <p className="mt-1 text-xs text-[#65766A]">{driestRootMonth.label} unitless index</p>
+        </article>
+      </div>
+    </section>
+  );
+};
+
+const PlanningComparison: React.FC<{
+  place: PlaceClimate;
+  heatChange: boolean;
+}> = ({ place, heatChange }) => {
+  const driestMonth = place.monthly.reduce((driest, month) =>
+    (month.meanPrecipitationMm ?? Infinity) < (driest.meanPrecipitationMm ?? Infinity)
+      ? month
+      : driest,
+  );
+  const lowestRootWetnessMonth = place.monthly.reduce((driest, month) =>
+    (month.meanRootWetnessIndex ?? Infinity) < (driest.meanRootWetnessIndex ?? Infinity)
+      ? month
+      : driest,
+  );
+  const warmestMonth = place.monthly.reduce((warmest, month) =>
+    (month.meanTemperatureC ?? -Infinity) > (warmest.meanTemperatureC ?? -Infinity)
+      ? month
+      : warmest,
+  );
+  const warmestTemperature =
+    warmestMonth.meanTemperatureC === null
+      ? null
+      : warmestMonth.meanTemperatureC + (heatChange ? 2 : 0);
+
+  const comparisons = [
+    {
+      label: 'Baseline',
+      title: 'Farmer’s current rotation',
+      evidence: 'Bring the current crop sequence and planting dates; NASA POWER does not contain farm rotation records.',
+      prompt: 'Which crop growth stages overlap the warmest or wettest months?',
+    },
+    {
+      label: 'Soil cover',
+      title: 'Explore a cover or legume window',
+      evidence: `Root-zone wetness is lowest in ${lowestRootWetnessMonth.label}; rainfall is lowest in ${driestMonth.label} in this six-year summary.`,
+      prompt: 'Could a locally suitable cover crop establish before the dry period with available water and seed?',
+    },
+    {
+      label: 'Heat response',
+      title: 'Compare a heat-ready alternative',
+      evidence: `${warmestMonth.label} has the highest monthly mean temperature (${formatNumber(warmestTemperature)}°C${heatChange ? ' in the +2°C scenario' : ''}).`,
+      prompt: 'Ask local extension staff which adapted varieties or planting windows are worth comparing.',
+    },
+  ];
+
+  return (
+    <section aria-labelledby="planning-comparison-title">
+      <div className="max-w-3xl">
+        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E]">
+          From climate signal to planting conversation
+        </p>
+        <h3 id="planning-comparison-title" className="mt-1 text-lg font-extrabold text-[#17271D]">
+          Three options to compare with the farmer
+        </h3>
+        <p className="mt-1 text-sm leading-6 text-[#65766A]">
+          These are discussion prompts, not ranked recommendations. The source data has no crop calendar,
+          field soil test, irrigation record, or market information.
+        </p>
+      </div>
+      <div className="mt-4 grid gap-3 lg:grid-cols-3">
+        {comparisons.map((item, index) => (
+          <article key={item.label} className="rounded-xl border border-[#D4DDD0] bg-white p-5">
+            <div className="flex items-center justify-between gap-3">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#52715E]">
+                Option 0{index + 1}
+              </span>
+              <span className="rounded-full bg-[#F0F5ED] px-2.5 py-1 text-[10px] font-bold text-[#3A6547]">
+                {item.label}
+              </span>
+            </div>
+            <h4 className="mt-3 text-base font-extrabold text-[#17271D]">{item.title}</h4>
+            <p className="mt-3 border-l-2 border-[#87A985] pl-3 text-xs leading-5 text-[#536458]">
+              <span className="font-bold text-[#263B2E]">Data signal: </span>
+              {item.evidence}
+            </p>
+            <p className="mt-3 text-xs leading-5 text-[#65766A]">
+              <span className="font-bold text-[#263B2E]">Discuss: </span>
+              {item.prompt}
+            </p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+export const WorkspaceView: React.FC = () => {
+  const [placeId, setPlaceId] = useState<PlaceId>('nueva-ecija');
+  const [selectedMonth, setSelectedMonth] = useState(1);
+  const [mapLayer, setMapLayer] = useState<MapLayer>('satellite');
+  const [rainfallChange, setRainfallChange] = useState(false);
+  const [heatChange, setHeatChange] = useState(false);
+  const place = PLACES_BY_ID[placeId];
+  const averageMonthlyTemperature = place.meanTemperatureC;
+  const averageRootWetness = place.meanRootWetnessIndex;
+  const annualPrecipitation = place.meanAnnualPrecipitationMm === null
+    ? null
+    : place.meanAnnualPrecipitationMm * (rainfallChange ? 0.8 : 1);
+  const scenarioTemperature = averageMonthlyTemperature === null
+    ? null
+    : averageMonthlyTemperature + (heatChange ? 2 : 0);
+
+  return (
+    <div className="mx-auto max-w-[1280px] space-y-8 px-4 py-8 sm:px-6 sm:py-10">
+      <div className="flex flex-col gap-5 border-b border-[#E2E8DF] pb-6 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E] sm:text-xs">
+            NASA POWER · historical monthly point data · 2020–2025
+          </p>
+          <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-[#17271D] sm:text-3xl">
+            Seasonal climate profile
+          </h2>
+          <p className="mt-1 text-sm text-[#536458]">
+            Explore six years of monthly history for a selected Philippine location.
+          </p>
         </div>
 
         <div
           role="tablist"
-          aria-label="Sample farm plots"
-          className="inline-flex self-start rounded-lg border border-[#CBD5C7] bg-[#EEF2EC] p-1"
+          aria-label="Select a NASA POWER location"
+          className="grid grid-cols-3 rounded-xl border border-[#D7E0D5] bg-[#F3F6F1] p-1"
         >
-          {(['plot-a', 'plot-b'] as SamplePlotKey[]).map((key) => (
+          {PLACES.map((item) => (
             <button
-              key={key}
+              key={item.id}
               type="button"
               role="tab"
-              aria-selected={plotKey === key}
-              onClick={() => setPlotKey(key)}
-              className={`h-8 rounded-md px-3 text-xs font-semibold transition-colors cursor-pointer ${
-                plotKey === key ? 'bg-white text-[#111C16] shadow-xs' : 'text-[#465A4E]'
+              aria-selected={placeId === item.id}
+              onClick={() => setPlaceId(item.id)}
+              className={`rounded-lg px-3 py-2 text-xs font-bold transition-colors sm:px-4 sm:text-sm ${
+                placeId === item.id
+                  ? 'bg-white text-[#1B4332] shadow-sm'
+                  : 'text-[#536458] hover:text-[#1B4332]'
               }`}
             >
-              {SAMPLE_PLOTS[key].label}
+              {item.name}
             </button>
           ))}
         </div>
       </div>
 
-      {/* 1. Visual Map & Key Telemetry Representation */}
-      <section className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-stretch">
-        <div className="lg:col-span-8 rounded-xl border border-[#D4DDD0] bg-white overflow-hidden flex flex-col">
-          <div className="flex flex-wrap items-center gap-1 border-b border-[#E2E8DF] px-4 py-2.5">
-            {OVERLAYS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => setOverlay(item.id)}
-                className={`h-8 rounded-md px-2.5 text-xs font-semibold transition-colors cursor-pointer ${
-                  overlay === item.id
-                    ? 'bg-[#1B4332] text-white'
-                    : 'text-[#354A3E] hover:bg-[#F3F6F1]'
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
+      <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
+        <section className="rounded-xl border border-[#D4DDD0] bg-white p-5 sm:p-6">
+          <div className="flex items-start gap-3">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E3EFDF] text-[#2D6A4F]">
+              <MapPin className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <div>
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E]">
+                Selected location
+              </p>
+              <h3 className="mt-0.5 text-xl font-extrabold text-[#17271D]">{place.name}</h3>
+              <p className="mt-0.5 text-sm text-[#65766A]">{place.region}</p>
+            </div>
           </div>
 
-          <div className="relative flex-1 min-h-[240px] bg-[#EDF2EA]">
-            <svg viewBox="0 0 800 320" className="h-full w-full block" role="img" aria-label="Sample field map representation">
-              <rect width="800" height="320" fill="#EDF2EA" />
-              {/* Subtle overlay tint */}
-              <rect width="800" height="320" fill={overlayTint} />
-              {/* Contour lines */}
-              <g fill="none" stroke="#8FA897" strokeWidth="1" strokeDasharray="4 4" opacity="0.7">
-                <path d="M 0 80 Q 260 65, 520 110 T 800 75" />
-                <path d="M 0 160 Q 280 140, 540 190 T 800 155" />
-                <path d="M 0 240 Q 250 220, 500 265 T 800 235" />
-              </g>
-              {/* Plot A Polygon */}
-              <path
-                d="M 150 95 L 330 82 L 355 205 L 170 225 Z"
-                fill={plotKey === 'plot-a' ? 'rgba(27, 67, 50, 0.28)' : 'rgba(255,255,255,0.4)'}
-                stroke={plotKey === 'plot-a' ? '#1B4332' : '#5A6D62'}
-                strokeWidth={plotKey === 'plot-a' ? 2.5 : 1.2}
-              />
-              <circle cx="250" cy="152" r="6" fill="#1B4332" stroke="#FFFFFF" strokeWidth="2" />
-              <text x="264" y="156" fontSize="12" fontWeight="700" fill="#111C16">
-                Plot A
-              </text>
-
-              {/* Plot B Polygon */}
-              <path
-                d="M 465 65 L 645 85 L 620 210 L 445 185 Z"
-                fill={plotKey === 'plot-b' ? 'rgba(27, 67, 50, 0.28)' : 'rgba(255,255,255,0.4)'}
-                stroke={plotKey === 'plot-b' ? '#1B4332' : '#5A6D62'}
-                strokeWidth={plotKey === 'plot-b' ? 2.5 : 1.2}
-              />
-              <circle cx="545" cy="135" r="6" fill="#1B4332" stroke="#FFFFFF" strokeWidth="2" />
-              <text x="559" y="139" fontSize="12" fontWeight="700" fill="#111C16">
-                Plot B
-              </text>
-            </svg>
+          <div className="mt-5 grid grid-cols-3 gap-2">
+            <div className="rounded-lg bg-[#F5F8F3] p-3">
+              <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-[#738278]">
+                Air temp
+              </p>
+              <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-[#17271D]">
+                {formatNumber(scenarioTemperature)}°
+              </p>
+              <p className="text-[10px] text-[#65766A]">T2M mean · °C</p>
+            </div>
+            <div className="rounded-lg bg-[#F5F8F3] p-3">
+              <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-[#738278]">
+                Rainfall
+              </p>
+              <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-[#17271D]">
+                {formatNumber(annualPrecipitation, 0)}
+              </p>
+              <p className="text-[10px] text-[#65766A]">mm / year</p>
+            </div>
+            <div className="rounded-lg bg-[#F5F8F3] p-3">
+              <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-[#738278]">
+                Root wetness
+              </p>
+              <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-[#17271D]">
+                {formatNumber(averageRootWetness, 2)}
+              </p>
+              <p className="text-[10px] text-[#65766A]">unitless index</p>
+            </div>
           </div>
-        </div>
+          <p className="mt-3 text-[11px] leading-5 text-[#738278]">
+            Summary values are six-year monthly averages. Soil wetness is a modeled index, not soil-water percentage.
+          </p>
+          <AdditionalSignalsPanel selectedPlot={place} selectedMonth={selectedMonth} />
+        </section>
 
-        <div className="lg:col-span-4 rounded-xl border border-[#D4DDD0] bg-white p-5 flex flex-col justify-between">
-          <div>
-            <div className="text-xs font-semibold text-[#2D6A4F] font-mono">Sample Telemetry</div>
-            <p className="mt-1 text-sm text-[#354A3E]">
-              Representative NASA satellite readings for the selected farm plot.
+        <FieldMapPanel
+          selectedPlot={place}
+          selectedMonth={selectedMonth}
+          onMonthChange={setSelectedMonth}
+          mapLayer={mapLayer}
+          onMapLayerChange={setMapLayer}
+        />
+      </div>
+
+      <SeasonalChart
+        place={place}
+        rainfallChange={rainfallChange}
+        heatChange={heatChange}
+      />
+
+      <section className="rounded-xl border border-[#D4DDD0] bg-[#F7FAF5] p-5 sm:p-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-2xl">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E]">
+              Explore a what-if
+            </p>
+            <h3 className="mt-1 text-lg font-extrabold text-[#17271D]">Adjust the historical baseline</h3>
+            <p className="mt-1 text-sm leading-6 text-[#536458]">
+              These hypothetical changes adjust only the displayed rainfall and temperature averages; root-zone wetness is not re-simulated. They are not forecasts or climate projections.
             </p>
           </div>
+          <div className="flex flex-wrap gap-3">
+            <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-[#D7E0D5] bg-white px-3 text-xs font-semibold text-[#263B2E]">
+              <input
+                type="checkbox"
+                checked={rainfallChange}
+                onChange={(event) => setRainfallChange(event.target.checked)}
+                className="h-4 w-4 accent-[#32658E]"
+              />
+              <span>20% less precipitation</span>
+            </label>
+            <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-[#D7E0D5] bg-white px-3 text-xs font-semibold text-[#263B2E]">
+              <input
+                type="checkbox"
+                checked={heatChange}
+                onChange={(event) => setHeatChange(event.target.checked)}
+                className="h-4 w-4 accent-[#C45A37]"
+              />
+              <span>2°C warmer</span>
+            </label>
+          </div>
+        </div>
+        <p aria-live="polite" className="mt-4 border-t border-[#DFE7DD] pt-4 text-sm text-[#536458]">
+          <span className="font-bold text-[#1B4332]">Planning question: </span>
+          {rainfallChange && heatChange
+            ? 'How might varieties, planting windows, and moisture-saving practices need to change if both conditions occur?'
+            : rainfallChange
+              ? 'Which crops and soil-cover practices can cope with a drier-than-usual season?'
+              : heatChange
+                ? 'Would a warmer season change crop choice or the timing of heat-sensitive field work?'
+                : 'Select a what-if scenario to explore how the historical pattern could shift.'}
+        </p>
+      </section>
 
-          <dl className="mt-5 divide-y divide-[#E2E8DF] border-t border-[#E2E8DF] text-sm">
-            {plot.metrics.map((m) => (
-              <div key={m.label} className="flex items-center justify-between py-3">
-                <dt className="text-[#465A4E]">{m.label}</dt>
-                <dd className="font-mono font-bold text-[#111C16] tabular-nums">{m.value}</dd>
-              </div>
-            ))}
+      <PlaceInsights place={place} rainfallChange={rainfallChange} heatChange={heatChange} />
+
+      <PlanningComparison place={place} heatChange={heatChange} />
+
+      <section className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="rounded-xl border border-[#D4DDD0] bg-white p-5 sm:p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E]">
+                Data provenance
+              </p>
+              <h3 className="mt-1 text-lg font-extrabold text-[#17271D]">
+                NASA POWER point data
+              </h3>
+            </div>
+            <a
+              href={NASA_POWER_API_DOCS}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex shrink-0 items-center gap-1.5 text-xs font-bold text-[#1B4332] hover:underline"
+            >
+              API docs
+              <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+            </a>
+          </div>
+          <p className="mt-3 text-sm leading-6 text-[#536458]">
+            NASA Langley Research Center POWER Project, Monthly and Annual API;
+            point data for {place.latitude.toFixed(3)}° N, {place.longitude.toFixed(3)}° E,
+            January 2020–December 2025. Product groups listed in the source file:{' '}
+            {place.dataSources.join(', ')}.
+          </p>
+          <dl className="mt-4 grid gap-3 border-t border-[#E6ECE4] pt-4 text-xs sm:grid-cols-3">
+            <div>
+              <dt className="font-bold text-[#263B2E]">T2M · °C</dt>
+              <dd className="mt-1 text-[#65766A]">Monthly mean air temperature at 2 m.</dd>
+            </div>
+            <div>
+              <dt className="font-bold text-[#263B2E]">PRECTOTCORR · mm/day</dt>
+              <dd className="mt-1 text-[#65766A]">
+                Multiplied by calendar days, then averaged by month.
+              </dd>
+            </div>
+            <div>
+              <dt className="font-bold text-[#263B2E]">GWETROOT · unitless</dt>
+              <dd className="mt-1 text-[#65766A]">
+                NASA root-zone wetness index; not a field soil test.
+              </dd>
+            </div>
           </dl>
-        </div>
-      </section>
-
-      {/* 2. Seasonal Timeline Representation */}
-      <section>
-        <div className="flex items-baseline justify-between mb-3">
-          <h2 className="text-lg font-extrabold text-[#111C16]">12-Month Stress Timeline</h2>
-          <span className="text-xs text-[#465A4E]">Shaded months indicate bare-soil storm risk</span>
+          <p className="mt-4 text-xs leading-5 text-[#65766A]">
+            Point-scale gridded estimates do not describe variation within a farm. Monthly summaries are historical, not current forecasts.
+          </p>
         </div>
 
-        <div className="rounded-xl border border-[#D4DDD0] bg-white p-4 overflow-x-auto">
-          <svg viewBox={`0 0 ${W} ${H}`} className="w-full min-w-[600px] h-auto block">
-            {MONTHS.map((month, i) => {
-              const x0 = padX + i * colW;
-              const cx = x0 + colW / 2;
-              const barH = (plot.monthlyRain[i] / 450) * chartH;
-              const isRisk = plot.monthlyNdvi[i] < 0.3 && plot.monthlyRain[i] >= 120;
-
-              return (
-                <g key={month}>
-                  {isRisk && (
-                    <rect
-                      x={x0 + 2}
-                      y={padY}
-                      width={colW - 4}
-                      height={chartH}
-                      rx="3"
-                      fill="rgba(220, 38, 38, 0.08)"
-                    />
-                  )}
-                  <rect
-                    x={cx - 12}
-                    y={padY + chartH - barH}
-                    width="24"
-                    height={barH}
-                    rx="2"
-                    fill="rgba(11, 61, 145, 0.20)"
-                  />
-                  <text
-                    x={cx}
-                    y={H - 6}
-                    textAnchor="middle"
-                    fontSize="11"
-                    fill="#465A4E"
-                    fontFamily="Plus Jakarta Sans, sans-serif"
-                  >
-                    {month}
-                  </text>
-                </g>
-              );
-            })}
-            <path d={ndviPoints} fill="none" stroke="#1B4332" strokeWidth="2.5" />
-          </svg>
-        </div>
-      </section>
-
-      {/* 3. Priorities & Scenario Toggles (Representation) */}
-      <section className="rounded-xl border border-[#D4DDD0] bg-white p-6">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="grid flex-1 grid-cols-2 gap-6 sm:grid-cols-4 text-sm">
-            {[
-              { label: 'Conserve Water', val: 70 },
-              { label: 'Stop Erosion', val: 80 },
-              { label: 'Soil Nutrients', val: 75 },
-              { label: 'Extra Income', val: 60 },
-            ].map((item) => (
-              <div key={item.label}>
-                <div className="flex items-baseline justify-between mb-1.5">
-                  <span className="text-xs font-semibold text-[#111C16]">{item.label}</span>
-                  <span className="font-mono text-xs text-[#1B4332] tabular-nums">{item.val}%</span>
-                </div>
-                <div className="h-2 w-full rounded-full bg-[#E2E8DF] overflow-hidden">
-                  <div className="h-full bg-[#1B4332]" style={{ width: `${item.val}%` }} />
-                </div>
-              </div>
-            ))}
+        <div className="flex flex-col justify-between rounded-xl border border-[#D4DDD0] bg-[#F7FAF5] p-5 sm:p-6">
+          <div>
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E]">
+              Take the data with you
+            </p>
+            <h3 className="mt-1 text-lg font-extrabold text-[#17271D]">Download and cite</h3>
+            <p className="mt-2 text-sm leading-6 text-[#536458]">
+              Export the original NASA POWER JSON for this point or a CSV of the derived monthly summaries for all three places. The CSV includes units, sample counts, bounding boxes, source products, and citation notes.
+            </p>
           </div>
-
-          <div className="flex flex-wrap items-center gap-4 border-t lg:border-t-0 lg:border-l border-[#E2E8DF] pt-4 lg:pt-0 lg:pl-6 text-xs font-semibold text-[#111C16]">
-            <label className="inline-flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={droughtOn}
-                onChange={(e) => setDroughtOn(e.target.checked)}
-                className="h-4 w-4 accent-[#D97706]"
-              />
-              <span>-20% Rainfall</span>
-            </label>
-            <label className="inline-flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={heatOn}
-                onChange={(e) => setHeatOn(e.target.checked)}
-                className="h-4 w-4 accent-[#DC2626]"
-              />
-              <span>+2°C Heatwave</span>
-            </label>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <a
+              href={place.dataUrl}
+              download={place.fileName}
+              className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-[#C7D5C5] bg-white px-3 text-xs font-bold text-[#1B4332] transition-colors hover:bg-[#EEF5EB] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332]"
+            >
+              <ArrowDownToLine className="h-4 w-4" aria-hidden="true" />
+              Raw JSON · {place.name}
+            </a>
+            <button
+              type="button"
+              onClick={downloadMonthlySummaryCsv}
+              className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-[#1B4332] px-3 text-xs font-bold text-white transition-colors hover:bg-[#2D6A4F] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332]"
+            >
+              <ArrowDownToLine className="h-4 w-4" aria-hidden="true" />
+              All places · CSV
+            </button>
           </div>
+          <p className="mt-3 break-all font-mono text-[10px] leading-4 text-[#738278]">
+            NASA Langley Research Center POWER Project. Monthly and Annual API, 2020–2025.{' '}
+            <a href={NASA_POWER_API_DOCS} target="_blank" rel="noreferrer" className="underline">
+              API documentation
+            </a>
+            .
+          </p>
         </div>
       </section>
 
-      {/* 4. Representative Strategy Cards */}
-      <section>
-        <h2 className="mb-4 text-lg font-extrabold text-[#111C16]">
-          Representative Crop Rotation Strategies
-        </h2>
-
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-          {REPRESENTATIVE_STRATEGIES.map((s) => {
-            const isTop = s.rank.startsWith('#1');
-            return (
-              <div
-                key={s.title}
-                className={`flex flex-col justify-between rounded-xl border bg-white p-5 ${
-                  isTop ? 'border-[#1B4332] ring-1 ring-[#1B4332]' : 'border-[#D4DDD0]'
-                }`}
-              >
-                <div>
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <div className="font-mono text-xs font-bold text-[#2D6A4F]">{s.rank}</div>
-                      <h3 className="mt-1 text-base font-extrabold text-[#111C16]">{s.title}</h3>
-                      <p className="mt-0.5 text-xs text-[#465A4E]">{s.crop}</p>
-                    </div>
-                    <div className="font-mono text-xl font-extrabold text-[#111C16] tabular-nums">
-                      {s.score}
-                      <span className="text-xs font-normal text-[#465A4E]">/100</span>
-                    </div>
-                  </div>
-
-                  {/* Thin 12-Month Cover Strip */}
-                  <div className="mt-4 grid grid-cols-12 gap-0.5 h-1.5 rounded-xs overflow-hidden">
-                    {s.coverBar.map((phase, idx) => (
-                      <div
-                        key={idx}
-                        className={
-                          phase === 'bare'
-                            ? 'bg-[#DC2626]'
-                            : phase === 'cover'
-                              ? 'bg-[#1B4332]'
-                              : phase === 'cash'
-                                ? 'bg-[#0B3D91]'
-                                : phase === 'mulch'
-                                  ? 'bg-[#D97706]'
-                                  : 'bg-[#94A39A]'
-                        }
-                      />
-                    ))}
-                  </div>
-
-                  <div className="mt-4 flex flex-wrap gap-x-3 gap-y-1 text-xs text-[#354A3E]">
-                    <span>{s.water}</span>
-                    <span>·</span>
-                    <span>{s.soil}</span>
-                    <span>·</span>
-                    <span>{s.cost}</span>
-                  </div>
-                </div>
-
-                <div className="mt-5 flex items-start gap-2 border-t border-[#E2E8DF] pt-3.5 text-xs text-[#1F2E25]">
-                  {s.windowStatus === 'optimal' && (
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#1B4332]" aria-hidden="true" />
-                  )}
-                  {s.windowStatus === 'caution' && (
-                    <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-[#D97706]" aria-hidden="true" />
-                  )}
-                  {s.windowStatus === 'hold' && (
-                    <OctagonAlert className="mt-0.5 h-4 w-4 shrink-0 text-[#DC2626]" aria-hidden="true" />
-                  )}
-                  <span>{s.windowText}</span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      <p className="border-t border-[#E2E8DF] pt-6 text-xs text-[#465A4E]">
-        Interface representation for FieldShift (Team Overachiever · NASA Space Apps Challenge). Supports—and never replaces—farmer judgment and local extension expertise.
+      <p className="border-t border-[#E2E8DF] pt-5 text-xs leading-5 text-[#65766A]">
+        FieldShift is a planning aid prototype. Use NASA POWER alongside local forecasts,
+        on-farm measurements, crop calendars, and farmer or extension expertise.
       </p>
     </div>
   );

@@ -1,7 +1,32 @@
 # FieldShift
 
-FieldShift is a Vite-powered React app for exploring climate-resilient farm
-planning.
+FieldShift is a Vite-powered React presentation prototype for exploring how
+temperature, rainfall, and soil moisture changes can shape farm planning. It
+was built by Team Overachiever for the NASA Space Apps Challenge.
+
+The demo is open—there are no accounts or paid plans. The dashboard uses NASA
+POWER monthly point data for Nueva Ecija, Bukidnon, and Isabela from 2020–2025.
+It summarizes monthly T2M and root-zone wetness values, and derives approximate
+monthly precipitation by multiplying the monthly mean daily precipitation by
+the number of calendar days. The source JSON files can be downloaded from the
+dashboard; derived CSV exports include temperature, rainfall, humidity, solar
+radiation, root- and surface-wetness summaries, sample counts, the source
+citation, and calculation notes.
+
+The interactive map uses Leaflet with Esri World Imagery satellite tiles and
+OpenStreetMap street tiles. It shows the configured study-area extent and the
+NASA POWER sample point; the selected month’s color cue is based on historical
+point averages and simple prototype thresholds, not a spatial stress raster or
+calibrated crop-risk assessment. Map tiles require an internet connection.
+
+These are historical gridded point estimates, not field measurements or
+forecasts. The what-if controls are hypothetical adjustments to historical
+averages, not climate projections or farm-specific recommendations. Pair
+planning ideas with local forecasts, field observations, and farmer or
+extension expertise.
+
+Data source: NASA Langley Research Center POWER Project,
+[Monthly and Annual API](https://power.larc.nasa.gov/docs/services/api/temporal/monthly/).
 
 ## Run locally
 

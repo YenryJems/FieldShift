@@ -1,0 +1,55 @@
+{
+  "plots": [
+    {
+      "id": "nueva-ecija",
+      "name": "Plot A: Muñoz–Talavera Lowland Plain",
+      "region": "Nueva Ecija, Central Luzon, Philippines",
+      "agroZone": "Lowland Irrigated/Rain-Fed Rice Bowl (Type I Climate)",
+      "center": {
+        "lat": 15.68,
+        "lon": 120.89,
+        "elevationM": 107.63
+      },
+      "bbox": [120.82, 15.6, 120.96, 15.76],
+      "bounds": [
+        [15.6, 120.82],
+        [15.76, 120.96]
+      ],
+      "zoom": 12
+    },
+    {
+      "id": "bukidnon",
+      "name": "Plot B: Malaybalay–Valencia Highland Plateau",
+      "region": "Bukidnon, Northern Mindanao, Philippines",
+      "agroZone": "Sloped Volcanic Highland Corn & Vegetable Belt (889m Elev)",
+      "center": {
+        "lat": 8.15,
+        "lon": 125.12,
+        "elevationM": 889.49
+      },
+      "bbox": [125.05, 8.08, 125.19, 8.22],
+      "bounds": [
+        [8.08, 125.05],
+        [8.22, 125.19]
+      ],
+      "zoom": 12
+    },
+    {
+      "id": "isabela",
+      "name": "Plot C: Cauayan–Ilagan Cagayan Valley Basin",
+      "region": "Isabela, Cagayan Valley, Philippines",
+      "agroZone": "Alluvial Corn & Tobacco Basin (Heatwave & Typhoon Corridor)",
+      "center": {
+        "lat": 16.975,
+        "lon": 121.81,
+        "elevationM": 133.8
+      },
+      "bbox": [121.74, 16.9, 121.88, 17.05],
+      "bounds": [
+        [16.9, 121.74],
+        [17.05, 121.88]
+      ],
+      "zoom": 12
+    }
+  ]
+}
