@@ -4,11 +4,9 @@ import {
   Beaker,
   Cpu,
   Info,
-  Leaf,
   Satellite,
   ShieldAlert,
   Sparkles,
-  Wheat,
 } from 'lucide-react';
 import {
   calculateSiComparison,
@@ -22,6 +20,8 @@ import { useLanguage } from '../../context/LanguageContext';
 import { FrostIndicator } from './FrostIndicator';
 import { SprayValidator } from './SprayValidator';
 import { SoilCertificate } from '../Certification/SoilCertificate';
+import { MarketCard } from '../Hub/MarketCard';
+import { SeedHub } from '../Hub/SeedHub';
 
 interface AnalyticalSuiteSectionProps {
   farmId: FarmId;
@@ -34,7 +34,6 @@ export const AnalyticalSuiteSection: React.FC<AnalyticalSuiteSectionProps> = ({
 }) => {
   const { t } = useLanguage();
   const [selectedStrategyId, setSelectedStrategyId] = useState<StrategyId>('S2');
-  const [seedFilter, setSeedFilter] = useState<'all' | 'commercial' | 'open-pollinated'>('all');
 
   const farm = getFarmById(farmId);
 
@@ -55,9 +54,6 @@ export const AnalyticalSuiteSection: React.FC<AnalyticalSuiteSectionProps> = ({
     farm.strategies.find((s) => s.id === selectedStrategyId) ??
     farm.strategies[1];
 
-  const filteredCultivars = activeStrategy.cultivars.filter((item) =>
-    seedFilter === 'all' ? true : item.type === seedFilter,
-  );
   const ecoCropReferences = getEcoCropReferencesForCrops(activeStrategy.crops);
 
   return (
@@ -402,110 +398,9 @@ export const AnalyticalSuiteSection: React.FC<AnalyticalSuiteSectionProps> = ({
         month={selectedMonth}
       />
 
-      {/* 5. Climate-Matched Seed & Livestock Forage Market Hub */}
-      <section
-        aria-labelledby="seed-forage-hub-heading"
-        className="rounded-2xl border border-[#D4DDD0] bg-white p-5 sm:p-6"
-      >
-        <div className="flex flex-col gap-3 border-b border-[#E2E8DF] pb-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <Wheat className="h-4 w-4 text-[#1B4332]" aria-hidden="true" />
-              <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#52715E]">
-                Seed Sovereignty &amp; Crop-Livestock Integration
-              </span>
-            </div>
-            <h3
-              id="seed-forage-hub-heading"
-              className="mt-1 text-xl font-extrabold text-[#17271D]"
-            >
-              Climate-Matched Cultivars &amp; Post-Harvest Livestock Forage Hub
-            </h3>
-          </div>
-
-          <div
-            role="group"
-            aria-label="Filter cultivar seed type"
-            className="inline-flex rounded-lg border border-[#C7D5C5] bg-[#F3F6F1] p-1"
-          >
-            {(
-              [
-                { id: 'all', label: 'All Cultivars' },
-                { id: 'open-pollinated', label: 'Open-Pollinated / Farmer-Saved' },
-                { id: 'commercial', label: 'Commercial / Certified' },
-              ] as const
-            ).map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                aria-pressed={seedFilter === tab.id}
-                onClick={() => setSeedFilter(tab.id)}
-                className={`rounded-md px-2.5 py-1 text-xs font-bold transition-colors ${
-                  seedFilter === tab.id
-                    ? 'bg-white text-[#1B4332] shadow-xs'
-                    : 'text-[#536458] hover:text-[#1B4332]'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-4 grid gap-4 lg:grid-cols-3">
-          <div className=" grid gap-3 sm:grid-cols-2 lg:col-span-2">
-            {filteredCultivars.map((cultivar) => (
-              <article
-                key={cultivar.name}
-                className="rounded-xl border border-[#D4DDD0] bg-[#FAFBF9] p-4"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="rounded bg-[#E8F3EC] px-2 py-0.5 font-mono text-[10px] font-bold text-[#1B4332]">
-                    {cultivar.crop}
-                  </span>
-                  <span
-                    className={`rounded-full px-2 py-0.5 font-mono text-[10px] font-bold ${
-                      cultivar.type === 'open-pollinated'
-                        ? 'bg-[#D8F3DC] text-[#1B4332]'
-                        : 'bg-[#E6EFF8] text-[#1D4E89]'
-                    }`}
-                  >
-                    {cultivar.type === 'open-pollinated'
-                      ? 'Open-Pollinated (Saveable)'
-                      : 'Commercial Line'}
-                  </span>
-                </div>
-                <h4 className="mt-2 text-sm font-extrabold text-[#17271D]">
-                  {cultivar.name}
-                </h4>
-                <p className="mt-1 text-xs text-[#3B4D41]">{cultivar.traitHighlight}</p>
-                <div className="mt-2 flex items-center justify-between border-t border-[#E2E8DF] pt-2 font-mono text-[11px] text-[#52715E]">
-                  <span>Maturity: {cultivar.maturityDays} days</span>
-                  <span>{cultivar.seedSourceNote}</span>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          <div className="flex flex-col justify-between rounded-xl border border-[#C7D5C5] bg-[#F4F9F4] p-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <Leaf className="h-4 w-4 text-[#1B4332]" aria-hidden="true" />
-                <h4 className="text-sm font-extrabold text-[#17271D]">
-                  Livestock Forage &amp; Cut-and-Carry Value
-                </h4>
-              </div>
-              <p className="mt-2 text-xs leading-5 text-[#3B4D41]">
-                {activeStrategy.forageSummary}
-              </p>
-            </div>
-            <div className="mt-4 rounded-lg bg-white p-3 font-mono text-xs text-[#1B4332]">
-              Forage Index ({activeStrategy.id}):{' '}
-              <strong>{Math.round(activeStrategy.forageValue * 100)}/100</strong> · Residue Mulch Index:{' '}
-              <strong>{Math.round(activeStrategy.residueMulch * 100)}/100</strong>
-            </div>
-          </div>
-        </div>
+      <div className="space-y-4">
+        <SeedHub farmId={farmId} strategyId={selectedStrategyId} />
+        <MarketCard farmId={farmId} strategyId={selectedStrategyId} />
         <div className="mt-4 rounded-xl border border-[#C7D5C5] bg-[#F7FAF5] p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
@@ -564,7 +459,7 @@ export const AnalyticalSuiteSection: React.FC<AnalyticalSuiteSectionProps> = ({
             Source: EcoCrop_DB.csv, EcoPortCode records {ecoCropReferences.map((profile) => profile.ecoPortCode).join(', ') || '—'}.
           </p>
         </div>
-      </section>
+      </div>
     </div>
   );
 };
