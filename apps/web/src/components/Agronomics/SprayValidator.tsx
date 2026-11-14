@@ -33,7 +33,7 @@ export const SprayValidator: React.FC<SprayValidatorProps> = ({ farmId, startMon
             90-Day Climatological Flower Induction (CFI) &amp; Foliar Spray Risk Validator
           </h3>
           <p className="mt-1 text-xs leading-5 text-[#536458]">
-            Screens three consecutive months starting in <strong>{windows[0].monthLabel}</strong> for historical heavy-rain days (≥14 mm/day), heat days (≥33°C), and cold days (≤2°C). This is a climatological risk screen, not a live 24-hour GPM forecast. Check PAGASA or the local weather service before applying KNO₃ or foliar sprays.
+            Counts how often heavy rain (≥14 mm/day), heat (≥33°C), and cold (≤2°C) appeared in the historical record across three months starting in <strong>{windows[0].monthLabel}</strong>. It cannot tell you what the weather will be today or next week. Check PAGASA or your local weather service before applying KNO₃ or foliar sprays.
           </p>
         </div>
         <span

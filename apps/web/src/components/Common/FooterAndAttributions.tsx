@@ -9,7 +9,7 @@ export const FooterAndAttributions: React.FC = () => {
     {
       agency: 'NASA',
       datasets:
-        'NASA POWER historical point baselines (2020-2025) and derived climatology; GPM IMERG precipitation included through POWER and available as a NASA GIBS map layer; NASA GIBS SMAP L4 surface-moisture map layer (about 9 km); NASA Terra MODIS rolling 8-day NDVI map layer (250 m). These three imagery layers provide regional context and do not enter FARI. ECOSTRESS, Landsat vegetation-index products, and GRACE-FO are not connected data inputs.',
+        'NASA POWER historical climate baselines; GPM IMERG precipitation; SMAP L4 surface-moisture map layer (about 9 km); and Terra MODIS rolling 8-day NDVI map layer (250 m). SMAP and MODIS appear on the map only; they do not enter FARI.',
     },
     {
       agency: 'ESA (Copernicus)',
@@ -19,17 +19,17 @@ export const FooterAndAttributions: React.FC = () => {
     {
       agency: 'UN FAO',
       datasets:
-        'ECOCROP species climate-reference records (13 curated profiles shown in the app) and agronomic literature context; CropWat, AquaCrop, and HWSD are not connected data inputs.',
+        'A local ECOCROP extract with 13 curated crop climate-reference profiles.',
     },
     {
       agency: 'USDA',
       datasets:
-        'USDA AMS Market News static Central Illinois corn/soybean price snapshot; CDL and SSURGO are regional benchmark references only, not connected data inputs.',
+        'A dated USDA AMS Market News corn and soybean price snapshot for the Central Illinois benchmark.',
     },
     {
-      agency: 'USGS & Philippine DA-BSWM',
+      agency: 'Philippine Statistics Authority',
       datasets:
-        'Configured farm elevation/slope context and regional soil/crop-guide references. No SRTM, Landsat, USGS, or BSWM raster or field-measurement feed is currently connected.',
+        'September 2026 national palay and corn farmgate price snapshots.',
     },
   ];
 
@@ -113,7 +113,7 @@ export const FooterAndAttributions: React.FC = () => {
             id="global-attributions-heading"
             className="text-lg font-extrabold text-[#17271D]"
           >
-            Global Space Agency &amp; Agronomic Data Attributions
+          Data providers used in FieldShift
           </h3>
         </div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">

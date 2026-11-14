@@ -47,14 +47,14 @@ export const FrostIndicator: React.FC<FrostIndicatorProps> = ({ farmId, month })
           : heatRisk
             ? 'High temperature exposure appears in the historical monthly baseline. Maintain soil cover and confirm crop-stage water needs locally.'
             : 'No elevated cold or heat threshold appears in this monthly historical baseline.'}{' '}
-        This is a gridded climate screen, not a field frost sensor or short-range forecast.
+        This uses gridded historical climate averages. It cannot tell you whether this exact field will have frost tonight.
       </p>
       <p className="mt-1 text-[10px] text-[#65766A]">
         {farmId === 'bukidnon'
           ? 'Bukidnon is the supported highland plot; Benguet is not one of the configured study locations.'
           : farmId === 'usa-midwest'
             ? 'USA Midwest values represent a Central Illinois benchmark coordinate, not a verified private farm.'
-            : `Study location: ${farm.name}.`} PRISM normals are referenced in project context but are not connected to this indicator.
+            : `Study location: ${farm.name}.`}
       </p>
     </section>
   );

@@ -104,7 +104,7 @@ export const GroundTruthModal: React.FC<GroundTruthModalProps> = ({
               </ComparisonRow>
               <ComparisonRow
                 label="Canopy temperature"
-                orbital={`NASA POWER T2M ${telemetry.t2m.toFixed(1)}°C is 2 m air temperature; ECOSTRESS canopy LST is not connected.`}
+                orbital={`NASA POWER T2M ${telemetry.t2m.toFixed(1)}°C is estimated air temperature at 2 m, not a crop-canopy temperature.`}
                 result="A canopy sensor or infrared thermometer is needed for a plant-temperature reading."
               >
                 <NumberInput label="Canopy temp. (°C)" value={canopyTemperature} onChange={setCanopyTemperature} min="-50" max="80" />
@@ -113,7 +113,7 @@ export const GroundTruthModal: React.FC<GroundTruthModalProps> = ({
           </table>
         </div>
         <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-[11px] leading-5 text-amber-950">
-          Sentinel-2 NDVI, SMAP site measurements, ECOSTRESS land-surface temperature, and PRISM normals are not ingested as verified farm-level inputs in this certificate. Do not use this comparison as laboratory certification, a credit decision, or a buyer guarantee.
+          NASA POWER values describe a gridded study location, while the field readings above must be entered from a soil test or on-site instrument. This comparison is educational; it is not laboratory certification, a credit decision, or a buyer guarantee.
         </p>
       </section>
     </div>

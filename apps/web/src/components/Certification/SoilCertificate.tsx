@@ -153,10 +153,10 @@ export const SoilCertificate: React.FC<SoilCertificateProps> = ({ farmId, strate
         <div className="rounded-xl border border-[#D4DDD0] bg-[#F8FAF7] p-4 lg:col-span-5">
           <h4 className="text-sm font-extrabold text-[#17271D]">What the orbital tier uses—and what is missing</h4>
           <p className="mt-1 text-xs leading-5 text-[#536458]">
-            The preliminary score is the selected strategy’s FARI result, weighted at 80%. It uses NASA POWER gridded climate/wetness indices and SRTM slope context where available.
+            The preliminary score is the selected strategy’s FARI result, weighted at 80%. It uses NASA POWER gridded climate and wetness indices plus the configured slope for the study location.
           </p>
           <ul className="mt-3 space-y-2 text-xs leading-5 text-[#3B4D41]">
-            <li className="rounded-lg bg-white p-2.5">Scored context: NASA POWER gridded wetness, rainfall and temperature plus SRTM slope. The POWER values are static historical baselines.</li>
+            <li className="rounded-lg bg-white p-2.5">Scored inputs: NASA POWER gridded wetness, rainfall and temperature plus the configured study-location slope. POWER values are historical baselines.</li>
             <li className="rounded-lg border border-sky-200 bg-sky-50 p-2.5 text-sky-950">
               <strong>Live Sentinel-2 L2A point sample (10 m): </strong>
               {sentinelStatus === 'loading' && 'Searching recent clear scenes…'}
@@ -169,7 +169,7 @@ export const SoilCertificate: React.FC<SoilCertificateProps> = ({ farmId, strate
               )}
               <span className="mt-1 block text-[10px]">Source: <a className="underline" href="https://earth-search.aws.element84.com/v1/collections/sentinel-2-c1-l2a" target="_blank" rel="noreferrer">Earth Search Sentinel-2 L2A catalog</a>; NDVI derived from red/NIR reflectance and screened with scene classification.</span>
             </li>
-            <li className="rounded-lg border border-sky-200 bg-sky-50 p-2.5 text-sky-950">NASA SMAP L4 is now shown as a live 9 km surface-moisture map layer. It is a satellite/model product and remains regional context, not a farm-scale/root-zone reading used in the score.</li>
+            <li className="rounded-lg border border-sky-200 bg-sky-50 p-2.5 text-sky-950">The SMAP map layer shows estimated surface moisture in pixels about 9 km wide. It cannot measure moisture inside this field or the crop root zone, and it does not change this score.</li>
             <li className="rounded-lg bg-white p-2.5">Field tests are required for pH, available N-P-K, organic matter and soil texture.</li>
           </ul>
           <p className="mt-3 text-[10px] leading-4 text-[#65766A]">

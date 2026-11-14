@@ -16,8 +16,7 @@ export type EnvironmentalOverlayId =
   | 'vegetation-ndvi'
   | 'precipitation-imerg'
   | 'erosion-corridors'
-  | 'bare-soil-ndvi'
-  | 'groundwater-grace';
+  | 'bare-soil-ndvi';
 
 interface OverlayMetadata {
   id: EnvironmentalOverlayId;
@@ -37,7 +36,7 @@ export const ENVIRONMENTAL_OVERLAYS: OverlayMetadata[] = [
     statusLabel: 'NASA product · model-assimilated',
     color: '#D97706',
     fillColor: '#F59E0B',
-    description: 'NASA GIBS SMAP L4 surface-moisture map layer (about 9 km). Regional model-assimilated context, not a field measurement and not used in FARI.',
+    description: 'NASA GIBS SMAP L4 surface-moisture map layer. Each pixel covers about 9 km, so it cannot show moisture variation inside one farm. This layer is not used in FARI.',
   },
   {
     id: 'vegetation-ndvi',
@@ -46,7 +45,7 @@ export const ENVIRONMENTAL_OVERLAYS: OverlayMetadata[] = [
     statusLabel: 'NASA satellite product',
     color: '#15803D',
     fillColor: '#22C55E',
-    description: 'NASA GIBS MODIS/Terra rolling 8-day NDVI imagery at 250 m. Regional vegetation context; not a crop classification, parcel average, or FARI input.',
+    description: 'NASA GIBS MODIS/Terra rolling 8-day NDVI imagery at 250 m per pixel. Pixels may include multiple fields and crops; this layer is not used in FARI.',
   },
   {
     id: 'precipitation-imerg',
@@ -55,7 +54,7 @@ export const ENVIRONMENTAL_OVERLAYS: OverlayMetadata[] = [
     statusLabel: 'NASA satellite product',
     color: '#0369A1',
     fillColor: '#38BDF8',
-    description: 'NASA GIBS IMERG precipitation-rate imagery combines Final and near-real-time Early products. Regional rainfall context, not a farm rain gauge or forecast.',
+    description: 'NASA GIBS IMERG shows satellite-estimated precipitation over an area. It does not predict future rain or replace a rain gauge at the farm.',
   },
   {
     id: 'erosion-corridors',
@@ -65,7 +64,7 @@ export const ENVIRONMENTAL_OVERLAYS: OverlayMetadata[] = [
     color: '#DC2626',
     fillColor: '#EF4444',
     description:
-      'Illustrative runoff susceptibility from configured study-area slope and summary rainfall bursts. No SRTM raster or spatial flow model is connected.',
+      'Illustrative runoff susceptibility from configured study-area slope and historical rainfall bursts. This is not a terrain-flow simulation.',
   },
   {
     id: 'bare-soil-ndvi',
@@ -76,16 +75,6 @@ export const ENVIRONMENTAL_OVERLAYS: OverlayMetadata[] = [
     fillColor: '#B45309',
     description:
       'Illustrative low-canopy / fallow exposure window based on configured crop-calendar assumptions. Not derived from satellite imagery or mapped field boundaries.',
-  },
-  {
-    id: 'groundwater-grace',
-    label: 'Groundwater Depletion Trends',
-    shortSensor: 'GRACE / GRACE-FO regional proxy',
-    statusLabel: 'Illustrative / modeled',
-    color: '#2563EB',
-    fillColor: '#3B82F6',
-    description:
-      'Modeled basin-scale terrestrial water storage & dry-season groundwater pumping pressure.',
   },
 ];
 

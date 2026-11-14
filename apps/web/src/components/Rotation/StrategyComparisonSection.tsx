@@ -665,7 +665,7 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
                           <dd className="font-bold">{monthlyTelemetry.gwetTop.toFixed(2)}</dd>
                         </div>
                         <div>
-                          <dt>SRTM terrain context</dt>
+                          <dt>Configured slope context</dt>
                           <dd className="font-bold">{farm.slopePct}% slope</dd>
                         </div>
                       </dl>
@@ -678,8 +678,7 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
                         </p>
                       )}
                       <p className="mt-1 text-[10px] text-[#65766A]">
-                        SMAP, ECOSTRESS, and Sentinel-2/Landsat values are not ingested as farm-point observations here; related map overlays are{' '}
-                        <span className="rounded bg-amber-100 px-1 font-bold text-amber-900">Illustrative / modeled</span>.
+                        Map imagery is shown separately and does not enter these farm-level scores. Scores use historical climate data and clearly labeled what-if adjustments.
                       </p>
                     </div>
                     <div>

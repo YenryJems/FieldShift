@@ -46,7 +46,7 @@ export const StressToggles: React.FC<StressTogglesProps> = ({
           {labels.stressPresetsTitle}
         </h3>
         <p className="mt-1 text-xs text-[#65766A]">
-          Runs deterministic what-if shocks against the {climate.monthLabel} NASA POWER and GPM IMERG baseline—not a forecast. Strategy scores, ranks, and the 90-day risk calendar recalculate when a preset changes.
+          These drought, heat, and heavy-rain settings simulate possible changes to the {climate.monthLabel} historical baseline. They do not predict actual weather. Strategy scores, rankings, and the 90-day risk screen update when a setting changes.
         </p>
         <div role="group" aria-label="Climate stress scenario presets" className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {SCENARIO_OPTIONS.map(({ id, icon: Icon }) => {
@@ -92,7 +92,7 @@ export const StressToggles: React.FC<StressTogglesProps> = ({
               <>Drought shock is set to −30% rainfall (the midpoint of the requested −20% to −40% range). Ranking changes depend on this farm, month, priorities, and constraints; the cards below show the recalculated order.</>
             )}
             {scenario === 'heatwave' && (
-              <>Thermal-risk check uses adjusted NASA POWER T2M and T2M_MAX to recalculate FARI heat penalties and spray-window alerts. It is a modeled scenario; no ECOSTRESS site observation is used.</>
+              <>Thermal-risk check uses adjusted NASA POWER T2M and T2M_MAX to recalculate FARI heat penalties and spray-window alerts. It is a modeled scenario, not a canopy-temperature reading.</>
             )}
             {scenario === 'deluge' && (
               <>Runoff check uses the adjusted extreme-rain burst with this farm’s {slopePct}% terrain slope, canopy closure, root depth, and contour factor to recalculate erosion scores.</>
