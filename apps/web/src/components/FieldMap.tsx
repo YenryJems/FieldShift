@@ -1,8 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import plotLocations from '../data/plotLocations.json';
-import type { MonthlyTelemetry } from '../data/nasaTelemetryData';
+import {
+  plotLocations,
+  type MonthlyTelemetry,
+} from '@fieldshift/climate-data';
 
 type PlotId = 'nueva-ecija' | 'bukidnon' | 'isabela';
 type MapLayer = 'satellite' | 'street';

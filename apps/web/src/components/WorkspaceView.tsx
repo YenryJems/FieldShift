@@ -9,13 +9,13 @@ import {
 } from 'lucide-react';
 import {
   buildMonthlySummaryCsv,
+  getMonthlyTelemetry,
   MONTHLY_SUMMARY_CSV_FILE_NAME,
   PlaceClimate,
   PlaceId,
   PLACES,
   PLACES_BY_ID,
-} from '../data/places';
-import { getMonthlyTelemetry } from '../data/nasaTelemetryData';
+} from '@fieldshift/climate-data';
 
 const MONTHS = [
   'Jan',

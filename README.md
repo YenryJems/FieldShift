@@ -28,6 +28,13 @@ extension expertise.
 Data source: NASA Langley Research Center POWER Project,
 [Monthly and Annual API](https://power.larc.nasa.gov/docs/services/api/temporal/monthly/).
 
+## Monorepo structure
+
+This repository uses npm workspaces:
+
+- `apps/web` (`@fieldshift/web`): Vite + React + Tailwind + Leaflet frontend.
+- `packages/climate-data` (`@fieldshift/climate-data`): NASA POWER monthly datasets, place extents, telemetry helpers, and CSV export utilities.
+
 ## Run locally
 
 Use Node.js 20.19 or newer, then install dependencies and start the dev server:
@@ -38,9 +45,11 @@ npm run dev
 ```
 
 Open the URL printed by Vite (by default, `http://localhost:3000`). To verify
-the production build locally, run:
+the production build, typechecking, and tests across all workspaces:
 
 ```sh
+npm run lint
+npm test
 npm run build
 npm run preview
 ```
@@ -48,7 +57,7 @@ npm run preview
 ## Deploy to Vercel
 
 Import this repository into Vercel. The included `vercel.json` configures the
-build command (`npm run build`), the `dist` output directory, and SPA fallback
-rewrites for client-side paths. Vercel installs dependencies from
+build command (`npm run build`), the `apps/web/dist` output directory, and SPA
+fallback rewrites for client-side paths. Vercel installs dependencies from
 `package-lock.json`; no environment variables are required for the current
 client-side app.
