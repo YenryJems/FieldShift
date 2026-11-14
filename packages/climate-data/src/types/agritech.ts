@@ -12,6 +12,23 @@ export type DataStatus =
   | 'modeled'
   | 'illustrative';
 
+/** NASA POWER climate indicators used by FieldShift. Wetness values are
+ * unitless model indices; they are not volumetric soil-moisture measurements. */
+export interface NasaTelemetryIndicators {
+  /** Surface soil wetness index for the top 0–5 cm; unitless, typically 0–1. */
+  GWETTOP: number;
+  /** Root-zone soil wetness index for the top 0–100 cm; unitless, typically 0–1. */
+  GWETROOT: number;
+  /** Mean air temperature at 2 m; °C in FieldShift's normalized telemetry. */
+  T2M: number;
+  /** Corrected daily precipitation; mm/day in FieldShift's normalized telemetry. */
+  PRECTOTCORR: number;
+  /** All-sky surface shortwave radiation; MJ/m²/day in normalized telemetry. */
+  ALLSKY_SFC_SW_DWN: number;
+  /** Relative humidity at 2 m; percent. */
+  RH2M: number;
+}
+
 export interface DatasetMetadata {
   id: string;
   source: string;
@@ -141,6 +158,14 @@ export interface FariPillarScores {
   erosion: number;
   nutrients: number;
   market: number;
+}
+
+/** Normalized FARI pillar scores, each constrained to [0, 1]. */
+export interface FariScore {
+  W: number;
+  E: number;
+  N: number;
+  M: number;
 }
 
 export interface FariScoreBreakdown {
@@ -273,6 +298,30 @@ export interface CfiMonthWindow {
   t2mMinC: number;
   gwetRoot: number;
   farmerActionAdvisory: string;
+}
+
+/** Three-month / 90-day spray-risk calendar; each monthly window is color-coded. */
+export interface CfiRiskCalendar90Day {
+  farmId: FarmId;
+  startMonth: number;
+  windows: [CfiMonthWindow, CfiMonthWindow, CfiMonthWindow];
+  dataStatus: DataStatus;
+}
+
+export interface OrbitalSoilCertificationTier {
+  tier: 'orbital';
+  score: number;
+  weightPct: 80;
+  dataStatus: DataStatus;
+  limitations: string[];
+}
+
+export interface GroundTruthSoilCertificationTier {
+  tier: 'ground-truth';
+  score: number | null;
+  weightPct: 20;
+  verified: boolean;
+  inputs: GroundTruthFieldInput;
 }
 
 export interface GroundTruthFieldInput {
