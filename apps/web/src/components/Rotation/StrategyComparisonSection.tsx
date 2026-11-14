@@ -4,15 +4,10 @@ import {
   Award,
   CheckCircle2,
   ClipboardCopy,
-  CloudRain,
-  Flame,
   Info,
   Layers,
   Printer,
-  ShieldCheck,
-  Sliders,
   Sprout,
-  Sun,
   TrendingUp,
   Volume2,
   VolumeX,
@@ -26,10 +21,11 @@ import {
   getFarmById,
   PriorityWeights,
   rankFarmStrategies,
-  STRESS_PRESETS,
   StressScenarioId,
 } from '@fieldshift/climate-data';
 import { useLanguage } from '../../context/LanguageContext';
+import { ScenarioControls } from '../Controls/ScenarioControls';
+import { StressToggles } from '../Controls/StressToggles';
 import { formatSmsFieldBrief } from '../../utils/exportBrief';
 import {
   isSpeechSynthesisSupported,
@@ -147,6 +143,10 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
       ...prev,
       [key]: Math.max(0, Math.min(100, value)),
     }));
+  };
+
+  const handleConstraintChange = (key: keyof FieldConstraints, value: boolean) => {
+    setConstraints((previous) => ({ ...previous, [key]: value }));
   };
 
   const handleToggleSpeech = () => {
@@ -341,222 +341,26 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
         </div>
       </div>
 
-      {/* Interactive Controls Grid: Priority Weights + Stress Scenarios + Field Constraints */}
       <div className="grid gap-5 lg:grid-cols-12">
-        {/* 4 Priority Sliders */}
-        <div className="rounded-xl border border-[#D4DDD0] bg-[#F8FAF7] p-4 sm:p-5 lg:col-span-6">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <Sliders className="h-4 w-4 text-[#1B4332]" aria-hidden="true" />
-              <h3 className="text-sm font-extrabold text-[#17271D]">
-                {t.prioritySlidersTitle}
-              </h3>
-            </div>
-            <button
-              type="button"
-              onClick={() =>
-                setWeights({ water: 25, erosion: 25, nutrients: 25, market: 25 })
-              }
-              className="text-xs font-bold text-[#2D6A4F] underline hover:text-[#1B4332]"
-            >
-              Reset 25% each
-            </button>
-          </div>
-          <p className="mt-1 text-xs text-[#65766A]">
-            Adjusting sliders dynamically re-weights $W, E, N, M$ so $\sum w_i = 1.00$.
-            {farm.slopePct <= 3 && (
-              <span>
-                {' '}
-                Note: On flat terrain ({farm.slopePct}% slope), all strategies naturally score high on Erosion ($E \ge 0.90$).
-              </span>
-            )}
-          </p>
-
-          <div className="mt-4 space-y-3">
-            {(
-              [
-                {
-                  key: 'water',
-                  label: t.waterPriorityLabel,
-                  norm: evaluation.normalizedWeights.water,
-                  color: 'accent-[#2563EB]',
-                },
-                {
-                  key: 'erosion',
-                  label: t.erosionPriorityLabel,
-                  norm: evaluation.normalizedWeights.erosion,
-                  color: 'accent-[#D97706]',
-                },
-                {
-                  key: 'nutrients',
-                  label: t.nutrientsPriorityLabel,
-                  norm: evaluation.normalizedWeights.nutrients,
-                  color: 'accent-[#1B4332]',
-                },
-                {
-                  key: 'market',
-                  label: t.marketPriorityLabel,
-                  norm: evaluation.normalizedWeights.market,
-                  color: 'accent-[#7C3AED]',
-                },
-              ] as const
-            ).map((item) => (
-              <div key={item.key} className="space-y-1">
-                <div className="flex items-center justify-between text-xs">
-                  <label
-                    htmlFor={`slider-${item.key}`}
-                    className="font-bold text-[#263B2E]"
-                  >
-                    {item.label}
-                  </label>
-                  <span className="font-mono text-xs font-bold text-[#1B4332]">
-                    Raw {weights[item.key]} · Normalized{' '}
-                    {Math.round(item.norm * 100)}%
-                  </span>
-                </div>
-                <input
-                  id={`slider-${item.key}`}
-                  type="range"
-                  min={0}
-                  max={100}
-                  step={5}
-                  value={weights[item.key]}
-                  onChange={(e) =>
-                    handleWeightChange(item.key, Number(e.target.value))
-                  }
-                  className={`h-2 w-full cursor-pointer rounded-lg bg-[#DCE5D8] ${item.color}`}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Climate Stress Presets & Field Reality Constraints */}
-        <div className="flex flex-col justify-between gap-4 rounded-xl border border-[#D4DDD0] bg-[#F8FAF7] p-4 sm:p-5 lg:col-span-6">
-          <div>
-            <h3 className="text-sm font-extrabold text-[#17271D]">
-              {t.stressPresetsTitle}
-            </h3>
-            <p className="mt-1 text-xs text-[#65766A]">
-              Applies deterministic climate perturbations to {evaluation.climate.monthLabel}{' '}
-              NASA POWER &amp; GPM IMERG baselines.
-            </p>
-            <div
-              role="group"
-              aria-label="Climate stress scenario presets"
-              className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4"
-            >
-              {(
-                [
-                  { id: 'baseline', icon: ShieldCheck },
-                  { id: 'drought', icon: Sun },
-                  { id: 'heatwave', icon: Flame },
-                  { id: 'deluge', icon: CloudRain },
-                ] as const
-              ).map(({ id, icon: Icon }) => {
-                const preset = STRESS_PRESETS[id];
-                const active = stressScenario === id;
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() => setStressScenario(id)}
-                    className={`flex flex-col items-start rounded-lg border p-2.5 text-left transition-colors ${
-                      active
-                        ? 'border-[#1B4332] bg-[#1B4332] text-white shadow-xs'
-                        : 'border-[#C7D5C5] bg-white text-[#263B2E] hover:border-[#1B4332]'
-                    }`}
-                  >
-                    <Icon className="h-4 w-4" aria-hidden="true" />
-                    <span className="mt-1.5 text-xs font-extrabold">
-                      {preset.shortLabel}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Active Climate Delta Readout */}
-            <div className="mt-3 rounded-lg border border-[#DCE5D8] bg-white p-3 text-xs text-[#3B4D41]">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="font-bold text-[#17271D]">
-                  {evaluation.climate.scenarioLabel} ({evaluation.climate.monthLabel})
-                </span>
-                <span className="rounded bg-[#E8F3EC] px-2 py-0.5 font-mono text-[10px] font-bold text-[#1B4332]">
-                  {stressScenario === 'baseline'
-                    ? 'Observed 2020–2025 Mean'
-                    : t.illustrativeModeledBadge}
-                </span>
-              </div>
-              <p className="mt-1 text-[11px] text-[#536458]">
-                {evaluation.climate.scenarioDescription}
-              </p>
-              <div className="mt-2 grid grid-cols-2 gap-2 border-t border-[#EDF2EB] pt-2 font-mono text-[11px] sm:grid-cols-4">
-                <div>
-                  T2M: <strong>{evaluation.climate.adjustedTempC.toFixed(1)}°C</strong>{' '}
-                  <span className="text-[#65766A]">
-                    (Max {evaluation.climate.adjustedMaxTempC.toFixed(1)}°C)
-                  </span>
-                </div>
-                <div>
-                  Rain: <strong>{evaluation.climate.adjustedDailyPrecipMm.toFixed(1)} mm/d</strong>
-                </div>
-                <div>
-                  Burst P95: <strong>{evaluation.climate.adjustedRainBurstMm.toFixed(0)} mm</strong>
-                </div>
-                <div>
-                  GWETROOT: <strong>{evaluation.climate.adjustedGwetRoot.toFixed(2)}</strong>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 3 Field Reality Constraints */}
-          <div className="border-t border-[#DCE5D8] pt-3">
-            <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#52715E]">
-              {t.constraintsTitle}
-            </h4>
-            <div className="mt-2 grid gap-2 sm:grid-cols-3">
-              {(
-                [
-                  {
-                    key: 'rainfedOnly',
-                    label: t.constraintRainfed,
-                  },
-                  {
-                    key: 'manualToolsOnly',
-                    label: t.constraintManual,
-                  },
-                  {
-                    key: 'fastCashNeeded',
-                    label: t.constraintFastCash,
-                  },
-                ] as const
-              ).map((item) => (
-                <label
-                  key={item.key}
-                  className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-[#C7D5C5] bg-white px-3 py-2 text-xs font-semibold text-[#263B2E]"
-                >
-                  <input
-                    type="checkbox"
-                    checked={constraints[item.key]}
-                    onChange={(e) =>
-                      setConstraints((prev) => ({
-                        ...prev,
-                        [item.key]: e.target.checked,
-                      }))
-                    }
-                    className="h-4 w-4 accent-[#1B4332]"
-                  />
-                  <span>{item.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        </div>
+        <ScenarioControls
+          weights={weights}
+          normalizedWeights={evaluation.normalizedWeights}
+          constraints={constraints}
+          slopePct={farm.slopePct}
+          labels={t}
+          onWeightChange={handleWeightChange}
+          onConstraintChange={handleConstraintChange}
+          onResetWeights={() => setWeights({ water: 25, erosion: 25, nutrients: 25, market: 25 })}
+        />
+        <StressToggles
+          scenario={stressScenario}
+          climate={evaluation.climate}
+          cfiWindows={cfiWindows}
+          slopePct={farm.slopePct}
+          labels={t}
+          onScenarioChange={setStressScenario}
+        />
       </div>
-
       {/* 3-Strategy Side-by-Side Comparison Cards (S1, S2, S3) */}
       <div>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">

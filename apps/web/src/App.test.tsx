@@ -58,10 +58,10 @@ describe('home view and full FieldShift specification suite', () => {
     expect(markup).toContain('5. Risks Requiring Local Review (MAO / Extension)');
 
     // Priority sliders & stress presets
-    expect(markup).toContain('Water Suitability (W)');
-    expect(markup).toContain('Erosion Protection (E)');
-    expect(markup).toContain('Nutrient Regeneration (N)');
-    expect(markup).toContain('Market &amp; Cash Viability (M)');
+    expect(markup).toContain('Conserve Water (W)');
+    expect(markup).toContain('Stop Erosion (E)');
+    expect(markup).toContain('Rebuild Nutrients (N)');
+    expect(markup).toContain('Supplemental Income (M)');
     expect(markup).toContain('Drought (−30% Rain)');
     expect(markup).toContain('Heatwave (+2.5°C)');
     expect(markup).toContain('Deluge (+40% Rain)');
