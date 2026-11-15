@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   AlertTriangle,
   Award,
-  CheckCircle2,
   ClipboardCopy,
   Info,
   Layers,
@@ -236,29 +235,29 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
 
   const projectedImpactCards = [
     {
-      metric: '+35 to +80 kg N/ha',
+      metric: planStrategyObj.nFixKgHa > 0 ? '+35 to +80 kg N/ha' : 'No legume N modeled',
       title: 'Biological Nitrogen Fixation',
-      detail: `Legume relay nodulation (${planStrategyObj.nFixKgHa} kg N/ha modeled for ${planStrategyObj.shortLabel}) replenishes root-zone nitrogen between main harvests.`,
+      detail: `The literature range applies to legume systems. This strategy has ${planStrategyObj.nFixKgHa} kg N/ha configured as a modeled input; actual fixation depends on field conditions and nodulation.`,
       source: 'FAO / IRRI tropical grain-legume biological N-fixation range',
     },
     {
-      metric: '25–40%',
+      metric: planStrategyObj.nFixKgHa > 0 ? '25-40% potential' : 'Not modeled for baseline',
       title: 'Synthetic Urea Reduction Potential',
-      detail:
-        'Incorporating mungbean, cowpea, peanut, or crimson clover haulms reduces synthetic basal N fertilizer requirements in the following cropping cycle.',
+      detail: 'Literature range for legume residue systems in a following cropping cycle. Confirm soil N and fertilizer needs with a local test; this is not a fertilizer prescription.',
       source: 'PCARRD / DA-BAR legume-cereal rotation trials',
     },
     {
-      metric: 'Up to 75%',
+      metric: farmId === 'bukidnon' ? 'Up to 75%' : 'Bukidnon trial reference',
       title: 'Slope Soil Erosion Reduction',
-      detail: `Rapid-closing canopy (${planStrategyObj.canopyClosureDays} days) and contour hedgerow root binding protect sloping fields (${farm.slopePct}% slope at ${farm.name}) against monsoon rain bursts.`,
-      source: 'World Agroforestry (ICRAF) NVS contour trials in Bukidnon (8–15% slopes)',
+      detail: `The up-to-75% literature estimate comes from contour-trial context on 8-15% Bukidnon slopes. It is not a measured or guaranteed reduction at ${farm.name} (${farm.slopePct}% configured slope).`,
+      source: 'World Agroforestry (ICRAF) NVS contour trials in Bukidnon (8-15% slopes)',
     },
     {
-      metric: 'PHP 15,000–35,000/ha',
-      title: 'Avoided Foliar Spray & Input Loss',
-      detail:
-        'Screening 90-day climatological storm washout (≥14 mm/day) and heat shock (≥33°C) windows prevents wasted KNO₃ flower inducers and foliar fertilizers.',
+      metric: farmId === 'guimaras' ? 'PHP 15,000-35,000/ha potential' : 'Guimaras mango reference',
+      title: 'Potential Avoided Spray Washout Loss',
+      detail: farmId === 'guimaras'
+        ? 'A literature-range cost exposure for mango spray washout. The 90-day historical screen flags periods to verify with a current local forecast; it cannot guarantee zero washout or savings.'
+        : 'This cost range refers to Guimaras mango flower-induction and foliar-spray context. It is not an estimate for this farm or crop system.',
       source: 'BPI-NMRDC Guimaras mango induction & smallholder input cost benchmarks',
     },
   ];
@@ -852,8 +851,8 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
                   >
                     {t.projectedEstimateBadge}
                   </span>
-                  <CheckCircle2
-                    className="h-4 w-4 text-[#2D6A4F]"
+                  <Info
+                    className="h-4 w-4 text-[#9A6B0D]"
                     aria-hidden="true"
                   />
                 </div>

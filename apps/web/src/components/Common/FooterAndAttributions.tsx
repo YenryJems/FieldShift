@@ -46,7 +46,7 @@ export const FooterAndAttributions: React.FC = () => {
           </span>
           <div>
             <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#52715E]">
-              Human-Centered Agricultural Design · Team Overachiever (CIT-U Cebu)
+              Challenge inspiration: multigenerational farming experience · Team Overachiever (CIT-U Cebu)
             </p>
             <h3
               id="farmers-reality-heading"
@@ -55,7 +55,7 @@ export const FooterAndAttributions: React.FC = () => {
               About the Farmer&rsquo;s Reality: Why Changing a Generational Crop Calendar Is Hard
             </h3>
             <p className="mt-2 text-sm leading-6 text-[#3B4D41]">
-              For a smallholder family in Nueva Ecija, Bukidnon, Isabela, or Guimaras, a planting calendar is not just a schedule—it is a multigenerational survival contract tied to seasonal production loans, local trader advances, irrigation turnouts, and household food security. Asking a farmer to abandon their primary crop is unrealistic. FieldShift is designed around{' '}
+              For a smallholder family in Nueva Ecija, Bukidnon, Isabela, or Guimaras, a planting calendar is not just a schedule—it is a multigenerational survival contract tied to production loans, local trader advances, irrigation access, and household food security. Trying an unfamiliar crop can mean risking a season&rsquo;s income; seed may be hard to source, buyers are not guaranteed, and weather can shift. FieldShift is designed around{' '}
               <strong>low-risk relay intercropping, fast 60-to-75-day legume cash turnarounds, farmer-saved open-pollinated seeds, and livestock cut-and-carry forage</strong>—so families can protect their topsoil and cut synthetic urea bills without sacrificing their main harvest.
             </p>
           </div>

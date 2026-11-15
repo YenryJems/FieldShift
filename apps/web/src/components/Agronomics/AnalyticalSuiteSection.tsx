@@ -254,7 +254,7 @@ export const AnalyticalSuiteSection: React.FC<AnalyticalSuiteSectionProps> = ({
         </div>
 
         <div className="mt-4 grid gap-6 lg:grid-cols-12">
-          {/* Approach A: 2001-2025 Rolling Z-Score Table */}
+          {/* Approach A: same-month 2001-2025 baseline z-score table */}
           <div className="rounded-xl border border-[#D4DDD0] bg-[#FAFBF9] p-4 lg:col-span-7">
             <div className="flex items-center justify-between gap-2">
               <h4 className="text-sm font-extrabold text-[#17271D]">

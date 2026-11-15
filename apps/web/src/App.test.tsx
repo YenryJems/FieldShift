@@ -21,6 +21,9 @@ describe('guided FieldShift planning experience', () => {
     expect(markup).toContain('Enter the field workspace');
     expect(markup).toContain('A changing season.');
     expect(markup).toContain('One decision at a time.');
+    expect(markup).toContain('Mango Sugar-Loading Index');
+    expect(markup).toContain('not measure fruit sugar');
+    expect(markup).toContain('18–22° Brix suitability target');
     expect(markup).not.toContain('Choose a study farm');
     expect(markup).not.toContain('Selected field context');
     expect(markup).not.toContain('Satellite field view');
@@ -69,6 +72,27 @@ describe('guided FieldShift planning experience', () => {
     expect(markup).not.toContain('disabled=""');
   });
 
+  it('scopes literature impact ranges to their farm context and avoids guaranteed-loss claims', () => {
+    const plains = renderToStaticMarkup(
+      createElement(StrategyComparisonSection, { farmId: 'nueva-ecija', selectedMonth: 1, displayMode: 'compare' }),
+    );
+    expect(plains).toContain('Bukidnon trial reference');
+    expect(plains).toContain('Guimaras mango reference');
+    expect(plains).not.toContain('prevents wasted KNO');
+
+    const guimaras = renderToStaticMarkup(
+      createElement(StrategyComparisonSection, { farmId: 'guimaras', selectedMonth: 1, displayMode: 'compare' }),
+    );
+    expect(guimaras).toContain('PHP 15,000-35,000/ha potential');
+    expect(guimaras).toContain('cannot guarantee zero washout or savings');
+
+    const bukidnon = renderToStaticMarkup(
+      createElement(StrategyComparisonSection, { farmId: 'bukidnon', selectedMonth: 1, displayMode: 'compare' }),
+    );
+    expect(bukidnon).toContain('Up to 75%');
+    expect(bukidnon).toContain('not a measured or guaranteed reduction');
+  });
+
   it('ends with a reviewable field brief and preserves scientific labels and the NASA disclaimer', () => {
     const review = renderToStaticMarkup(
       createElement(WorkspaceView, { plannerStep: 4, onPlannerStepChange }),
@@ -98,6 +122,7 @@ describe('guided FieldShift planning experience', () => {
     expect(analyticalMarkup).toContain('Rule-based suitability ensemble (RF-style)');
     expect(analyticalMarkup).toContain('Orbital Confidence 80% | Ground-Truth Testing Required 20%');
     const footerMarkup = renderToStaticMarkup(createElement(FooterAndAttributions));
+    expect(footerMarkup).toContain('Challenge inspiration: multigenerational farming experience');
     expect(footerMarkup).toContain('NASA does not endorse any non-U.S. Government entity. FieldShift is an educational decision-support prototype designed to support, and never replace, farmer judgment, local soil testing, and certified agricultural extension expertise.');
   });
 
