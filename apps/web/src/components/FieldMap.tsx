@@ -36,25 +36,28 @@ export const ENVIRONMENTAL_OVERLAYS: OverlayMetadata[] = [
     statusLabel: 'NASA product · model-assimilated',
     color: '#D97706',
     fillColor: '#F59E0B',
-    description: 'NASA GIBS SMAP L4 surface-moisture map layer. Each pixel covers about 9 km, so it cannot show moisture variation inside one farm. This layer is not used in FARI.',
+    description:
+      'NASA GIBS SMAP L4 surface-moisture map layer. Each pixel covers about 9 km, so it cannot show moisture variation inside one farm. This layer is not used in FARI.',
   },
   {
     id: 'vegetation-ndvi',
     label: 'Vegetation Greenness (NDVI)',
-    shortSensor: 'NASA Terra MODIS - rolling 8-day - 250 m',
+    shortSensor: 'NASA Terra MODIS · rolling 8-day · 250 m',
     statusLabel: 'NASA satellite product',
     color: '#15803D',
     fillColor: '#22C55E',
-    description: 'NASA GIBS MODIS/Terra rolling 8-day NDVI imagery at 250 m per pixel. Pixels may include multiple fields and crops; this layer is not used in FARI.',
+    description:
+      'NASA GIBS MODIS/Terra rolling 8-day NDVI imagery at 250 m per pixel. Pixels may include multiple fields and crops; this layer is not used in FARI.',
   },
   {
     id: 'precipitation-imerg',
     label: 'Recent Precipitation Rate',
-    shortSensor: 'NASA GPM IMERG - 0.1 degree - 30-minute product',
+    shortSensor: 'NASA GPM IMERG · 0.1 degree · 30-minute product',
     statusLabel: 'NASA satellite product',
     color: '#0369A1',
     fillColor: '#38BDF8',
-    description: 'NASA GIBS IMERG shows satellite-estimated precipitation over an area. It does not predict future rain or replace a rain gauge at the farm.',
+    description:
+      'NASA GIBS IMERG shows satellite-estimated precipitation over an area. It does not predict future rain or replace a rain gauge at the farm.',
   },
   {
     id: 'erosion-corridors',
@@ -69,7 +72,7 @@ export const ENVIRONMENTAL_OVERLAYS: OverlayMetadata[] = [
   {
     id: 'bare-soil-ndvi',
     label: 'Bare-Soil Exposure Windows',
-    shortSensor: 'Crop calendar x modeled cover period',
+    shortSensor: 'Crop calendar × modeled cover period',
     statusLabel: 'Illustrative / modeled',
     color: '#92400E',
     fillColor: '#B45309',
@@ -232,8 +235,6 @@ export const FieldMap: React.FC<FieldMapProps> = ({
     smapLayerRef.current = null;
     if (!activeOverlays.includes('water-stress')) return;
 
-    // NASA GIBS serves the actual SMAP L4 analyzed surface-moisture map.
-    // This is a 9 km satellite/model visualization, not a farm point reading.
     const smapLayer = L.tileLayer.wms(
       'https://gibs.earthdata.nasa.gov/wms/epsg3857/best/wms.cgi',
       {
@@ -318,7 +319,6 @@ export const FieldMap: React.FC<FieldMapProps> = ({
 
     overlayGroup.clearLayers();
 
-    // Render all 5 farms' bounding boxes & markers so all 5 farm locations are represented
     for (const plot of plotLocations.plots) {
       const isSelected = plot.id === selectedPlotId;
       const bounds = plot.bounds as L.LatLngBoundsExpression;
@@ -369,7 +369,6 @@ export const FieldMap: React.FC<FieldMapProps> = ({
       }
     }
 
-    // Render active modeled environmental overlays around the selected plot
     const [[minLat, minLon], [maxLat, maxLon]] = plotConfig.bounds;
     const latSpan = maxLat - minLat;
     const lonSpan = maxLon - minLon;
@@ -377,7 +376,6 @@ export const FieldMap: React.FC<FieldMapProps> = ({
     activeOverlays.forEach((overlayId, idx) => {
       const meta = ENVIRONMENTAL_OVERLAYS.find((o) => o.id === overlayId);
       if (!meta) return;
-      // NASA SMAP, MODIS NDVI, and GPM IMERG are rendered by GIBS WMS above.
       if (['water-stress', 'vegetation-ndvi', 'precipitation-imerg'].includes(overlayId)) return;
 
       const inset = 0.08 + idx * 0.05;
@@ -412,25 +410,17 @@ export const FieldMap: React.FC<FieldMapProps> = ({
 
   return (
     <div className="space-y-3">
-      {/* NASA raster products are identified separately from illustrative overlays. */}
-      <div className="rounded-xl border border-[#D4DDD0] bg-[#F7FAF5] p-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#263B2E]">
-              Environmental Telemetry Overlays (6 Layers)
-            </span>
-            <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 font-mono text-[10px] font-bold text-amber-900">
-              Three NASA data layers and three illustrative overlays
-            </span>
-          </div>
+      {/* Compact Map Action Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => setShowSplitComparison((prev) => !prev)}
             aria-pressed={showSplitComparison}
-            className={`rounded-lg border px-2.5 py-1 text-[11px] font-bold transition-colors ${
+            className={`inline-flex min-h-8 items-center rounded-lg border px-3 py-1 text-xs font-bold transition-colors ${
               showSplitComparison
                 ? 'border-[#1B4332] bg-[#1B4332] text-white'
-                : 'border-[#C7D5C5] bg-white text-[#1B4332] hover:bg-[#EEF5EB]'
+                : 'border-[#C7D5C5] bg-[#F7FAF5] text-[#1B4332] hover:bg-[#EEF5EB]'
             }`}
           >
             {showSplitComparison
@@ -442,51 +432,15 @@ export const FieldMap: React.FC<FieldMapProps> = ({
               type="button"
               aria-pressed={showOsmOverlay}
               onClick={() => setShowOsmOverlay((visible) => !visible)}
-              className="rounded-lg border border-[#C7D5C5] bg-white px-2.5 py-1 text-[11px] font-bold text-[#1B4332] hover:bg-[#EEF5EB] focus-visible:outline-2 focus-visible:outline-offset-2"
+              className="inline-flex min-h-8 items-center rounded-lg border border-[#C7D5C5] bg-[#F7FAF5] px-3 py-1 text-xs font-bold text-[#1B4332] transition-colors hover:bg-[#EEF5EB] focus-visible:outline-2 focus-visible:outline-offset-2"
             >
               {showOsmOverlay ? 'Hide' : 'Show'} OSM roads &amp; boundaries
             </button>
           )}
         </div>
-
-        <div
-          role="group"
-          aria-label="Environmental telemetry layers"
-          className="mt-2.5 grid gap-2 sm:grid-cols-2"
-        >
-          {ENVIRONMENTAL_OVERLAYS.map((overlay) => {
-            const isActive = activeOverlays.includes(overlay.id);
-            return (
-              <button
-                key={overlay.id}
-                type="button"
-                aria-pressed={isActive}
-                onClick={() => toggleOverlay(overlay.id)}
-                className={`flex flex-col items-start rounded-lg border p-2.5 text-left transition-colors ${
-                  isActive
-                    ? 'border-[#1B4332] bg-white shadow-xs'
-                    : 'border-[#DCE4D9] bg-[#F3F6F1]/70 text-[#536458] hover:bg-white'
-                }`}
-              >
-                <div className="flex w-full items-center justify-between gap-2">
-                  <span className="flex items-center gap-1.5 text-xs font-bold text-[#17271D]">
-                    <span
-                      className="inline-block h-2.5 w-2.5 rounded-full"
-                      style={{ backgroundColor: overlay.color }}
-                    />
-                    {overlay.label}
-                  </span>
-                  <span className={`rounded px-1.5 py-0.5 font-mono text-[9px] font-semibold ${overlay.statusLabel.startsWith('NASA') ? 'bg-sky-100 text-sky-950' : 'bg-amber-100/90 text-amber-900'}`}>
-                    {overlay.statusLabel}
-                  </span>
-                </div>
-                <span className="mt-1 font-mono text-[10px] text-[#52715E]">
-                  {overlay.shortSensor}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        <span className="font-mono text-[10px] font-semibold text-[#52715E]">
+          {activeOverlays.length} of {ENVIRONMENTAL_OVERLAYS.length} layers active
+        </span>
       </div>
 
       {/* Offline / Tile Failure Fallback Banner */}
@@ -503,7 +457,7 @@ export const FieldMap: React.FC<FieldMapProps> = ({
       )}
 
       {/* Map Canvas + Optional Split-Screen Visual Comparison */}
-      <div className="relative h-[420px] w-full overflow-hidden rounded-xl border border-[#D4DDD0] bg-[#E8EFE6] shadow-lg">
+      <div className="relative h-[420px] w-full overflow-hidden rounded-xl border border-[#D4DDD0] bg-[#E8EFE6] shadow-sm">
         <div
           ref={mapContainerRef}
           className="z-0 h-full w-full"
@@ -513,7 +467,9 @@ export const FieldMap: React.FC<FieldMapProps> = ({
 
         {showSplitComparison && <SplitSlider value={splitPercent} onChange={setSplitPercent} />}
 
-        <div className={`absolute ${showSplitComparison ? 'bottom-16' : 'bottom-3'} left-3 z-[1000] max-w-[calc(100%-1.5rem)] rounded-lg border border-slate-700 bg-slate-900/90 px-3 py-2 text-xs text-slate-100 shadow backdrop-blur-sm`}>
+        <div
+          className={`absolute ${showSplitComparison ? 'bottom-16' : 'bottom-3'} left-3 z-[1000] max-w-[calc(100%-1.5rem)] rounded-lg border border-slate-700 bg-slate-900/90 px-3 py-2 text-xs text-slate-100 shadow backdrop-blur-sm`}
+        >
           <span className="font-semibold text-emerald-400">
             Historical {activeMonthData.month} signal:
           </span>{' '}
@@ -523,7 +479,65 @@ export const FieldMap: React.FC<FieldMapProps> = ({
         </div>
       </div>
 
+      {/* Sleek Single-Column Environmental Telemetry Layer Selector */}
+      <div className="rounded-xl border border-[#D4DDD0] bg-[#F7FAF5] p-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 pb-2">
+          <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#263B2E]">
+            Environmental Telemetry Overlays ({ENVIRONMENTAL_OVERLAYS.length} Layers)
+          </span>
+          <span className="font-mono text-[10px] font-semibold text-[#52715E]">
+            3 NASA GIBS layers · 2 illustrative overlays
+          </span>
+        </div>
 
+        <div
+          role="group"
+          aria-label="Environmental telemetry layers"
+          className="grid gap-1.5"
+        >
+          {ENVIRONMENTAL_OVERLAYS.map((overlay) => {
+            const isActive = activeOverlays.includes(overlay.id);
+            const isNasaProduct = overlay.statusLabel.startsWith('NASA');
+            return (
+              <button
+                key={overlay.id}
+                type="button"
+                aria-pressed={isActive}
+                onClick={() => toggleOverlay(overlay.id)}
+                className={`flex w-full items-center justify-between gap-3 rounded-lg border px-3 py-2 text-left transition-colors ${
+                  isActive
+                    ? 'border-[#1B4332] bg-white shadow-2xs'
+                    : 'border-[#DCE4D9] bg-white/60 text-[#536458] hover:bg-white'
+                }`}
+              >
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <span
+                    className="h-2.5 w-2.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: overlay.color }}
+                  />
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-bold text-[#17271D]">
+                      {overlay.label}
+                    </p>
+                    <p className="truncate font-mono text-[10px] text-[#52715E]">
+                      {overlay.shortSensor}
+                    </p>
+                  </div>
+                </div>
+                <span
+                  className={`shrink-0 whitespace-nowrap rounded-md px-2 py-0.5 font-mono text-[10px] font-semibold ${
+                    isNasaProduct
+                      ? 'border border-sky-200 bg-sky-50 text-sky-900'
+                      : 'border border-amber-200 bg-amber-50 text-amber-900'
+                  }`}
+                >
+                  {overlay.statusLabel}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 };
