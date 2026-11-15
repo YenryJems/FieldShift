@@ -754,31 +754,32 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
           plainEnglish={plainEnglish}
           onPlainEnglishChange={setPlainEnglish}
           showSandbox={evidencePanel === 'sandbox'}
+          subNavigation={
+            <nav aria-label="Evidence sections" className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#D8E2D5] bg-[#F7FAF5] p-1.5">
+              <div className="flex flex-wrap gap-1.5">
+                {EVIDENCE_PANELS.map((panel) => (
+                  <button
+                    key={panel.id}
+                    type="button"
+                    aria-pressed={evidencePanel === panel.id}
+                    onClick={() => setEvidencePanel(panel.id)}
+                    className={`min-h-9 shrink-0 rounded-lg px-3 text-xs font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332] ${
+                      evidencePanel === panel.id
+                        ? 'bg-[#1B4332] text-white shadow-2xs'
+                        : 'text-[#516357] hover:bg-white hover:text-[#1B4332]'
+                    }`}
+                  >
+                    {panel.title}
+                  </button>
+                ))}
+              </div>
+              <span className="hidden pr-2 font-mono text-[10px] font-semibold text-[#65766A] md:inline">
+                Synced to {place.name} · {MONTHS[selectedMonth - 1]}
+              </span>
+            </nav>
+          }
         />
       )}
-
-      <nav aria-label="Evidence sections" className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#D8E2D5] bg-white p-2">
-        <div className="flex flex-wrap gap-1.5">
-          {EVIDENCE_PANELS.map((panel) => (
-            <button
-              key={panel.id}
-              type="button"
-              aria-pressed={evidencePanel === panel.id}
-              onClick={() => setEvidencePanel(panel.id)}
-              className={`min-h-9 shrink-0 rounded-lg px-3 text-xs font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332] ${
-                evidencePanel === panel.id
-                  ? 'bg-[#1B4332] text-white shadow-2xs'
-                  : 'text-[#516357] hover:bg-[#F1F5EF]'
-              }`}
-            >
-              {panel.title}
-            </button>
-          ))}
-        </div>
-        <span className="hidden pr-2 font-mono text-[10px] font-semibold text-[#65766A] md:inline">
-          Synced to {place.name} · {MONTHS[selectedMonth - 1]}
-        </span>
-      </nav>
 
       <div className={evidencePanel === 'climate' ? 'space-y-5' : 'hidden'}>
         <div id="field-map" className="scroll-mt-28 grid items-start gap-5 lg:grid-cols-[1.08fr_0.92fr]">

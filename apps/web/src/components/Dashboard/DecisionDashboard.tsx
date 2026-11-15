@@ -31,6 +31,7 @@ export interface DecisionDashboardProps {
   plainEnglish: boolean;
   onPlainEnglishChange: (plainEnglish: boolean) => void;
   showSandbox?: boolean;
+  subNavigation?: React.ReactNode;
 }
 
 const DEFAULT_DASHBOARD_WEIGHTS: PriorityWeights = {
@@ -52,6 +53,7 @@ export const DecisionDashboard: React.FC<DecisionDashboardProps> = ({
   plainEnglish,
   onPlainEnglishChange,
   showSandbox = true,
+  subNavigation,
 }) => {
   const evaluationResult = useMemo<{
     evaluation: PlotStrategyEvaluation | null;
@@ -164,7 +166,9 @@ export const DecisionDashboard: React.FC<DecisionDashboardProps> = ({
         plainEnglish={plainEnglish}
       />
 
-      <div className={showSandbox ? 'space-y-4 pt-2' : 'hidden'}>
+      {subNavigation}
+
+      <div className={showSandbox ? 'space-y-4 border-t border-[#E2E8DF] pt-4' : 'hidden'}>
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
           <SimulationPanel
             weights={weights}
