@@ -40,7 +40,9 @@ export const SprayValidator: React.FC<SprayValidatorProps> = ({ farmId, startMon
           title={t.projectedEstimateTooltip}
           className="shrink-0 rounded-full border border-[#D97706]/40 bg-[#FFFBEB] px-3 py-1 font-mono text-[10px] font-bold text-[#92400E]"
         >
-          Potential Spray Loss Exposure: PHP 15,000-35,000/ha ({t.projectedEstimateBadge})
+          {farmId === 'guimaras'
+            ? `Potential Spray Loss Exposure: PHP 15,000–35,000/ha (${t.projectedEstimateBadge})`
+            : `Guimaras Mango Spray Reference: PHP 15,000–35,000/ha (${t.projectedEstimateBadge})`}
         </span>
       </div>
 

@@ -114,22 +114,24 @@ export const AnalyticalSuiteSection: React.FC<AnalyticalSuiteSectionProps> = ({
               id="terroir-engine-heading"
               className="mt-1 text-xl font-extrabold text-[#17271D]"
             >
-              Terroir Nutrient Balance &amp; Guimaras Mango Sugar-Loading Index (0–100)
+              {farmId === 'guimaras'
+                ? 'Terroir Nutrient Balance & Guimaras Mango Sugar-Loading Index (0–100)'
+                : 'Terroir Nutrient Balance & Seasonal Maturation Index (0–100)'}
             </h3>
             <p className="mt-1 text-xs leading-5 text-[#536458]">
-              Computes $\Delta\text&#123;Adjustment&#125; = \text&#123;TargetIdealProfile&#125; - (\text&#123;SoilBaseline&#125; + \text&#123;CoverCropContribution&#125;)$ for {farm.name} under Strategy {activeStrategy.id}. Soil baselines are regional literature reference values—not direct satellite measurements.
+              Computes Δ Adjustment = Target Ideal Profile − (Soil Baseline + Cover-Crop Contribution) for {farm.name} under Strategy {activeStrategy.id}. Soil baselines are regional literature reference values—not direct satellite measurements.
             </p>
           </div>
 
           <div className="flex flex-wrap gap-2">
             <div className="rounded-xl border border-[#C7D5C5] bg-[#F5F9F3] px-3.5 py-2 text-right">
               <p className="font-mono text-[10px] font-bold uppercase text-[#52715E]">
-                Sugar-Loading Index
+                {farmId === 'guimaras' ? 'Sugar-Loading Index' : 'Maturation Index'}
               </p>
               <p className="font-mono text-xl font-extrabold text-[#1B4332]">
                 {terroir.mangoSugarLoadingIndex}/100{' '}
                 <span className="text-xs font-normal text-[#3B4D41]">
-                  ({terroir.targetBrixRange})
+                  ({farmId === 'guimaras' ? terroir.targetBrixRange : 'Solar + dry-spell'})
                 </span>
               </p>
             </div>
@@ -149,7 +151,7 @@ export const AnalyticalSuiteSection: React.FC<AnalyticalSuiteSectionProps> = ({
           </div>
         </div>
 
-        {/* Sugar Loading Component Sub-Indices */}
+        {/* Sugar Loading / Maturation Component Sub-Indices */}
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
           <div className="rounded-lg border border-[#E2E8DF] bg-[#F8FAF7] p-3">
             <p className="font-mono text-[10px] font-bold uppercase text-[#52715E]">
@@ -159,7 +161,9 @@ export const AnalyticalSuiteSection: React.FC<AnalyticalSuiteSectionProps> = ({
               {Math.round(terroir.solarIndex * 100)}/100
             </p>
             <p className="text-[11px] text-[#65766A]">
-              Drives sucrose translocation during fruit maturation.
+              {farmId === 'guimaras'
+                ? 'Drives sucrose translocation during fruit maturation.'
+                : 'Supports photosynthetic grain fill and dry-matter accumulation.'}
             </p>
           </div>
           <div className="rounded-lg border border-[#E2E8DF] bg-[#F8FAF7] p-3">
@@ -170,7 +174,9 @@ export const AnalyticalSuiteSection: React.FC<AnalyticalSuiteSectionProps> = ({
               {Math.round(terroir.drySpellIndex * 100)}/100
             </p>
             <p className="text-[11px] text-[#65766A]">
-              Dry ripening prevents watery dilution and anthracnose fungal rot.
+              {farmId === 'guimaras'
+                ? 'Dry ripening prevents watery dilution and anthracnose fungal rot.'
+                : 'Dry ripening windows reduce harvest moisture and fungal spoilage.'}
             </p>
           </div>
           <div className="rounded-lg border border-[#E2E8DF] bg-[#F8FAF7] p-3">
@@ -181,7 +187,9 @@ export const AnalyticalSuiteSection: React.FC<AnalyticalSuiteSectionProps> = ({
               {Math.round(terroir.drainageIndex * 100)}/100
             </p>
             <p className="text-[11px] text-[#65766A]">
-              Gentle 4–8% orchard drainage induces mild root stress that triggers flowering.
+              {farmId === 'guimaras'
+                ? 'Gentle 4–8% orchard drainage induces mild root stress that triggers flowering.'
+                : 'Reflects surface drainage and root-zone aeration across this terrain slope.'}
             </p>
           </div>
         </div>
@@ -265,7 +273,7 @@ export const AnalyticalSuiteSection: React.FC<AnalyticalSuiteSectionProps> = ({
               </span>
             </div>
             <p className="mt-1 text-xs text-[#536458]">
-              Compares {siComparison.monthLabel} 2020–2025 observations against the 25-year (`2001–2025`) NASA POWER historical mean ($\mu_m$) and standard deviation ($\sigma_m$).
+              Compares {siComparison.monthLabel} 2020–2025 observations against the 25-year (2001–2025) NASA POWER historical mean (μ) and standard deviation (σ).
             </p>
 
             <div className="mt-3 overflow-x-auto">

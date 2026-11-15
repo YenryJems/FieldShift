@@ -866,7 +866,8 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
           </div>
           <p className="mt-3 text-sm leading-6 text-[#536458]">
             NASA Langley Research Center POWER Project, Monthly and Annual API;
-            point data for {place.latitude.toFixed(3)}° N, {place.longitude.toFixed(3)}° E,
+            point data for {Math.abs(place.latitude).toFixed(3)}° {place.latitude < 0 ? 'S' : 'N'},{' '}
+            {Math.abs(place.longitude).toFixed(3)}° {place.longitude < 0 ? 'W' : 'E'},
             January 2020–December 2025. Product groups listed in the source file:{' '}
             {place.dataSources.join(', ')}.
           </p>
@@ -900,7 +901,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
             </p>
             <h3 className="mt-1 text-lg font-extrabold text-[#17271D]">Download and cite</h3>
             <p className="mt-2 text-sm leading-6 text-[#536458]">
-              Export the original NASA POWER JSON for this point or a CSV of the derived monthly summaries for all three places. The CSV includes units, sample counts, bounding boxes, source products, and citation notes.
+              Export the original NASA POWER JSON for this point or a CSV of the derived monthly summaries for all five study farms. The CSV includes units, sample counts, bounding boxes, source products, and citation notes.
             </p>
           </div>
           <div className="mt-5 flex flex-wrap gap-3">

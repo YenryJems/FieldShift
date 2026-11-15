@@ -692,7 +692,7 @@ export const FARMS_BY_ID: Record<FarmId, FarmProfile> = {
           supportingEvidence:
             'NASA POWER daily records confirm Isabela reaches 37.8°C mean T2M_MAX in May and experiences 66.5 mm/day 95th-percentile rainfall bursts in October. Deep-rooted (90 cm) dwarf sorghum and underground camote tubers protect harvestable yield against both thermal sterility and wind lodging.',
           expectedBenefits:
-            'Maintains high Water ($W$) and Market ($M$) resilience under both Heatwave (+2.5°C) and Deluge (+40% rain burst) scenarios, covers soil in 26 days, and supplies feed grain plus flood-safe root crops.',
+            'Maintains high Water (W) and Market (M) resilience under both Heatwave (+2.5°C) and Deluge (+40% rain burst) scenarios, covers soil in 26 days, and supplies feed grain plus flood-safe root crops.',
           dataGaps:
             'Satellite data cannot assess riverbank overflow depth on low alluvial floodplains or sorghum grain mold incidence if continuous rain hits at physiological maturity.',
           localReviewAlerts:

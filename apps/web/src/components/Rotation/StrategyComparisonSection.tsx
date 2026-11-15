@@ -370,7 +370,7 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
         aria-label="Field moisture & spray advisory banner"
         className={`rounded-xl border p-4 ${
           isDroughtCondition
-            ? 'border-[#E6B86A] bg-[#FFF8EB] text-[#5F3DC4]'
+            ? 'border-[#E6B86A] bg-[#FFF8EB] text-[#92400E]'
             : 'border-[#C7D5C5] bg-[#F5F9F3]'
         }`}
       >

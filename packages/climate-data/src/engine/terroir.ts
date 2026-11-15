@@ -102,7 +102,9 @@ export const calculateTerroirAssessment = (
       targetIdeal: target.potassiumPpm,
       adjustmentGap: kGap,
       advisoryNote:
-        'Returned crop haulms and vine mulch recycle potassium critical for grain fill and mango Brix.',
+        farmId === 'guimaras'
+          ? 'Returned crop haulms and vine mulch recycle potassium critical for mango fruit fill and Brix.'
+          : 'Returned crop haulms and vine mulch recycle potassium critical for grain fill, stalk strength, and drought tolerance.',
     },
     {
       nutrient: 'Organic Matter (%)',
