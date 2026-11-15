@@ -29,7 +29,7 @@ interface ScenarioControlsProps {
 
 const WEIGHT_CONTROLS = [
   { key: 'water', label: 'waterPriorityLabel', color: 'accent-[#2563EB]' },
-  { key: 'erosion', label: 'erosionPriorityLabel', color: 'accent-[#D97706]' },
+  { key: 'erosion', label: 'erosionPriorityLabel', color: 'accent-[#B45309]' },
   { key: 'nutrients', label: 'nutrientsPriorityLabel', color: 'accent-[#1B4332]' },
   { key: 'market', label: 'marketPriorityLabel', color: 'accent-[#7C3AED]' },
 ] as const satisfies ReadonlyArray<{
