@@ -138,6 +138,20 @@ describe('guided FieldShift planning experience', () => {
     expect(evidence).toContain('Satellite field view');
   });
 
+  it('keeps evidence navigation above the expandable sandbox and sticky below the header', () => {
+    const markup = renderToStaticMarkup(
+      createElement(WorkspaceView, { plannerStep: 1, onPlannerStepChange }),
+    );
+    const navigationStart = markup.indexOf('<nav aria-label="Evidence sections"');
+    const dashboardStart = markup.indexOf('<section id="decision-dashboard"');
+
+    expect(navigationStart).toBeGreaterThanOrEqual(0);
+    expect(navigationStart).toBeLessThan(dashboardStart);
+    expect(markup.slice(navigationStart, markup.indexOf('</nav>', navigationStart))).toContain(
+      'sticky top-[72px]',
+    );
+  });
+
   it('renders strategy and analytical views cleanly for every supported farm', () => {
     for (const farm of FARMS) {
       const strategyMarkup = renderToStaticMarkup(
