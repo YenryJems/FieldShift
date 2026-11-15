@@ -6,6 +6,7 @@ import App from './App';
 import { AnalyticalSuiteSection } from './components/Agronomics/AnalyticalSuiteSection';
 import { FooterAndAttributions } from './components/Common/FooterAndAttributions';
 import { WorkspaceView } from './components/WorkspaceView';
+import { TopNavBar } from './components/TopNavBar';
 import { StrategyComparisonSection } from './components/Rotation/StrategyComparisonSection';
 import { TRANSLATIONS } from './context/LanguageContext';
 
@@ -34,6 +35,7 @@ describe('guided FieldShift planning experience', () => {
     );
     expect(season).toContain('Which rotation is worth discussing for this field and season?');
     expect(season).toContain('Satellite field view');
+    expect(season).toContain('Current conditions &amp; 3-day outlook');
 
     const priorities = renderToStaticMarkup(
       createElement(WorkspaceView, { plannerStep: 2, onPlannerStepChange }),
@@ -55,6 +57,16 @@ describe('guided FieldShift planning experience', () => {
       '4. Information &amp; Data Gaps',
       '5. Risks Requiring Local Review (MAO / Extension)',
     ]) expect(comparison).toContain(heading);
+  });
+
+  it('keeps every planning step directly accessible without completing earlier steps', () => {
+    const markup = renderToStaticMarkup(
+      createElement(TopNavBar, { plannerStep: 0, onPlannerStepChange }),
+    );
+    for (const label of ['Farm', 'Season', 'Priorities', 'Rotations', 'Review']) {
+      expect(markup).toContain(`Go to ${label}`);
+    }
+    expect(markup).not.toContain('disabled=""');
   });
 
   it('ends with a reviewable field brief and preserves scientific labels and the NASA disclaimer', () => {

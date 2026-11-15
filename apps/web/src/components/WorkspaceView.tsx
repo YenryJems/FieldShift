@@ -22,6 +22,7 @@ import {
   StrategyId,
 } from '@fieldshift/climate-data';
 import { AnalyticalSuiteSection } from './Agronomics/AnalyticalSuiteSection';
+import { LiveWeatherPanel } from './Agronomics/LiveWeatherPanel';
 import { FooterAndAttributions } from './Common/FooterAndAttributions';
 import { StrategyComparisonSection } from './Rotation/StrategyComparisonSection';
 
@@ -651,11 +652,11 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
     <main id="field-demo" className="mx-auto max-w-[1280px] space-y-7 px-4 py-7 sm:px-6 sm:py-9">
       <section id="workspace-content" aria-live="polite" className="scroll-mt-24 flex flex-col gap-2 border-b border-[#E4E9E2] pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-[#698071]">Field workspace · Step {String(plannerStep + 1).padStart(2, '0')} of {PLANNER_STEPS.length}</p>
+          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-[#698071]">Field workspace · Step {String(plannerStep + 1).padStart(2, '0')} of {PLANNER_STEPS.length} | move between steps anytime</p>
           <h1 className="mt-1 text-2xl font-semibold tracking-[-0.035em] text-[#1B2B20] sm:text-3xl">{PLANNER_STEPS[plannerStep].title}</h1>
           <p className="mt-1 max-w-2xl text-xs leading-5 text-[#68766C] sm:text-sm">{PLANNER_STEPS[plannerStep].prompt}</p>
         </div>
-        <span className="inline-flex w-fit items-center rounded-full border border-[#E2E8DF] bg-white px-3 py-1.5 text-[9px] font-semibold text-[#758178]">Historical context · farmer-reviewed decisions</span>
+        <span className="inline-flex w-fit items-center rounded-full border border-[#E2E8DF] bg-white px-3 py-1.5 text-[9px] font-semibold text-[#758178]">Live forecast | historical climate baselines</span>
       </section>
       <div className={`planner-stage ${plannerStep === 0 ? 'planner-stage-active step-one space-y-5' : 'hidden'}`}>
       <section id="field-sites" className="scroll-mt-28 flex flex-col gap-5 border-b border-[#E2E8DF] pb-6 lg:flex-row lg:items-end lg:justify-between">
@@ -739,6 +740,9 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
         ))}
       </nav>
 
+      {plannerStep === 1 && evidencePanel === 'climate' && (
+        <LiveWeatherPanel latitude={farm.latitude} longitude={farm.longitude} locationName={farm.name} />
+      )}
       <div className={evidencePanel === 'climate' ? 'space-y-5' : 'hidden'}>
       <div className="flex flex-col gap-1 border-b border-[#E2E8DF] pb-4">
         <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E] sm:text-xs">
@@ -978,7 +982,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
         <button type="button" disabled={plannerStep === 0} onClick={() => goToStep(plannerStep - 1)} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#C8D5C7] bg-white px-4 text-xs font-bold text-[#33493A] transition-colors hover:bg-[#F0F5EE] disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332]">
           <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back
         </button>
-        <p className="hidden text-xs font-semibold text-[#5C6D60] sm:block">{plannerStep < 4 ? `Next: ${PLANNER_STEPS[plannerStep + 1].title}` : 'Your plan is ready for local review.'}</p>
+        <p className="hidden text-xs font-semibold text-[#5C6D60] sm:block">Use the steps above to jump anywhere. {plannerStep < 4 ? `Next: ${PLANNER_STEPS[plannerStep + 1].title}` : 'Your plan is ready for local review.'}</p>
         {plannerStep < 4 ? (
           <button type="button" onClick={() => goToStep(plannerStep + 1)} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#1B4332] px-5 text-xs font-extrabold text-white transition-colors hover:bg-[#2D6A4F] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B3D91]">
             {plannerStep === 0 ? 'Read this farm’s season' : plannerStep === 1 ? 'Set my priorities' : plannerStep === 2 ? 'Compare rotations' : 'Review my draft plan'} <ArrowRight className="h-4 w-4" aria-hidden="true" />

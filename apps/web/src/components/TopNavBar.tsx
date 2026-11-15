@@ -16,7 +16,6 @@ interface TopNavBarProps {
 
 export const TopNavBar: React.FC<TopNavBarProps> = ({ plannerStep, onPlannerStepChange }) => {
   const navigateToStep = (index: number) => {
-    if (index > plannerStep) return;
     onPlannerStepChange(index);
     document.getElementById('workspace-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -35,15 +34,14 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({ plannerStep, onPlannerStep
         <nav aria-label="Planning steps" className="flex max-w-[690px] items-center gap-0.5 overflow-x-auto rounded-full border border-[#E0E5DE] bg-white p-1 shadow-[0_2px_12px_rgba(29,47,34,0.05)] sm:gap-1">
           {navigation.map((item, index) => {
             const active = plannerStep === index;
-            const complete = plannerStep > index;
             return (
               <button
                 key={item.label}
                 type="button"
-                disabled={index > plannerStep}
                 aria-current={active ? 'step' : undefined}
+                aria-label={`Go to ${item.label}${active ? ', current step' : ''}`}
                 onClick={() => navigateToStep(index)}
-                className={`inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-[10px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#1B4332] sm:px-3.5 sm:text-[11px] ${active ? 'bg-[#1B4332] text-white' : complete ? 'text-[#496A50] hover:bg-[#F2F6F0]' : 'cursor-not-allowed text-[#ABB3AC]'}`}
+                className={`inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-[10px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#1B4332] sm:px-3.5 sm:text-[11px] ${active ? 'bg-[#1B4332] text-white' : 'text-[#496A50] hover:bg-[#F2F6F0]'}`}
               >
                 <span className={`font-mono text-[8px] sm:text-[9px] ${active ? 'text-white/65' : ''}`}>{String(index + 1).padStart(2, '0')}</span>
                 {item.label}
