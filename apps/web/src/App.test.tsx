@@ -21,9 +21,6 @@ describe('guided FieldShift planning experience', () => {
     expect(markup).toContain('Enter the field workspace');
     expect(markup).toContain('A changing season.');
     expect(markup).toContain('One decision at a time.');
-    expect(markup).toContain('Mango Sugar-Loading Index');
-    expect(markup).toContain('not measure fruit sugar');
-    expect(markup).toContain('18–22° Brix suitability target');
     expect(markup).toContain('Open-Meteo · live weather model');
     expect(markup).toContain('NASA SRTM · configured slope context');
     expect(markup).toContain('NASA does not endorse any non-U.S. Government entity. FieldShift is an educational decision-support prototype designed to support, and never replace, farmer judgment, local soil testing, and certified agricultural extension expertise.');

@@ -153,17 +153,6 @@ export const HomeView: React.FC<HomeViewProps> = ({ onEnterWorkspace }) => (
           <a href="#approach" className="mt-4 inline-flex min-h-9 items-center gap-1.5 rounded px-2 text-xs font-semibold text-[#526458] transition-colors hover:text-[#1B4332] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332]">
             See the three-step journey <ArrowDown className="h-3.5 w-3.5" aria-hidden="true" />
           </a>
-          <section aria-label="Featured Guimaras mango terroir index" className="mt-6 w-full max-w-2xl rounded-2xl border border-[#D8E2D5] bg-white/90 p-4 text-left shadow-sm backdrop-blur-sm sm:p-5">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-[#52715E]">Featured case · Guimaras orchard</p>
-                <h2 className="mt-1 text-base font-extrabold text-[#17271D] sm:text-lg">Mango Sugar-Loading Index</h2>
-                <p className="mt-1 max-w-lg text-xs leading-5 text-[#536458]">A modeled 0–100 climate-suitability index using historical dry spells, solar radiation, and configured terrain slope.</p>
-              </div>
-              <span className="shrink-0 rounded-xl bg-[#EDF7F0] px-3 py-2 font-mono text-sm font-extrabold text-[#1B4332]">0–100</span>
-            </div>
-            <p className="mt-3 border-t border-[#E2E8DF] pt-2 text-[10px] leading-4 text-[#65766A]">Designed around an 18–22° Brix suitability target; it does not measure fruit sugar or connect a live SRTM terrain feed.</p>
-          </section>
         </div>
 
         <div className="relative z-10 mt-auto flex w-full max-w-[1120px] items-end justify-between gap-4 pb-5 pt-12 text-left text-white sm:pb-7 sm:pt-16">
