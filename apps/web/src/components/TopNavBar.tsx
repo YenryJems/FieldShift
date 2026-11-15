@@ -12,9 +12,10 @@ const navigation = [
 interface TopNavBarProps {
   plannerStep: number;
   onPlannerStepChange: (step: number) => void;
+  onReturnHome: () => void;
 }
 
-export const TopNavBar: React.FC<TopNavBarProps> = ({ plannerStep, onPlannerStepChange }) => {
+export const TopNavBar: React.FC<TopNavBarProps> = ({ plannerStep, onPlannerStepChange, onReturnHome }) => {
   const navigateToStep = (index: number) => {
     onPlannerStepChange(index);
     document.getElementById('workspace-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -23,13 +24,18 @@ export const TopNavBar: React.FC<TopNavBarProps> = ({ plannerStep, onPlannerStep
   return (
     <header className="sticky top-0 z-40 border-b border-[#E2E8DF] bg-[#FBFCFA]/95 backdrop-blur-md">
       <div className="mx-auto flex min-h-[68px] max-w-[1360px] items-center justify-between gap-3 px-4 sm:px-6 lg:px-10">
-        <a href="#top" className="flex shrink-0 items-center gap-2.5 rounded-md text-[#1B4332] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#1B4332]">
+        <button
+          type="button"
+          onClick={onReturnHome}
+          aria-label="Return to the FieldShift landing page"
+          className="flex shrink-0 items-center gap-2.5 rounded-md text-left text-[#1B4332] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#1B4332]"
+        >
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1B4332] text-white"><Compass className="h-[18px] w-[18px]" aria-hidden="true" /></span>
           <span>
             <span className="block text-[14px] font-extrabold tracking-tight">FieldShift</span>
             <span className="hidden font-mono text-[8px] uppercase tracking-[0.14em] text-[#78867D] sm:block">Field workspace</span>
           </span>
-        </a>
+        </button>
 
         <nav aria-label="Planning steps" className="flex max-w-[690px] items-center gap-0.5 overflow-x-auto rounded-full border border-[#E0E5DE] bg-white p-1 shadow-[0_2px_12px_rgba(29,47,34,0.05)] sm:gap-1">
           {navigation.map((item, index) => {

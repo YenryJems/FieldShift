@@ -67,8 +67,9 @@ describe('guided FieldShift planning experience', () => {
 
   it('keeps every planning step directly accessible without completing earlier steps', () => {
     const markup = renderToStaticMarkup(
-      createElement(TopNavBar, { plannerStep: 0, onPlannerStepChange }),
+      createElement(TopNavBar, { plannerStep: 0, onPlannerStepChange, onReturnHome: () => undefined }),
     );
+    expect(markup).toContain('Return to the FieldShift landing page');
     for (const label of ['Farm', 'Season', 'Priorities', 'Rotations', 'Review']) {
       expect(markup).toContain(`Go to ${label}`);
     }
