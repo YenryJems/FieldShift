@@ -211,6 +211,7 @@ const FieldMapPanel: React.FC<{
         <LazyFieldMap
           activeMonthData={selectedMonthTelemetry}
           mapLayer={mapLayer}
+          onMapLayerChange={onMapLayerChange}
           selectedPlotId={selectedPlot.id}
           onSelectPlot={onSelectPlot}
         />

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { Maximize2, Minimize2 } from 'lucide-react';
 import { SplitSlider } from './SplitSlider';
 import {
   FARMS_BY_ID,
@@ -85,6 +86,7 @@ interface FieldMapProps {
   selectedPlotId: PlotId;
   activeMonthData: MonthlyTelemetry;
   mapLayer: MapBaseLayer;
+  onMapLayerChange?: (layer: MapBaseLayer) => void;
   onSelectPlot?: (plotId: PlotId) => void;
 }
 
@@ -92,8 +94,10 @@ export const FieldMap: React.FC<FieldMapProps> = ({
   selectedPlotId,
   activeMonthData,
   mapLayer,
+  onMapLayerChange,
   onSelectPlot,
 }) => {
+  const fullscreenWrapperRef = useRef<HTMLDivElement | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const overlayGroupRef = useRef<L.LayerGroup | null>(null);
@@ -110,6 +114,7 @@ export const FieldMap: React.FC<FieldMapProps> = ({
   const [showSplitComparison, setShowSplitComparison] = useState(false);
   const [splitPercent, setSplitPercent] = useState(50);
   const [showOsmOverlay, setShowOsmOverlay] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const plotConfig = plotLocations.plots.find((plot) => plot.id === selectedPlotId);
   if (!plotConfig) {
@@ -408,8 +413,123 @@ export const FieldMap: React.FC<FieldMapProps> = ({
     });
   }, [selectedPlotId]);
 
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (map) {
+      const rafId = window.requestAnimationFrame(() => {
+        map.invalidateSize({ animate: false });
+      });
+      const timerId = window.setTimeout(() => {
+        map.invalidateSize({ animate: false });
+      }, 180);
+      return () => {
+        window.cancelAnimationFrame(rafId);
+        window.clearTimeout(timerId);
+      };
+    }
+    return undefined;
+  }, [isFullscreen]);
+
+  useEffect(() => {
+    if (!isFullscreen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsFullscreen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isFullscreen]);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (!document.fullscreenElement && isFullscreen) {
+        mapInstanceRef.current?.invalidateSize({ animate: false });
+      }
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, [isFullscreen]);
+
+  const toggleFullscreen = () => {
+    setIsFullscreen((prev) => {
+      const next = !prev;
+      try {
+        if (!next && document.fullscreenElement) {
+          void document.exitFullscreen?.();
+        }
+      } catch {
+        // Ignore browser fullscreen errors; fixed viewport overlay handles layout cleanly.
+      }
+      return next;
+    });
+  };
+
   return (
-    <div className="space-y-3">
+    <div
+      ref={fullscreenWrapperRef}
+      className={
+        isFullscreen
+          ? 'fixed inset-0 z-[2000] flex flex-col gap-3 overflow-y-auto bg-[#F5F7F4] p-3 sm:p-5'
+          : 'space-y-3'
+      }
+    >
+      {/* Fullscreen Header Banner (only visible when expanded) */}
+      {isFullscreen && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#D4DDD0] bg-white px-4 py-3 shadow-xs">
+          <div>
+            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E]">
+              Fullscreen Field Inspector · Esri &amp; NASA GIBS
+            </p>
+            <h3 className="text-base font-extrabold text-[#17271D]">
+              {plotConfig.name} ({activeMonthData.month}) · {plotConfig.center.lat.toFixed(3)}°N,{' '}
+              {plotConfig.center.lon.toFixed(3)}°E
+            </h3>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {onMapLayerChange && (
+              <div
+                role="group"
+                aria-label="Map layer"
+                className="inline-flex h-9 rounded-lg border border-[#C7D5C5] bg-[#F3F6F1] p-1"
+              >
+                {(['satellite', 'street'] as const).map((layer) => (
+                  <button
+                    key={layer}
+                    type="button"
+                    aria-pressed={mapLayer === layer}
+                    onClick={() => onMapLayerChange(layer)}
+                    className={`rounded-md px-3 text-xs font-bold capitalize transition-colors ${
+                      mapLayer === layer
+                        ? 'bg-white text-[#1B4332] shadow-sm'
+                        : 'text-[#536458] hover:text-[#1B4332]'
+                    }`}
+                  >
+                    {layer}
+                  </button>
+                ))}
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={toggleFullscreen}
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-[#1B4332] px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition-colors hover:bg-[#2D6A4F]"
+            >
+              <Minimize2 className="h-3.5 w-3.5" aria-hidden="true" />
+              Exit Fullscreen (Esc)
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Compact Map Action Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
@@ -438,9 +558,29 @@ export const FieldMap: React.FC<FieldMapProps> = ({
             </button>
           )}
         </div>
-        <span className="font-mono text-[10px] font-semibold text-[#52715E]">
-          {activeOverlays.length} of {ENVIRONMENTAL_OVERLAYS.length} layers active
-        </span>
+        <div className="flex items-center gap-2.5">
+          <span className="font-mono text-[10px] font-semibold text-[#52715E]">
+            {activeOverlays.length} of {ENVIRONMENTAL_OVERLAYS.length} layers active
+          </span>
+          <button
+            type="button"
+            onClick={toggleFullscreen}
+            aria-pressed={isFullscreen}
+            className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-[#C7D5C5] bg-white px-2.5 py-1 text-xs font-bold text-[#1B4332] shadow-2xs transition-colors hover:bg-[#EEF5EB]"
+          >
+            {isFullscreen ? (
+              <>
+                <Minimize2 className="h-3.5 w-3.5" aria-hidden="true" />
+                Exit Fullscreen
+              </>
+            ) : (
+              <>
+                <Maximize2 className="h-3.5 w-3.5" aria-hidden="true" />
+                Fullscreen
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Offline / Tile Failure Fallback Banner */}
@@ -457,13 +597,38 @@ export const FieldMap: React.FC<FieldMapProps> = ({
       )}
 
       {/* Map Canvas + Optional Split-Screen Visual Comparison */}
-      <div className="relative h-[420px] w-full overflow-hidden rounded-xl border border-[#D4DDD0] bg-[#E8EFE6] shadow-sm">
+      <div
+        className={`relative w-full overflow-hidden rounded-xl border border-[#D4DDD0] bg-[#E8EFE6] shadow-sm ${
+          isFullscreen ? 'min-h-[60vh] flex-1' : 'h-[420px]'
+        }`}
+      >
         <div
           ref={mapContainerRef}
           className="z-0 h-full w-full"
           role="region"
           aria-label={`Map of ${plotConfig.name}, ${activeMonthData.month} historical NASA POWER signals`}
         />
+
+        {/* Floating Top-Right Fullscreen Map Button */}
+        <button
+          type="button"
+          onClick={toggleFullscreen}
+          aria-label={isFullscreen ? 'Exit fullscreen map' : 'Open map in fullscreen'}
+          title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Expand map to fullscreen'}
+          className="absolute top-3 right-3 z-[1000] inline-flex items-center gap-1.5 rounded-lg border border-[#D4DDD0] bg-white/95 px-2.5 py-1.5 text-xs font-bold text-[#17271D] shadow-md backdrop-blur-xs transition-colors hover:bg-[#EEF5EB] hover:text-[#1B4332]"
+        >
+          {isFullscreen ? (
+            <>
+              <Minimize2 className="h-3.5 w-3.5 text-[#1B4332]" aria-hidden="true" />
+              <span>Exit Fullscreen</span>
+            </>
+          ) : (
+            <>
+              <Maximize2 className="h-3.5 w-3.5 text-[#1B4332]" aria-hidden="true" />
+              <span>Fullscreen</span>
+            </>
+          )}
+        </button>
 
         {showSplitComparison && <SplitSlider value={splitPercent} onChange={setSplitPercent} />}
 
@@ -479,7 +644,7 @@ export const FieldMap: React.FC<FieldMapProps> = ({
         </div>
       </div>
 
-      {/* Sleek Single-Column Environmental Telemetry Layer Selector */}
+      {/* Sleek Environmental Telemetry Layer Selector */}
       <div className="rounded-xl border border-[#D4DDD0] bg-[#F7FAF5] p-3">
         <div className="flex flex-wrap items-center justify-between gap-2 pb-2">
           <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#263B2E]">
@@ -493,7 +658,7 @@ export const FieldMap: React.FC<FieldMapProps> = ({
         <div
           role="group"
           aria-label="Environmental telemetry layers"
-          className="grid gap-1.5"
+          className={`grid gap-1.5 ${isFullscreen ? 'sm:grid-cols-2 lg:grid-cols-3' : ''}`}
         >
           {ENVIRONMENTAL_OVERLAYS.map((overlay) => {
             const isActive = activeOverlays.includes(overlay.id);
