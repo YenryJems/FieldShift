@@ -1,12 +1,13 @@
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { FARMS } from '@fieldshift/climate-data';
+import { evaluatePlotStrategies, FARMS } from '@fieldshift/climate-data';
 import App from './App';
 import { AnalyticalSuiteSection } from './components/Agronomics/AnalyticalSuiteSection';
 import { FooterAndAttributions } from './components/Common/FooterAndAttributions';
 import { WorkspaceView } from './components/WorkspaceView';
 import { TopNavBar } from './components/TopNavBar';
+import { CropStrategyBoard } from './components/Rotation/CropStrategyBoard';
 import { StrategyComparisonSection } from './components/Rotation/StrategyComparisonSection';
 import { TRANSLATIONS } from './context/LanguageContext';
 
@@ -160,5 +161,83 @@ describe('guided FieldShift planning experience', () => {
   it('keeps the English interface and four plain-language glossary terms', () => {
     expect(TRANSLATIONS.en.glossaryItems).toHaveLength(4);
     expect(Object.keys(TRANSLATIONS)).toEqual(['en']);
+  });
+
+  it('renders the farmer decision dashboard on plannerStep 1 with all SSR-safe controls and guardrails', () => {
+    const markup = renderToStaticMarkup(
+      createElement(WorkspaceView, { plannerStep: 1, onPlannerStepChange }),
+    );
+
+    expect(markup).toContain('Field decision dashboard');
+    for (const month of ['Jan', 'Jun', 'Dec']) {
+      expect(markup).toContain(month);
+    }
+    expect(markup).toContain('Farmer Plain-English');
+    expect(markup).toContain('aria-checked="true"');
+    expect(markup).toContain('Read Aloud');
+    expect(markup).toContain('Copy SMS Field Brief');
+
+    for (const kpiLabel of [
+      'Air Temperature',
+      'Daily Rainfall',
+      'Root-Zone Soil Moisture (0–100 cm)',
+      'Top FARI Suitability Score',
+    ]) {
+      expect(markup).toContain(kpiLabel);
+    }
+
+    for (const sliderId of [
+      'dash-slider-water',
+      'dash-slider-erosion',
+      'dash-slider-nutrients',
+      'dash-slider-market',
+    ]) {
+      expect(markup).toContain(sliderId);
+    }
+    expect(markup).toContain('−20% Rainfall Drought Shock');
+    expect(markup).toContain('+2°C Heatwave Shock');
+    expect(markup).toContain('Local Seed Fallback');
+
+    for (const title of [
+      'Current Monocrop Baseline',
+      'Soil &amp; Moisture Regenerator',
+      'Climate-Resilient Cash Crop',
+      'Max Market Value Optimizer',
+    ]) {
+      expect(markup).toContain(title);
+    }
+
+    for (const drawerHeading of [
+      'Why It Was Suggested',
+      'Multi-Sensor NASA Telemetry Evidence',
+      'Spatial Resolution &amp; Uncertainty Guardrail',
+      'Mandatory Local Validation Checklist',
+    ]) {
+      expect(markup).toContain(drawerHeading);
+    }
+
+    expect(markup).toMatch(/Optimal Window|Split Application \/ Caution|Hold Urea — Heavy Rain/);
+    expect(markup).toContain('never replaces, farmer judgment');
+    expect(markup).toContain('Satellite field view');
+    expect(markup).not.toContain('<details open');
+  });
+
+  it('renders CropStrategyBoard for every farm without raw telemetry codes in plain mode', () => {
+    for (const farm of FARMS) {
+      const evaluation = evaluatePlotStrategies({ farmId: farm.id, month: 3 });
+      const markup = renderToStaticMarkup(
+        createElement(CropStrategyBoard, {
+          evaluation,
+          plainEnglish: true,
+          farmName: farm.name,
+        }),
+      );
+
+      for (const key of ['baseline', 'regenerator', 'resilient-cash', 'market-optimizer']) {
+        expect(markup).toContain(`data-strategy-key="${key}"`);
+      }
+      expect(markup).not.toContain('GWETTOP');
+      expect(markup).not.toContain('PRECTOTCORR');
+    }
   });
 });

@@ -94,3 +94,28 @@ export {
   calculateSiComparison,
   evaluateTwoTierSoilCertificate,
 } from './engine/siComparison';
+
+export {
+  applyDashboardShocks,
+  applyLocalSeedFallback,
+  APPLICATION_WINDOW_THRESHOLDS,
+  classifyApplicationWindow,
+  computeGainPct,
+  DASHBOARD_SHOCK_FACTORS,
+  DEFAULT_PLOT_SHOCKS,
+  deriveMarketOptimizerStrategy,
+  evaluatePlotStrategies,
+  LOCAL_OPV_FALLBACKS,
+  PLOT_STRATEGY_KEY_ORDER,
+  PLOT_STRATEGY_TITLES,
+  rankPlotResults,
+} from './engine/plotStrategies';
+export type {
+  ApplicationWindow,
+  ApplicationWindowLevel,
+  PlotStrategyEvaluation,
+  PlotStrategyEvaluationInput,
+  PlotStrategyKey,
+  PlotStrategyResult,
+  PlotStrategyShocks,
+} from './engine/plotStrategies';
