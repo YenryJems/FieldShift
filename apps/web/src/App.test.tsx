@@ -24,6 +24,9 @@ describe('guided FieldShift planning experience', () => {
     expect(markup).toContain('Mango Sugar-Loading Index');
     expect(markup).toContain('not measure fruit sugar');
     expect(markup).toContain('18–22° Brix suitability target');
+    expect(markup).toContain('Open-Meteo · live weather model');
+    expect(markup).toContain('NASA SRTM · configured slope context');
+    expect(markup).toContain('NASA does not endorse any non-U.S. Government entity. FieldShift is an educational decision-support prototype designed to support, and never replace, farmer judgment, local soil testing, and certified agricultural extension expertise.');
     expect(markup).not.toContain('Choose a study farm');
     expect(markup).not.toContain('Selected field context');
     expect(markup).not.toContain('Satellite field view');
@@ -123,6 +126,9 @@ describe('guided FieldShift planning experience', () => {
     expect(analyticalMarkup).toContain('Orbital Confidence 80% | Ground-Truth Testing Required 20%');
     const footerMarkup = renderToStaticMarkup(createElement(FooterAndAttributions));
     expect(footerMarkup).toContain('Challenge inspiration: multigenerational farming experience');
+    for (const citation of ['POWER data &amp; API', 'GPM IMERG', 'SMAP L4 product', 'MODIS Terra NDVI layer', 'SRTM mission data', 'Sentinel-2 mission &amp; products', 'FAO ECOCROP database', 'Illinois Grain Bids report', 'Forecast API documentation', 'OpenStreetMap copyright &amp; license']) {
+      expect(footerMarkup).toContain(citation);
+    }
     expect(footerMarkup).toContain('NASA does not endorse any non-U.S. Government entity. FieldShift is an educational decision-support prototype designed to support, and never replace, farmer judgment, local soil testing, and certified agricultural extension expertise.');
   });
 

@@ -21,7 +21,7 @@ const connectedDatasets = [
   {
     name: 'NASA POWER · historical climate',
     status: 'Decision model input',
-    detail: 'Real gridded point series for all five study locations. Monthly 2001–2025 climate normals and 2020–2025 historical baselines, plus daily 2020–2025 event summaries. Variables include 2 m temperature, corrected precipitation, root/surface wetness indices, humidity, solar radiation, and heat/rain-event counts.',
+    detail: 'Real gridded point series for all five study locations. Monthly 2001–2025 climate normals and 2020–2025 historical baselines, plus daily 2020–2025 event summaries. Variables include 2 m temperature, corrected precipitation, root/surface wetness indices, humidity, solar radiation, and heat/rain-event counts. NASA POWER meteorology is based on MERRA-2; the configured solar source is CERES/SYN1deg.',
     limit: 'These gridded values describe a broad area around the study point. They are not readings from sensors in the field, a day-by-day weather forecast, or a soil test.',
     href: 'https://power.larc.nasa.gov/',
   },
@@ -37,7 +37,7 @@ const connectedDatasets = [
     status: 'Map context only',
     detail: 'NASA GIBS displays the SMAP L4 analyzed surface soil-moisture product. Each map pixel covers about 9 km, so it can show broad moisture patterns around the study location.',
     limit: 'A pixel this large cannot tell you the soil moisture in a specific field. This map layer is not used in the rotation score.',
-    href: 'https://nsidc.org/data/smap/data',
+    href: 'https://nsidc.org/data/spl4smau/versions/8',
   },
   {
     name: 'NASA Terra MODIS · 8-day NDVI',
@@ -45,6 +45,20 @@ const connectedDatasets = [
     detail: 'NASA GIBS displays rolling 8-day vegetation greenness (NDVI) imagery at about 250 m per pixel.',
     limit: 'A pixel may contain multiple fields and land-cover types. It does not identify the crop in a field and is not used in the rotation score.',
     href: 'https://gibs.earthdata.nasa.gov/layer-metadata/v1.0/MODIS_Terra_NDVI_8Day.json',
+  },
+  {
+    name: 'NASA SRTM · configured slope context',
+    status: 'Static farm-profile input',
+    detail: 'The comparison model uses fixed slope values stored in the representative farm profiles, cited there to SRTM. The app does not fetch an SRTM raster or derive parcel-scale slope.',
+    limit: 'These configured values are broad study-location context, not a measured slope for a farmer’s field.',
+    href: 'https://www.earthdata.nasa.gov/data/instruments/srtm',
+  },
+  {
+    name: 'Open-Meteo · live weather model',
+    status: 'Live weather and 3-day forecast',
+    detail: 'The Season panel fetches current model-updated conditions and a three-day outlook for the selected study coordinate. It refreshes every 15 minutes and offers a manual refresh.',
+    limit: 'These are model-derived conditions, not readings from a weather station at the farm. Forecast availability depends on network access; confirm spray timing with PAGASA or the local weather service.',
+    href: 'https://open-meteo.com/en/docs',
   },
   {
     name: 'ESA Copernicus Sentinel-2 L2A',
@@ -82,10 +96,17 @@ const connectedDatasets = [
     href: 'https://psa.gov.ph/sites/default/files/infographics/Palay%20and%20Corn%20Statistics%2C%20Q3%202026.pdf',
   },
   {
-    name: 'Esri World Imagery + OpenStreetMap',
+    name: 'Esri World Imagery',
     status: 'Map basemaps',
-    detail: 'The field map can display Esri satellite imagery or OpenStreetMap street and place context beneath the selectable data layers.',
-    limit: 'Basemaps help orient the map; they do not establish surveyed field boundaries or enter any score.',
+    detail: 'Satellite imagery basemap shown beneath map overlays for visual orientation.',
+    limit: 'Imagery does not establish surveyed field boundaries or enter any score.',
+    href: 'https://www.arcgis.com/home/item.html?id=10df2279f9684e4a9f6a7f08febac2a9',
+  },
+  {
+    name: 'OpenStreetMap',
+    status: 'Map basemap',
+    detail: 'Street and place map data shown as an alternative basemap.',
+    limit: 'Map features help orient the user; they do not establish surveyed field boundaries or enter any score.',
     href: 'https://www.openstreetmap.org/copyright',
   },
 ];
@@ -211,7 +232,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onEnterWorkspace }) => (
                 </summary>
                 <p className="mt-3 text-xs leading-5 text-[#536157]">{item.detail}</p>
                 <p className="mt-2 border-l-2 border-[#D6C28A] pl-3 text-xs leading-5 text-[#6F6650]"><strong>Limit:</strong> {item.limit}</p>
-                <a className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[#285A40] underline decoration-[#A7BCA8] underline-offset-2" href={item.href} target="_blank" rel="noreferrer">Open source <ExternalLink className="h-3 w-3" aria-hidden="true" /></a>
+                <a className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[#285A40] underline decoration-[#A7BCA8] underline-offset-2" href={item.href} target="_blank" rel="noreferrer">Source citation <ExternalLink className="h-3 w-3" aria-hidden="true" /></a>
               </details>
             ))}
           </div>
@@ -228,6 +249,7 @@ export const HomeView: React.FC<HomeViewProps> = ({ onEnterWorkspace }) => (
           <span className="font-bold text-[#38513E]">FieldShift · Team Overachiever · NASA Space Apps Challenge</span>
           <span>Educational decision support · pair climate information with local forecasts and extension expertise.</span>
         </div>
+        <p className="mx-auto mt-3 max-w-[1120px] border-t border-[#E6E9E3] pt-3 text-[10px] leading-5 text-[#5C685F]">NASA does not endorse any non-U.S. Government entity. FieldShift is an educational decision-support prototype designed to support, and never replace, farmer judgment, local soil testing, and certified agricultural extension expertise.</p>
       </footer>
     </div>
   </main>
