@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import {
   buildMonthlySummaryCsv,
+  DEFAULT_PLOT_SHOCKS,
   getMonthlyTelemetry,
   MONTHLY_SUMMARY_CSV_FILE_NAME,
   FARMS_BY_ID,
@@ -19,11 +20,14 @@ import {
   PlaceId,
   PLACES,
   PLACES_BY_ID,
+  PlotStrategyShocks,
+  PriorityWeights,
   StrategyId,
 } from '@fieldshift/climate-data';
 import { AnalyticalSuiteSection } from './Agronomics/AnalyticalSuiteSection';
 import { LiveWeatherPanel } from './Agronomics/LiveWeatherPanel';
 import { FooterAndAttributions } from './Common/FooterAndAttributions';
+import { DecisionDashboard } from './Dashboard/DecisionDashboard';
 import { StrategyComparisonSection } from './Rotation/StrategyComparisonSection';
 
 const MONTHS = [
@@ -629,6 +633,14 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
   const [heatChange, setHeatChange] = useState(false);
   const [evidencePanel, setEvidencePanel] = useState<EvidencePanel>('climate');
   const [selectedStrategyId, setSelectedStrategyId] = useState<StrategyId | null>(null);
+  const [dashboardWeights, setDashboardWeights] = useState<PriorityWeights>({
+    water: 25,
+    erosion: 25,
+    nutrients: 25,
+    market: 25,
+  });
+  const [dashboardShocks, setDashboardShocks] = useState<PlotStrategyShocks>(DEFAULT_PLOT_SHOCKS);
+  const [plainEnglish, setPlainEnglish] = useState(true);
   const place = PLACES_BY_ID[placeId];
   const farm = FARMS_BY_ID[placeId];
   const averageMonthlyTemperature = place.meanTemperatureC;
@@ -732,6 +744,20 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
         </div>
         <span className="inline-flex w-fit items-center rounded-full border border-[#D4E6A7]/30 bg-white/[0.06] px-3 py-2 font-mono text-[10px] font-bold text-[#E5F0DA]">OBSERVE → COMPARE → VERIFY</span>
       </section>
+      {plannerStep === 1 && (
+        <DecisionDashboard
+          farmId={placeId}
+          farmName={farm.name}
+          selectedMonth={selectedMonth}
+          onMonthChange={setSelectedMonth}
+          weights={dashboardWeights}
+          onWeightsChange={setDashboardWeights}
+          shocks={dashboardShocks}
+          onShocksChange={setDashboardShocks}
+          plainEnglish={plainEnglish}
+          onPlainEnglishChange={setPlainEnglish}
+        />
+      )}
       <nav aria-label="Evidence sections" className="flex gap-2 overflow-x-auto rounded-xl border border-[#D8E2D5] bg-white p-2">
         {EVIDENCE_PANELS.map((panel) => (
           <button key={panel.id} type="button" aria-pressed={evidencePanel === panel.id} onClick={() => setEvidencePanel(panel.id)} className={`min-h-10 shrink-0 rounded-lg px-3 text-xs font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332] ${evidencePanel === panel.id ? 'bg-[#1B4332] text-white' : 'text-[#516357] hover:bg-[#F1F5EF]'}`}>
