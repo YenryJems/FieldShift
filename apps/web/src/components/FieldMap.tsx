@@ -449,7 +449,8 @@ export const FieldMap: React.FC<FieldMapProps> = ({
 
   useEffect(() => {
     const handleFullscreenChange = () => {
-      if (!document.fullscreenElement && isFullscreen) {
+      if (!document.fullscreenElement) {
+        setIsFullscreen(false);
         mapInstanceRef.current?.invalidateSize({ animate: false });
       }
     };
@@ -457,20 +458,22 @@ export const FieldMap: React.FC<FieldMapProps> = ({
     return () => {
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
     };
-  }, [isFullscreen]);
+  }, []);
 
   const toggleFullscreen = () => {
-    setIsFullscreen((prev) => {
-      const next = !prev;
-      try {
-        if (!next && document.fullscreenElement) {
-          void document.exitFullscreen?.();
-        }
-      } catch {
-        // Ignore browser fullscreen errors; fixed viewport overlay handles layout cleanly.
+    const next = !isFullscreen;
+    setIsFullscreen(next);
+    try {
+      if (next && !document.fullscreenElement && fullscreenWrapperRef.current?.requestFullscreen) {
+        void fullscreenWrapperRef.current.requestFullscreen().catch(() => {
+          // Fallback to fixed viewport overlay when native fullscreen is not permitted.
+        });
+      } else if (!next && document.fullscreenElement) {
+        void document.exitFullscreen?.();
       }
-      return next;
-    });
+    } catch {
+      // Ignore browser fullscreen errors; fixed viewport overlay handles layout cleanly.
+    }
   };
 
   return (
@@ -478,13 +481,13 @@ export const FieldMap: React.FC<FieldMapProps> = ({
       ref={fullscreenWrapperRef}
       className={
         isFullscreen
-          ? 'fixed inset-0 z-[2000] flex flex-col gap-3 overflow-y-auto bg-[#F5F7F4] p-3 sm:p-5'
+          ? 'fixed inset-0 z-[9999] flex h-dvh w-screen flex-col gap-2.5 overflow-hidden bg-[#F5F7F4] p-3 sm:p-4'
           : 'space-y-3'
       }
     >
       {/* Fullscreen Header Banner (only visible when expanded) */}
       {isFullscreen && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#D4DDD0] bg-white px-4 py-3 shadow-xs">
+        <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-xl border border-[#D4DDD0] bg-white px-4 py-2.5 shadow-xs">
           <div>
             <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E]">
               Fullscreen Field Inspector · Esri &amp; NASA GIBS
@@ -531,7 +534,7 @@ export const FieldMap: React.FC<FieldMapProps> = ({
       )}
 
       {/* Compact Map Action Toolbar */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
@@ -599,7 +602,7 @@ export const FieldMap: React.FC<FieldMapProps> = ({
       {/* Map Canvas + Optional Split-Screen Visual Comparison */}
       <div
         className={`relative w-full overflow-hidden rounded-xl border border-[#D4DDD0] bg-[#E8EFE6] shadow-sm ${
-          isFullscreen ? 'min-h-[60vh] flex-1' : 'h-[420px]'
+          isFullscreen ? 'min-h-0 flex-1' : 'h-[420px]'
         }`}
       >
         <div
@@ -645,7 +648,7 @@ export const FieldMap: React.FC<FieldMapProps> = ({
       </div>
 
       {/* Sleek Environmental Telemetry Layer Selector */}
-      <div className="rounded-xl border border-[#D4DDD0] bg-[#F7FAF5] p-3">
+      <div className="shrink-0 rounded-xl border border-[#D4DDD0] bg-[#F7FAF5] p-3">
         <div className="flex flex-wrap items-center justify-between gap-2 pb-2">
           <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#263B2E]">
             Environmental Telemetry Overlays ({ENVIRONMENTAL_OVERLAYS.length} Layers)
