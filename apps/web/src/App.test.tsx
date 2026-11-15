@@ -143,10 +143,10 @@ describe('guided FieldShift planning experience', () => {
       createElement(WorkspaceView, { plannerStep: 1, onPlannerStepChange }),
     );
     const navigationStart = markup.indexOf('<nav aria-label="Evidence sections"');
-    const dashboardStart = markup.indexOf('<section id="decision-dashboard"');
+    const sandboxStart = markup.indexOf('Priority and stress simulation');
 
     expect(navigationStart).toBeGreaterThanOrEqual(0);
-    expect(navigationStart).toBeLessThan(dashboardStart);
+    expect(navigationStart).toBeLessThan(sandboxStart);
     expect(markup.slice(navigationStart, markup.indexOf('</nav>', navigationStart))).toContain(
       'sticky top-[72px]',
     );

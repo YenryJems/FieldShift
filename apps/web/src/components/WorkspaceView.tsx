@@ -739,7 +739,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
           onPlainEnglishChange={setPlainEnglish}
           showSandbox={evidencePanel === 'sandbox'}
           subNavigation={
-            <nav aria-label="Evidence sections" className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#D8E2D5] bg-[#F7FAF5] p-1.5">
+            <nav aria-label="Evidence sections" className="sticky top-[72px] z-20 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#D8E2D5] bg-[#F7FAF5] p-1.5">
               <div className="flex flex-wrap gap-1.5">
                 {EVIDENCE_PANELS.map((panel) => (
                   <button

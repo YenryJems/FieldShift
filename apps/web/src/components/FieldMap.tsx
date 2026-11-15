@@ -94,10 +94,8 @@ export const FieldMap: React.FC<FieldMapProps> = ({
   selectedPlotId,
   activeMonthData,
   mapLayer,
-  onMapLayerChange,
   onSelectPlot,
 }) => {
-  const fullscreenWrapperRef = useRef<HTMLDivElement | null>(null);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const overlayGroupRef = useRef<L.LayerGroup | null>(null);
@@ -164,6 +162,12 @@ export const FieldMap: React.FC<FieldMapProps> = ({
     const map = L.map(mapContainerRef.current, {
       center: [plotConfig.center.lat, plotConfig.center.lon],
       zoom: plotConfig.zoom,
+      minZoom: 3,
+      maxBounds: [
+        [-85, -180],
+        [85, 180],
+      ],
+      maxBoundsViscosity: 1.0,
       zoomControl: true,
     });
 
@@ -447,94 +451,14 @@ export const FieldMap: React.FC<FieldMapProps> = ({
     };
   }, [isFullscreen]);
 
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      if (!document.fullscreenElement) {
-        setIsFullscreen(false);
-        mapInstanceRef.current?.invalidateSize({ animate: false });
-      }
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
-    };
-  }, []);
-
   const toggleFullscreen = () => {
-    const next = !isFullscreen;
-    setIsFullscreen(next);
-    try {
-      if (next && !document.fullscreenElement && fullscreenWrapperRef.current?.requestFullscreen) {
-        void fullscreenWrapperRef.current.requestFullscreen().catch(() => {
-          // Fallback to fixed viewport overlay when native fullscreen is not permitted.
-        });
-      } else if (!next && document.fullscreenElement) {
-        void document.exitFullscreen?.();
-      }
-    } catch {
-      // Ignore browser fullscreen errors; fixed viewport overlay handles layout cleanly.
-    }
+    setIsFullscreen((prev) => !prev);
   };
 
   return (
-    <div
-      ref={fullscreenWrapperRef}
-      className={
-        isFullscreen
-          ? 'fixed inset-0 z-[9999] flex h-dvh w-screen flex-col gap-2.5 overflow-hidden bg-[#F5F7F4] p-3 sm:p-4'
-          : 'space-y-3'
-      }
-    >
-      {/* Fullscreen Header Banner (only visible when expanded) */}
-      {isFullscreen && (
-        <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-xl border border-[#D4DDD0] bg-white px-4 py-2.5 shadow-xs">
-          <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E]">
-              Fullscreen Field Inspector · Esri &amp; NASA GIBS
-            </p>
-            <h3 className="text-base font-extrabold text-[#17271D]">
-              {plotConfig.name} ({activeMonthData.month}) · {plotConfig.center.lat.toFixed(3)}°N,{' '}
-              {plotConfig.center.lon.toFixed(3)}°E
-            </h3>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {onMapLayerChange && (
-              <div
-                role="group"
-                aria-label="Map layer"
-                className="inline-flex h-9 rounded-lg border border-[#C7D5C5] bg-[#F3F6F1] p-1"
-              >
-                {(['satellite', 'street'] as const).map((layer) => (
-                  <button
-                    key={layer}
-                    type="button"
-                    aria-pressed={mapLayer === layer}
-                    onClick={() => onMapLayerChange(layer)}
-                    className={`rounded-md px-3 text-xs font-bold capitalize transition-colors ${
-                      mapLayer === layer
-                        ? 'bg-white text-[#1B4332] shadow-sm'
-                        : 'text-[#536458] hover:text-[#1B4332]'
-                    }`}
-                  >
-                    {layer}
-                  </button>
-                ))}
-              </div>
-            )}
-            <button
-              type="button"
-              onClick={toggleFullscreen}
-              className="inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-[#1B4332] px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition-colors hover:bg-[#2D6A4F]"
-            >
-              <Minimize2 className="h-3.5 w-3.5" aria-hidden="true" />
-              Exit Fullscreen (Esc)
-            </button>
-          </div>
-        </div>
-      )}
-
+    <div className="space-y-3">
       {/* Compact Map Action Toolbar */}
-      <div className="flex shrink-0 flex-wrap items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
@@ -561,29 +485,9 @@ export const FieldMap: React.FC<FieldMapProps> = ({
             </button>
           )}
         </div>
-        <div className="flex items-center gap-2.5">
-          <span className="font-mono text-[10px] font-semibold text-[#52715E]">
-            {activeOverlays.length} of {ENVIRONMENTAL_OVERLAYS.length} layers active
-          </span>
-          <button
-            type="button"
-            onClick={toggleFullscreen}
-            aria-pressed={isFullscreen}
-            className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-[#C7D5C5] bg-white px-2.5 py-1 text-xs font-bold text-[#1B4332] shadow-2xs transition-colors hover:bg-[#EEF5EB]"
-          >
-            {isFullscreen ? (
-              <>
-                <Minimize2 className="h-3.5 w-3.5" aria-hidden="true" />
-                Exit Fullscreen
-              </>
-            ) : (
-              <>
-                <Maximize2 className="h-3.5 w-3.5" aria-hidden="true" />
-                Fullscreen
-              </>
-            )}
-          </button>
-        </div>
+        <span className="font-mono text-[10px] font-semibold text-[#52715E]">
+          {activeOverlays.length} of {ENVIRONMENTAL_OVERLAYS.length} layers active
+        </span>
       </div>
 
       {/* Offline / Tile Failure Fallback Banner */}
@@ -601,9 +505,11 @@ export const FieldMap: React.FC<FieldMapProps> = ({
 
       {/* Map Canvas + Optional Split-Screen Visual Comparison */}
       <div
-        className={`relative w-full overflow-hidden rounded-xl border border-[#D4DDD0] bg-[#E8EFE6] shadow-sm ${
-          isFullscreen ? 'min-h-0 flex-1' : 'h-[420px]'
-        }`}
+        className={
+          isFullscreen
+            ? 'fixed inset-0 z-[9999] h-dvh w-screen overflow-hidden bg-[#E8EFE6]'
+            : 'relative h-[420px] w-full overflow-hidden rounded-xl border border-[#D4DDD0] bg-[#E8EFE6] shadow-sm'
+        }
       >
         <div
           ref={mapContainerRef}
@@ -612,18 +518,19 @@ export const FieldMap: React.FC<FieldMapProps> = ({
           aria-label={`Map of ${plotConfig.name}, ${activeMonthData.month} historical NASA POWER signals`}
         />
 
-        {/* Floating Top-Right Fullscreen Map Button */}
+        {/* Single Floating Top-Right Fullscreen Map Button */}
         <button
           type="button"
           onClick={toggleFullscreen}
+          aria-pressed={isFullscreen}
           aria-label={isFullscreen ? 'Exit fullscreen map' : 'Open map in fullscreen'}
           title={isFullscreen ? 'Exit fullscreen (Esc)' : 'Expand map to fullscreen'}
-          className="absolute top-3 right-3 z-[1000] inline-flex items-center gap-1.5 rounded-lg border border-[#D4DDD0] bg-white/95 px-2.5 py-1.5 text-xs font-bold text-[#17271D] shadow-md backdrop-blur-xs transition-colors hover:bg-[#EEF5EB] hover:text-[#1B4332]"
+          className="absolute top-3 right-3 z-[1000] inline-flex items-center gap-1.5 rounded-lg border border-[#D4DDD0] bg-white/95 px-3 py-1.5 text-xs font-bold text-[#17271D] shadow-md backdrop-blur-xs transition-colors hover:bg-[#EEF5EB] hover:text-[#1B4332]"
         >
           {isFullscreen ? (
             <>
               <Minimize2 className="h-3.5 w-3.5 text-[#1B4332]" aria-hidden="true" />
-              <span>Exit Fullscreen</span>
+              <span>Exit Fullscreen (Esc)</span>
             </>
           ) : (
             <>
