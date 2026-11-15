@@ -30,6 +30,7 @@ export interface DecisionDashboardProps {
   onShocksChange: (shocks: PlotStrategyShocks) => void;
   plainEnglish: boolean;
   onPlainEnglishChange: (plainEnglish: boolean) => void;
+  showSandbox?: boolean;
 }
 
 const DEFAULT_DASHBOARD_WEIGHTS: PriorityWeights = {
@@ -50,6 +51,7 @@ export const DecisionDashboard: React.FC<DecisionDashboardProps> = ({
   onShocksChange,
   plainEnglish,
   onPlainEnglishChange,
+  showSandbox = true,
 }) => {
   const evaluationResult = useMemo<{
     evaluation: PlotStrategyEvaluation | null;
@@ -74,14 +76,14 @@ export const DecisionDashboard: React.FC<DecisionDashboardProps> = ({
     return (
       <section
         id="decision-dashboard"
-        className="space-y-4 rounded-3xl bg-slate-950 p-4 text-slate-100 sm:p-6"
+        className="space-y-4 rounded-2xl border border-[#D4DDD0] bg-white p-4 text-[#17271D] shadow-xs sm:p-5"
       >
-        <h2 className="text-lg font-extrabold text-slate-100 sm:text-xl">
+        <h2 className="text-lg font-extrabold text-[#17271D] sm:text-xl">
           Field decision dashboard
         </h2>
         <div
           role="alert"
-          className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-200"
+          className="rounded-xl border border-[#F5B7BD] bg-[#FEF2F2] p-4 text-sm text-[#991B1B]"
         >
           Climate data unavailable for this month
         </div>
@@ -130,14 +132,19 @@ export const DecisionDashboard: React.FC<DecisionDashboardProps> = ({
   return (
     <section
       id="decision-dashboard"
-      className="space-y-5 rounded-3xl bg-slate-950 p-4 text-slate-100 sm:p-6"
+      className="space-y-4 rounded-2xl border border-[#D4DDD0] bg-white p-4 text-[#17271D] shadow-xs sm:p-5"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-lg font-extrabold text-slate-100 sm:text-xl">
-          Field decision dashboard
-        </h2>
-        <p className="text-xs text-slate-400">
-          NASA POWER 2020–2025 climatology · {monthLabel}
+        <div>
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E]">
+            NASA POWER · historical monthly point data · 2020–2025
+          </p>
+          <h2 className="mt-0.5 text-lg font-extrabold text-[#17271D] sm:text-xl">
+            Field decision dashboard
+          </h2>
+        </div>
+        <p className="font-mono text-xs font-bold text-[#52715E]">
+          {farmName} · {monthLabel} baseline
         </p>
       </div>
 
@@ -157,24 +164,26 @@ export const DecisionDashboard: React.FC<DecisionDashboardProps> = ({
         plainEnglish={plainEnglish}
       />
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-        <SimulationPanel
-          weights={weights}
-          normalizedWeights={evaluation.normalizedWeights}
-          shocks={shocks}
-          onWeightChange={handleWeightChange}
-          onShockChange={handleShockChange}
-          onReset={handleReset}
-        />
+      <div className={showSandbox ? 'space-y-4 pt-2' : 'hidden'}>
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+          <SimulationPanel
+            weights={weights}
+            normalizedWeights={evaluation.normalizedWeights}
+            shocks={shocks}
+            onWeightChange={handleWeightChange}
+            onShockChange={handleShockChange}
+            onReset={handleReset}
+          />
 
-        <CropStrategyBoard
-          evaluation={evaluation}
-          plainEnglish={plainEnglish}
-          farmName={farmName}
-        />
+          <CropStrategyBoard
+            evaluation={evaluation}
+            plainEnglish={plainEnglish}
+            farmName={farmName}
+          />
+        </div>
+
+        <HumanInTheLoopBanner />
       </div>
-
-      <HumanInTheLoopBanner />
     </section>
   );
 };

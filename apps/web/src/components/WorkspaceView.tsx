@@ -616,21 +616,19 @@ const PLANNER_STEPS = [
   { title: 'Review the plan', prompt: 'Check the trade-offs and prepare a field brief for local review.' },
 ];
 
-type EvidencePanel = 'climate' | 'seasonal' | 'agronomy' | 'sources';
+type EvidencePanel = 'climate' | 'sandbox' | 'agronomy' | 'sources';
 
 const EVIDENCE_PANELS: ReadonlyArray<{ id: EvidencePanel; title: string }> = [
-  { id: 'climate', title: 'Climate & map' },
-  { id: 'seasonal', title: 'Season outlook' },
-  { id: 'agronomy', title: 'Soil & crop checks' },
-  { id: 'sources', title: 'Sources & help' },
+  { id: 'climate', title: 'Map & 12-month pattern' },
+  { id: 'sandbox', title: 'Quick strategy sandbox' },
+  { id: 'agronomy', title: 'Spray risk & terroir' },
+  { id: 'sources', title: 'Data & export' },
 ];
 
 export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPlannerStepChange }) => {
   const [placeId, setPlaceId] = useState<PlaceId>('nueva-ecija');
   const [selectedMonth, setSelectedMonth] = useState(1);
   const [mapLayer, setMapLayer] = useState<MapLayer>('satellite');
-  const [rainfallChange, setRainfallChange] = useState(false);
-  const [heatChange, setHeatChange] = useState(false);
   const [evidencePanel, setEvidencePanel] = useState<EvidencePanel>('climate');
   const [selectedStrategyId, setSelectedStrategyId] = useState<StrategyId | null>(null);
   const [dashboardWeights, setDashboardWeights] = useState<PriorityWeights>({
@@ -641,16 +639,14 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
   });
   const [dashboardShocks, setDashboardShocks] = useState<PlotStrategyShocks>(DEFAULT_PLOT_SHOCKS);
   const [plainEnglish, setPlainEnglish] = useState(true);
+  const rainfallChange = dashboardShocks.rainfallShock;
+  const heatChange = dashboardShocks.heatShock;
+  const setRainfallChange = (value: boolean) =>
+    setDashboardShocks((prev) => ({ ...prev, rainfallShock: value }));
+  const setHeatChange = (value: boolean) =>
+    setDashboardShocks((prev) => ({ ...prev, heatShock: value }));
   const place = PLACES_BY_ID[placeId];
   const farm = FARMS_BY_ID[placeId];
-  const averageMonthlyTemperature = place.meanTemperatureC;
-  const averageRootWetness = place.meanRootWetnessIndex;
-  const annualPrecipitation = place.meanAnnualPrecipitationMm === null
-    ? null
-    : place.meanAnnualPrecipitationMm * (rainfallChange ? 0.8 : 1);
-  const scenarioTemperature = averageMonthlyTemperature === null
-    ? null
-    : averageMonthlyTemperature + (heatChange ? 2 : 0);
   const goToStep = (nextStep: number) => {
     onPlannerStepChange(nextStep);
     document.getElementById('workspace-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -735,8 +731,8 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
       />
       </div>
 
-      <div className={`planner-stage ${plannerStep === 1 ? 'planner-stage-active step-two space-y-6' : 'hidden'}`}>
-      <section aria-label="Decision this demo supports" className="grid gap-3 rounded-2xl border border-[#223B30] bg-[#10251B] p-5 text-white sm:grid-cols-[1fr_auto] sm:items-center sm:p-6">
+      <div className={`planner-stage ${plannerStep === 1 ? 'planner-stage-active step-two space-y-5' : 'hidden'}`}>
+      <section aria-label="Decision this demo supports" className="grid gap-3 rounded-2xl border border-[#223B30] bg-[#10251B] p-4 text-white sm:grid-cols-[1fr_auto] sm:items-center sm:p-5">
         <div>
           <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-[#D4E6A7]">The farm decision</p>
           <h2 className="mt-1 text-lg font-extrabold sm:text-xl">Which rotation is worth discussing for this field and season?</h2>
@@ -744,6 +740,7 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
         </div>
         <span className="inline-flex w-fit items-center rounded-full border border-[#D4E6A7]/30 bg-white/[0.06] px-3 py-2 font-mono text-[10px] font-bold text-[#E5F0DA]">OBSERVE → COMPARE → VERIFY</span>
       </section>
+
       {plannerStep === 1 && (
         <DecisionDashboard
           farmId={placeId}
@@ -756,90 +753,102 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
           onShocksChange={setDashboardShocks}
           plainEnglish={plainEnglish}
           onPlainEnglishChange={setPlainEnglish}
+          showSandbox={evidencePanel === 'sandbox'}
         />
       )}
-      <nav aria-label="Evidence sections" className="flex gap-2 overflow-x-auto rounded-xl border border-[#D8E2D5] bg-white p-2">
-        {EVIDENCE_PANELS.map((panel) => (
-          <button key={panel.id} type="button" aria-pressed={evidencePanel === panel.id} onClick={() => setEvidencePanel(panel.id)} className={`min-h-10 shrink-0 rounded-lg px-3 text-xs font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332] ${evidencePanel === panel.id ? 'bg-[#1B4332] text-white' : 'text-[#516357] hover:bg-[#F1F5EF]'}`}>
-            {panel.title}
-          </button>
-        ))}
+
+      <nav aria-label="Evidence sections" className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-[#D8E2D5] bg-white p-2">
+        <div className="flex flex-wrap gap-1.5">
+          {EVIDENCE_PANELS.map((panel) => (
+            <button
+              key={panel.id}
+              type="button"
+              aria-pressed={evidencePanel === panel.id}
+              onClick={() => setEvidencePanel(panel.id)}
+              className={`min-h-9 shrink-0 rounded-lg px-3 text-xs font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332] ${
+                evidencePanel === panel.id
+                  ? 'bg-[#1B4332] text-white shadow-2xs'
+                  : 'text-[#516357] hover:bg-[#F1F5EF]'
+              }`}
+            >
+              {panel.title}
+            </button>
+          ))}
+        </div>
+        <span className="hidden pr-2 font-mono text-[10px] font-semibold text-[#65766A] md:inline">
+          Synced to {place.name} · {MONTHS[selectedMonth - 1]}
+        </span>
       </nav>
 
-      {plannerStep === 1 && evidencePanel === 'climate' && (
-        <LiveWeatherPanel latitude={farm.latitude} longitude={farm.longitude} locationName={farm.name} />
-      )}
       <div className={evidencePanel === 'climate' ? 'space-y-5' : 'hidden'}>
-      <div className="flex flex-col gap-1 border-b border-[#E2E8DF] pb-4">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E] sm:text-xs">
-          NASA POWER · historical monthly point data · 2020–2025
-        </p>
-        <h2 className="text-2xl font-semibold tracking-tight text-[#17271D] sm:text-3xl">Seasonal climate profile</h2>
-        <p className="text-sm text-[#536458]">Explore six years of historical monthly patterns for this study location.</p>
-      </div>
+        <div id="field-map" className="scroll-mt-28 grid items-start gap-5 lg:grid-cols-[1.08fr_0.92fr]">
+          {plannerStep === 1 && evidencePanel === 'climate' && (
+            <FieldMapPanel
+              selectedPlot={place}
+              selectedMonth={selectedMonth}
+              onMonthChange={setSelectedMonth}
+              mapLayer={mapLayer}
+              onMapLayerChange={setMapLayer}
+              onSelectPlot={selectFarm}
+            />
+          )}
 
-      <div id="field-map" className="scroll-mt-28 grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
-        <section className="rounded-xl border border-[#D4DDD0] bg-white p-5 sm:p-6">
-          <div className="flex items-start gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#E3EFDF] text-[#2D6A4F]">
-              <MapPin className="h-5 w-5" aria-hidden="true" />
-            </span>
-            <div>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E]">
-                Selected location
-              </p>
-              <h3 className="mt-0.5 text-xl font-extrabold text-[#17271D]">{place.name}</h3>
-              <p className="mt-0.5 text-sm text-[#65766A]">{place.region}</p>
-            </div>
+          <div className="space-y-4">
+            {plannerStep === 1 && evidencePanel === 'climate' && (
+              <LiveWeatherPanel latitude={farm.latitude} longitude={farm.longitude} locationName={farm.name} />
+            )}
+
+            <SeasonalChart
+              place={place}
+              rainfallChange={rainfallChange}
+              heatChange={heatChange}
+            />
+
+            <section className="rounded-xl border border-[#D4DDD0] bg-[#F7FAF5] p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-[#52715E]">
+                    Quick what-if climate toggle
+                  </p>
+                  <p className="mt-0.5 text-xs text-[#536458]">
+                    Test how a drier or warmer season shifts the monthly bars, temperature curve, and KPI cards above.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <label className="inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-lg border border-[#D7E0D5] bg-white px-3 text-xs font-semibold text-[#263B2E]">
+                    <input
+                      type="checkbox"
+                      checked={rainfallChange}
+                      onChange={(event) => setRainfallChange(event.target.checked)}
+                      className="h-4 w-4 accent-[#32658E]"
+                    />
+                    <span>−20% Rain</span>
+                  </label>
+                  <label className="inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-lg border border-[#D7E0D5] bg-white px-3 text-xs font-semibold text-[#263B2E]">
+                    <input
+                      type="checkbox"
+                      checked={heatChange}
+                      onChange={(event) => setHeatChange(event.target.checked)}
+                      className="h-4 w-4 accent-[#C45A37]"
+                    />
+                    <span>+2°C Heat</span>
+                  </label>
+                </div>
+              </div>
+            </section>
+
+            <details className="rounded-xl border border-[#D4DDD0] bg-white p-4">
+              <summary className="cursor-pointer select-none text-xs font-bold text-[#1B4332] hover:text-[#2D6A4F]">
+                More NASA POWER signals &amp; seasonal highlights (RH2M, Solar, GWETTOP, IMERG)
+              </summary>
+              <div className="mt-3 space-y-5 border-t border-[#E2E8DF] pt-3">
+                <AdditionalSignalsPanel selectedPlot={place} selectedMonth={selectedMonth} />
+                <PlaceInsights place={place} rainfallChange={rainfallChange} heatChange={heatChange} />
+                <PlanningComparison place={place} heatChange={heatChange} />
+              </div>
+            </details>
           </div>
-
-          <div className="mt-5 grid grid-cols-3 gap-2">
-            <div className="rounded-lg bg-[#F5F8F3] p-3">
-              <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-[#738278]">
-                Air temp
-              </p>
-              <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-[#17271D]">
-                {formatNumber(scenarioTemperature)}°
-              </p>
-              <p className="text-[10px] text-[#65766A]">T2M mean · °C</p>
-            </div>
-            <div className="rounded-lg bg-[#F5F8F3] p-3">
-              <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-[#738278]">
-                Rainfall
-              </p>
-              <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-[#17271D]">
-                {formatNumber(annualPrecipitation, 0)}
-              </p>
-              <p className="text-[10px] text-[#65766A]">mm / year</p>
-            </div>
-            <div className="rounded-lg bg-[#F5F8F3] p-3">
-              <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-[#738278]">
-                Root wetness
-              </p>
-              <p className="mt-1 font-mono text-lg font-extrabold tabular-nums text-[#17271D]">
-                {formatNumber(averageRootWetness, 2)}
-              </p>
-              <p className="text-[10px] text-[#65766A]">unitless index</p>
-            </div>
-          </div>
-          <p className="mt-3 text-[11px] leading-5 text-[#738278]">
-            Summary values are six-year monthly averages. Soil wetness is a modeled index, not soil-water percentage.
-          </p>
-          <AdditionalSignalsPanel selectedPlot={place} selectedMonth={selectedMonth} />
-        </section>
-
-        {plannerStep === 1 && evidencePanel === 'climate' && (
-          <FieldMapPanel
-            selectedPlot={place}
-            selectedMonth={selectedMonth}
-            onMonthChange={setSelectedMonth}
-            mapLayer={mapLayer}
-            onMapLayerChange={setMapLayer}
-            onSelectPlot={selectFarm}
-          />
-        )}
-      </div>
-
+        </div>
       </div>
 
       <div className={evidencePanel === 'agronomy' ? 'space-y-6' : 'hidden'}>
@@ -847,62 +856,6 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
         farmId={placeId}
         selectedMonth={selectedMonth}
       />
-      </div>
-
-      <div className={evidencePanel === 'seasonal' ? 'space-y-6' : 'hidden'}>
-      <SeasonalChart
-        place={place}
-        rainfallChange={rainfallChange}
-        heatChange={heatChange}
-      />
-
-      <section className="rounded-xl border border-[#D4DDD0] bg-[#F7FAF5] p-5 sm:p-6">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-          <div className="max-w-2xl">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-[#52715E]">
-              Explore a what-if
-            </p>
-            <h3 className="mt-1 text-lg font-extrabold text-[#17271D]">Adjust the historical baseline</h3>
-            <p className="mt-1 text-sm leading-6 text-[#536458]">
-              These hypothetical changes adjust only the displayed rainfall and temperature averages; root-zone wetness is not re-simulated. They are not forecasts or climate projections.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-[#D7E0D5] bg-white px-3 text-xs font-semibold text-[#263B2E]">
-              <input
-                type="checkbox"
-                checked={rainfallChange}
-                onChange={(event) => setRainfallChange(event.target.checked)}
-                className="h-4 w-4 accent-[#32658E]"
-              />
-              <span>20% less precipitation</span>
-            </label>
-            <label className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-[#D7E0D5] bg-white px-3 text-xs font-semibold text-[#263B2E]">
-              <input
-                type="checkbox"
-                checked={heatChange}
-                onChange={(event) => setHeatChange(event.target.checked)}
-                className="h-4 w-4 accent-[#C45A37]"
-              />
-              <span>2°C warmer</span>
-            </label>
-          </div>
-        </div>
-        <p aria-live="polite" className="mt-4 border-t border-[#DFE7DD] pt-4 text-sm text-[#536458]">
-          <span className="font-bold text-[#1B4332]">Planning question: </span>
-          {rainfallChange && heatChange
-            ? 'How might varieties, planting windows, and moisture-saving practices need to change if both conditions occur?'
-            : rainfallChange
-              ? 'Which crops and soil-cover practices can cope with a drier-than-usual season?'
-              : heatChange
-                ? 'Would a warmer season change crop choice or the timing of heat-sensitive field work?'
-                : 'Select a what-if scenario to explore how the historical pattern could shift.'}
-        </p>
-      </section>
-
-      <PlaceInsights place={place} rainfallChange={rainfallChange} heatChange={heatChange} />
-
-      <PlanningComparison place={place} heatChange={heatChange} />
       </div>
 
       <div className={evidencePanel === 'sources' ? 'space-y-6' : 'hidden'}>

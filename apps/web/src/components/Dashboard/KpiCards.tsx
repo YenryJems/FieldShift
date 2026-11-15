@@ -15,11 +15,11 @@ export interface KpiCardsProps {
 }
 
 const TONE_CLASSES: Record<Tone, string> = {
-  emerald: 'bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30',
-  sky: 'bg-sky-500/15 text-sky-300 ring-1 ring-sky-500/30',
-  amber: 'bg-amber-500/15 text-amber-300 ring-1 ring-amber-500/30',
-  rose: 'bg-rose-500/15 text-rose-300 ring-1 ring-rose-500/30',
-  slate: 'bg-slate-700/60 text-slate-300 ring-1 ring-slate-600/50',
+  emerald: 'bg-[#E3F2E8] text-[#1B4332] border border-[#B7DFC5]',
+  sky: 'bg-[#E6F0FA] text-[#1D4E89] border border-[#B8D4F0]',
+  amber: 'bg-[#FFF3CD] text-[#92400E] border border-[#F3D9A4]',
+  rose: 'bg-[#FDE2E4] text-[#991B1B] border border-[#F5B7BD]',
+  slate: 'bg-[#EEF2EC] text-[#465A4E] border border-[#D4DDD0]',
 };
 
 export const KpiCards: React.FC<KpiCardsProps> = ({
@@ -33,68 +33,68 @@ export const KpiCards: React.FC<KpiCardsProps> = ({
   const isWhatIf = climate.scenarioId !== 'baseline';
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <article className="flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900 p-4">
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <article className="flex flex-col justify-between rounded-xl border border-[#D4DDD0] bg-white p-4 shadow-2xs">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-xs font-semibold text-slate-400">
+          <h3 className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#52715E]">
             {termLabel('temp', plainEnglish)}
           </h3>
           {isWhatIf && (
-            <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${TONE_CLASSES.amber}`}>
+            <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${TONE_CLASSES.amber}`}>
               What-if
             </span>
           )}
         </div>
-        <div className="mt-3 flex items-baseline justify-between gap-2">
-          <p className="text-2xl font-bold tabular-nums text-slate-100">
+        <div className="mt-2.5 flex items-baseline justify-between gap-2">
+          <p className="font-mono text-2xl font-extrabold tabular-nums text-[#17271D]">
             {climate.adjustedTempC.toFixed(1)}°C
           </p>
-          <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${TONE_CLASSES[tempBadge.tone]}`}>
+          <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${TONE_CLASSES[tempBadge.tone]}`}>
             {tempBadge.label}
           </span>
         </div>
-        <p className="mt-2 text-xs text-slate-400">
-          Daily max {climate.adjustedMaxTempC.toFixed(1)}°C
+        <p className="mt-1.5 text-xs text-[#65766A]">
+          Daily max {climate.adjustedMaxTempC.toFixed(1)}°C · 2m mean
         </p>
       </article>
 
-      <article className="flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900 p-4">
+      <article className="flex flex-col justify-between rounded-xl border border-[#D4DDD0] bg-white p-4 shadow-2xs">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-xs font-semibold text-slate-400">
+          <h3 className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#52715E]">
             {termLabel('rain', plainEnglish)}
           </h3>
           {isWhatIf && (
-            <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${TONE_CLASSES.amber}`}>
+            <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${TONE_CLASSES.amber}`}>
               What-if
             </span>
           )}
         </div>
-        <div className="mt-3 flex items-baseline justify-between gap-2">
-          <p className="text-2xl font-bold tabular-nums text-slate-100">
+        <div className="mt-2.5 flex items-baseline justify-between gap-2">
+          <p className="font-mono text-2xl font-extrabold tabular-nums text-[#17271D]">
             {climate.adjustedDailyPrecipMm.toFixed(1)} mm/day
           </p>
-          <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${TONE_CLASSES[rainBadge.tone]}`}>
+          <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${TONE_CLASSES[rainBadge.tone]}`}>
             {rainBadge.label}
           </span>
         </div>
-        <p className="mt-2 text-xs text-slate-400">
+        <p className="mt-1.5 text-xs text-[#65766A]">
           Heavy-rain days (&gt;=14 mm): {climate.stormDaysGe14Mm.toFixed(1)}/mo
         </p>
       </article>
 
-      <article className="flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900 p-4">
+      <article className="flex flex-col justify-between rounded-xl border border-[#D4DDD0] bg-white p-4 shadow-2xs">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-xs font-semibold text-slate-400">
+          <h3 className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#52715E]">
             {termLabel('rootMoisture', plainEnglish)}
           </h3>
           {isWhatIf && (
-            <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${TONE_CLASSES.amber}`}>
+            <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${TONE_CLASSES.amber}`}>
               What-if
             </span>
           )}
         </div>
-        <div className="mt-3">
-          <p className="text-2xl font-bold tabular-nums text-slate-100">
+        <div className="mt-2.5">
+          <p className="font-mono text-2xl font-extrabold tabular-nums text-[#17271D]">
             {moisturePct}%
           </p>
           <div
@@ -103,31 +103,31 @@ export const KpiCards: React.FC<KpiCardsProps> = ({
             aria-valuenow={moisturePct}
             aria-valuemin={0}
             aria-valuemax={100}
-            className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-800"
+            className="mt-2 h-2 w-full overflow-hidden rounded-full bg-[#E6ECE4]"
           >
             <div
-              className="h-full rounded-full bg-sky-400 transition-all"
+              className="h-full rounded-full bg-[#2D6A4F] transition-all"
               style={{ width: `${moisturePct}%` }}
             />
           </div>
         </div>
-        <p className="mt-2 text-xs text-slate-400">
+        <p className="mt-1.5 text-xs text-[#65766A]">
           Modeled wetness index (% of saturation), not a soil test
         </p>
       </article>
 
-      <article className="flex flex-col justify-between rounded-2xl border border-slate-800 bg-slate-900 p-4">
+      <article className="flex flex-col justify-between rounded-xl border border-[#D4DDD0] bg-[#F5F9F3] p-4 shadow-2xs">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-xs font-semibold text-slate-400">
+          <h3 className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#2D6A4F]">
             {termLabel('fari', plainEnglish)}
           </h3>
         </div>
-        <div className="mt-3">
-          <p className="text-2xl font-bold tabular-nums text-emerald-300">
+        <div className="mt-2.5">
+          <p className="font-mono text-2xl font-extrabold tabular-nums text-[#1B4332]">
             {topResult.fariScore.toFixed(1)}%
           </p>
         </div>
-        <p className="mt-2 text-xs font-medium text-slate-300">
+        <p className="mt-1.5 text-xs font-bold text-[#263B2E]">
           Best: {topResult.title}
         </p>
       </article>

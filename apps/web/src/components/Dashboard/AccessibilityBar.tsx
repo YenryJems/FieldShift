@@ -68,15 +68,15 @@ export const AccessibilityBar: React.FC<AccessibilityBarProps> = ({
   const activeMonthLabel = MONTH_SHORT[selectedMonth - 1] ?? MONTH_SHORT[0];
 
   return (
-    <div className="space-y-3 rounded-2xl border border-slate-800 bg-slate-900 p-4">
+    <div className="space-y-3 rounded-2xl border border-[#D4DDD0] bg-[#F7FAF5] p-3.5 sm:p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex min-h-10 items-center gap-1.5 rounded-full bg-slate-800 px-3 text-xs font-semibold text-slate-100 ring-1 ring-slate-700">
-            <MapPin className="h-3.5 w-3.5 text-emerald-400" aria-hidden="true" />
+          <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[#C7D5C5] bg-white px-3 text-xs font-bold text-[#1B4332]">
+            <MapPin className="h-3.5 w-3.5 text-[#2D6A4F]" aria-hidden="true" />
             <span>{locationName}</span>
           </span>
-          <span className="text-xs text-slate-400">
-            Change location on the map or in the Farm step
+          <span className="text-xs text-[#536458]">
+            Select any month below to update signals, map, and suitability
           </span>
         </div>
 
@@ -86,14 +86,14 @@ export const AccessibilityBar: React.FC<AccessibilityBarProps> = ({
             role="switch"
             aria-checked={plainEnglish}
             onClick={() => onPlainEnglishChange(!plainEnglish)}
-            className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-slate-700 bg-slate-800 px-3 text-xs font-semibold text-slate-100 transition-colors hover:bg-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
+            className="inline-flex min-h-9 items-center gap-2 rounded-xl border border-[#C7D5C5] bg-white px-3 text-xs font-bold text-[#17271D] transition-colors hover:bg-[#EEF4EC] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332]"
           >
             <span>Farmer Plain-English</span>
             <span
-              className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
+              className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${
                 plainEnglish
-                  ? 'bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-500/30'
-                  : 'bg-slate-700 text-slate-300'
+                  ? 'bg-[#E3F2E8] text-[#1B4332]'
+                  : 'bg-[#E6ECE4] text-[#536458]'
               }`}
             >
               {plainEnglish ? 'ON' : 'OFF'}
@@ -104,12 +104,12 @@ export const AccessibilityBar: React.FC<AccessibilityBarProps> = ({
             type="button"
             disabled={!speechSupported}
             onClick={handleToggleSpeech}
-            className="inline-flex min-h-10 items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3 text-xs font-semibold text-slate-100 transition-colors hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-xl border border-[#C7D5C5] bg-white px-3 text-xs font-bold text-[#17271D] transition-colors hover:bg-[#EEF4EC] disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332]"
           >
             {speaking ? (
-              <VolumeX className="h-3.5 w-3.5 text-amber-300" aria-hidden="true" />
+              <VolumeX className="h-3.5 w-3.5 text-[#B45309]" aria-hidden="true" />
             ) : (
-              <Volume2 className="h-3.5 w-3.5 text-sky-300" aria-hidden="true" />
+              <Volume2 className="h-3.5 w-3.5 text-[#1B4332]" aria-hidden="true" />
             )}
             <span>{speaking ? 'Stop' : 'Read Aloud'}</span>
           </button>
@@ -117,16 +117,16 @@ export const AccessibilityBar: React.FC<AccessibilityBarProps> = ({
           <button
             type="button"
             onClick={handleCopySms}
-            className="inline-flex min-h-10 items-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 px-3 text-xs font-semibold text-slate-100 transition-colors hover:bg-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
+            className="inline-flex min-h-9 items-center gap-1.5 rounded-xl border border-[#C7D5C5] bg-white px-3 text-xs font-bold text-[#1B4332] transition-colors hover:bg-[#EEF4EC] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332]"
           >
-            <Copy className="h-3.5 w-3.5 text-emerald-300" aria-hidden="true" />
+            <Copy className="h-3.5 w-3.5 text-[#2D6A4F]" aria-hidden="true" />
             <span>Copy SMS Field Brief</span>
           </button>
 
           {copyStatus === 'copied' && (
             <span
               role="status"
-              className="inline-flex min-h-10 items-center rounded-full bg-emerald-500/15 px-3 text-xs font-semibold text-emerald-300 ring-1 ring-emerald-500/30"
+              className="inline-flex min-h-9 items-center rounded-full bg-[#E3F2E8] px-3 text-xs font-bold text-[#1B4332]"
             >
               Copied!
             </span>
@@ -134,7 +134,7 @@ export const AccessibilityBar: React.FC<AccessibilityBarProps> = ({
           {copyStatus === 'failed' && (
             <span
               role="status"
-              className="inline-flex min-h-10 items-center rounded-full bg-rose-500/15 px-3 text-xs font-semibold text-rose-300 ring-1 ring-rose-500/30"
+              className="inline-flex min-h-9 items-center rounded-full bg-[#FDE2E4] px-3 text-xs font-bold text-[#991B1B]"
             >
               Copy failed
             </span>
@@ -146,7 +146,7 @@ export const AccessibilityBar: React.FC<AccessibilityBarProps> = ({
         <div
           role="group"
           aria-label="Select month"
-          className="hidden gap-1.5 overflow-x-auto pb-1 sm:flex"
+          className="hidden grid-cols-12 gap-1 rounded-xl border border-[#D4DDD0] bg-white p-1 sm:grid"
         >
           {MONTH_SHORT.map((label, index) => {
             const monthNum = index + 1;
@@ -157,10 +157,10 @@ export const AccessibilityBar: React.FC<AccessibilityBarProps> = ({
                 type="button"
                 aria-pressed={active}
                 onClick={() => onMonthChange(monthNum)}
-                className={`min-h-10 shrink-0 rounded-lg px-3 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400 ${
+                className={`min-h-8 rounded-lg px-2 text-xs font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332] ${
                   active
-                    ? 'bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-500/40'
-                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-slate-100'
+                    ? 'bg-[#1B4332] text-white shadow-xs'
+                    : 'text-[#536458] hover:bg-[#F1F5EF] hover:text-[#1B4332]'
                 }`}
               >
                 {label}
@@ -170,7 +170,7 @@ export const AccessibilityBar: React.FC<AccessibilityBarProps> = ({
         </div>
 
         <div className="flex items-center gap-3 sm:hidden">
-          <label htmlFor="dash-month-range" className="text-xs font-semibold text-slate-300">
+          <label htmlFor="dash-month-range" className="text-xs font-bold text-[#263B2E]">
             Month: {activeMonthLabel}
           </label>
           <input
@@ -183,7 +183,7 @@ export const AccessibilityBar: React.FC<AccessibilityBarProps> = ({
             aria-label="Select month"
             aria-valuetext={activeMonthLabel}
             onChange={(e) => onMonthChange(Number(e.target.value))}
-            className="min-h-10 flex-1 accent-emerald-400"
+            className="min-h-9 flex-1 accent-[#1B4332]"
           />
         </div>
       </div>
