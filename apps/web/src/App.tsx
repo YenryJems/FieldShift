@@ -1,26 +1,26 @@
 import { useState } from 'react';
-import { TopNavBar } from './components/TopNavBar';
+import { TopNavBar, type WorkbenchTab } from './components/TopNavBar';
 import { HomeView } from './components/HomeView';
 import { WorkspaceView } from './components/WorkspaceView';
 import { LanguageProvider } from './context/LanguageContext';
 
 export default function App() {
-  const [plannerStep, setPlannerStep] = useState(0);
+  const [activeTab, setActiveTab] = useState<WorkbenchTab>('field-season');
   const [hasEnteredWorkspace, setHasEnteredWorkspace] = useState(false);
 
   return (
     <LanguageProvider>
       {hasEnteredWorkspace ? (
-        <div id="top" className="workspace-enter min-h-screen bg-[#F8FAF7] text-[#111C16]">
+        <div id="top" className="workspace-enter min-h-screen bg-[#040811] text-[#F0F9FF]">
           <TopNavBar
-            plannerStep={plannerStep}
-            onPlannerStepChange={setPlannerStep}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
             onReturnHome={() => {
-              setPlannerStep(0);
+              setActiveTab('field-season');
               setHasEnteredWorkspace(false);
             }}
           />
-          <WorkspaceView plannerStep={plannerStep} onPlannerStepChange={setPlannerStep} />
+          <WorkspaceView activeTab={activeTab} onTabChange={setActiveTab} />
         </div>
       ) : (
         <HomeView onEnterWorkspace={() => setHasEnteredWorkspace(true)} />

@@ -1,15 +1,16 @@
+import { wetnessIndexToPct } from './metricLabels';
 import { PLACES_BY_ID, PlaceId } from './places';
 
 export interface MonthlyTelemetry {
   month: string;
   monthNumber: number;
-  t2m: number;
-  precCorr: number;
-  gwetRoot: number;
-  gwetTop: number;
+  airTempCelsius: number;
+  dailyRainfallMm: number;
+  rootZoneMoisturePct: number;
+  surfaceSoilMoisturePct: number;
   relativeHumidityPct: number;
-  solarRadiationMjM2Day: number;
-  imergPrecipitationMmDay: number;
+  solarRadiationMj: number;
+  imergRainfallMmDay: number;
 }
 
 const requireTelemetryValue = (
@@ -28,24 +29,18 @@ const buildMonthlyTelemetry = (placeId: PlaceId): MonthlyTelemetry[] =>
   PLACES_BY_ID[placeId].monthly.map((month) => ({
     month: month.label,
     monthNumber: month.month,
-    t2m: requireTelemetryValue(placeId, month.label, 'T2M', month.meanTemperatureC),
-    precCorr: requireTelemetryValue(
+    airTempCelsius: requireTelemetryValue(placeId, month.label, 'T2M', month.meanTemperatureC),
+    dailyRainfallMm: requireTelemetryValue(
       placeId,
       month.label,
       'PRECTOTCORR',
       month.meanDailyPrecipitationMm,
     ),
-    gwetRoot: requireTelemetryValue(
-      placeId,
-      month.label,
-      'GWETROOT',
-      month.meanRootWetnessIndex,
+    rootZoneMoisturePct: wetnessIndexToPct(
+      requireTelemetryValue(placeId, month.label, 'GWETROOT', month.meanRootWetnessIndex),
     ),
-    gwetTop: requireTelemetryValue(
-      placeId,
-      month.label,
-      'GWETTOP',
-      month.meanSurfaceWetnessIndex,
+    surfaceSoilMoisturePct: wetnessIndexToPct(
+      requireTelemetryValue(placeId, month.label, 'GWETTOP', month.meanSurfaceWetnessIndex),
     ),
     relativeHumidityPct: requireTelemetryValue(
       placeId,
@@ -53,13 +48,13 @@ const buildMonthlyTelemetry = (placeId: PlaceId): MonthlyTelemetry[] =>
       'RH2M',
       month.meanRelativeHumidityPct,
     ),
-    solarRadiationMjM2Day: requireTelemetryValue(
+    solarRadiationMj: requireTelemetryValue(
       placeId,
       month.label,
       'ALLSKY_SFC_SW_DWN',
       month.meanSolarRadiationMjM2Day,
     ),
-    imergPrecipitationMmDay: requireTelemetryValue(
+    imergRainfallMmDay: requireTelemetryValue(
       placeId,
       month.label,
       'IMERG_PRECTOT',

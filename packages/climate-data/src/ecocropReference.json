@@ -15,7 +15,12 @@
     "PHMAX": 7.5,
     "ALTMX": null,
     "GMIN": 110,
-    "GMAX": 270
+    "GMAX": 270,
+    "rootDepthCm": 70,
+    "plantFamilyGroup": "Poaceae",
+    "soilTextureType": "Loam to Clay Loam",
+    "soilDrainageClass": "Well-drained",
+    "soilNutrientDemand": "Moderate"
   },
   {
     "EcoPortCode": 1150,
@@ -33,7 +38,12 @@
     "PHMAX": 8.4,
     "ALTMX": 3000,
     "GMIN": 75,
-    "GMAX": 180
+    "GMAX": 180,
+    "rootDepthCm": 80,
+    "plantFamilyGroup": "Fabaceae",
+    "soilTextureType": "Loam to Silt Loam",
+    "soilDrainageClass": "Well-drained",
+    "soilNutrientDemand": "Low-Moderate (N-fixer)"
   },
   {
     "EcoPortCode": 1265,
@@ -51,7 +61,12 @@
     "PHMAX": 8.7,
     "ALTMX": 2800,
     "GMIN": 80,
-    "GMAX": 170
+    "GMAX": 170,
+    "rootDepthCm": 75,
+    "plantFamilyGroup": "Convolvulaceae",
+    "soilTextureType": "Sandy Loam to Loam",
+    "soilDrainageClass": "Well-drained",
+    "soilNutrientDemand": "Moderate (High K)"
   },
   {
     "EcoPortCode": 1416,
@@ -69,7 +84,12 @@
     "PHMAX": 8.5,
     "ALTMX": 1200,
     "GMIN": 150,
-    "GMAX": 365
+    "GMAX": 365,
+    "rootDepthCm": 150,
+    "plantFamilyGroup": "Anacardiaceae",
+    "soilTextureType": "Deep Loam to Sandy Loam",
+    "soilDrainageClass": "Well-drained",
+    "soilNutrientDemand": "Moderate"
   },
   {
     "EcoPortCode": 1574,
@@ -87,7 +107,12 @@
     "PHMAX": 9,
     "ALTMX": 2500,
     "GMIN": 80,
-    "GMAX": 180
+    "GMAX": 180,
+    "rootDepthCm": 40,
+    "plantFamilyGroup": "Poaceae",
+    "soilTextureType": "Clay to Clay Loam",
+    "soilDrainageClass": "Poorly-drained / Bunded",
+    "soilNutrientDemand": "High"
   },
   {
     "EcoPortCode": 1929,
@@ -105,7 +130,12 @@
     "PHMAX": 8.2,
     "ALTMX": 4300,
     "GMIN": 110,
-    "GMAX": 270
+    "GMAX": 270,
+    "rootDepthCm": 90,
+    "plantFamilyGroup": "Poaceae",
+    "soilTextureType": "Sandy Loam to Loam",
+    "soilDrainageClass": "Well-drained",
+    "soilNutrientDemand": "Low-Moderate"
   },
   {
     "EcoPortCode": 1982,
@@ -123,7 +153,12 @@
     "PHMAX": 8.5,
     "ALTMX": 2500,
     "GMIN": 90,
-    "GMAX": 300
+    "GMAX": 300,
+    "rootDepthCm": 110,
+    "plantFamilyGroup": "Poaceae",
+    "soilTextureType": "Loam to Clay Loam",
+    "soilDrainageClass": "Moderately well-drained",
+    "soilNutrientDemand": "Moderate"
   },
   {
     "EcoPortCode": 2114,
@@ -141,7 +176,12 @@
     "PHMAX": 8.5,
     "ALTMX": 4500,
     "GMIN": 90,
-    "GMAX": 250
+    "GMAX": 250,
+    "rootDepthCm": 85,
+    "plantFamilyGroup": "Poaceae",
+    "soilTextureType": "Loam to Clay Loam",
+    "soilDrainageClass": "Well-drained",
+    "soilNutrientDemand": "High"
   },
   {
     "EcoPortCode": 2150,
@@ -159,7 +199,12 @@
     "PHMAX": 8.3,
     "ALTMX": 2000,
     "GMIN": 50,
-    "GMAX": 120
+    "GMAX": 120,
+    "rootDepthCm": 55,
+    "plantFamilyGroup": "Fabaceae",
+    "soilTextureType": "Sandy Loam to Loam",
+    "soilDrainageClass": "Well-drained",
+    "soilNutrientDemand": "Low (N-fixer)"
   },
   {
     "EcoPortCode": 2175,
@@ -177,7 +222,12 @@
     "PHMAX": 8.5,
     "ALTMX": 4000,
     "GMIN": 65,
-    "GMAX": 365
+    "GMAX": 365,
+    "rootDepthCm": 90,
+    "plantFamilyGroup": "Poaceae",
+    "soilTextureType": "Loam to Silt Loam",
+    "soilDrainageClass": "Well-drained",
+    "soilNutrientDemand": "High"
   },
   {
     "EcoPortCode": 2199,
@@ -195,7 +245,12 @@
     "PHMAX": 8.5,
     "ALTMX": 1650,
     "GMIN": 90,
-    "GMAX": 150
+    "GMAX": 150,
+    "rootDepthCm": 70,
+    "plantFamilyGroup": "Fabaceae",
+    "soilTextureType": "Sandy Loam",
+    "soilDrainageClass": "Well-drained / Friable",
+    "soilNutrientDemand": "Low-Moderate (N-fixer)"
   },
   {
     "EcoPortCode": 10534,
@@ -213,7 +268,12 @@
     "PHMAX": 8.3,
     "ALTMX": null,
     "GMIN": 100,
-    "GMAX": 170
+    "GMAX": 170,
+    "rootDepthCm": 45,
+    "plantFamilyGroup": "Fabaceae",
+    "soilTextureType": "Sandy Loam to Loam",
+    "soilDrainageClass": "Well-drained",
+    "soilNutrientDemand": "Low (N-fixer)"
   },
   {
     "EcoPortCode": 238009,
@@ -231,6 +291,34 @@
     "PHMAX": 8.2,
     "ALTMX": 2200,
     "GMIN": 135,
-    "GMAX": 255
+    "GMAX": 255,
+    "rootDepthCm": 60,
+    "plantFamilyGroup": "Fabaceae",
+    "soilTextureType": "Loam to Sandy Loam",
+    "soilDrainageClass": "Well-drained",
+    "soilNutrientDemand": "Low (N-fixer)"
+  },
+  {
+    "EcoPortCode": 745,
+    "ScientificName": "Coix lacryma-jobi",
+    "COMNAME": "adlai, Job's tears, adlay",
+    "TOPMN": 20,
+    "TOPMX": 30,
+    "TMIN": 10,
+    "TMAX": 38,
+    "ROPMN": 1000,
+    "ROPMX": 2000,
+    "RMIN": 600,
+    "RMAX": 3500,
+    "PHMIN": 4.5,
+    "PHMAX": 7.5,
+    "ALTMX": 2000,
+    "GMIN": 120,
+    "GMAX": 180,
+    "rootDepthCm": 85,
+    "plantFamilyGroup": "Poaceae",
+    "soilTextureType": "Loam to Clay Loam",
+    "soilDrainageClass": "Moderately well-drained",
+    "soilNutrientDemand": "Low-Moderate"
   }
 ]

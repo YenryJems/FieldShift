@@ -73,29 +73,27 @@ export const FooterAndAttributions: React.FC = () => {
   ];
 
   return (
-    <footer className="space-y-8 border-t border-[#D4DDD0] pt-8">
+    <footer className="space-y-8 border-t border-sky-400/20 pt-8">
       {/* 1. About the Farmer's Reality — Multigenerational Empathy Context Panel */}
       <section
         aria-labelledby="farmers-reality-heading"
-        className="rounded-2xl border border-[#C7D5C5] bg-[#F4F8F2] p-5 sm:p-6"
+        className="rounded-2xl border border-sky-400/20 bg-[#0B1426]/85 p-5 backdrop-blur-md sm:p-6"
       >
         <div className="flex items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1B4332] text-white">
-            <HeartHandshake className="h-5 w-5" aria-hidden="true" />
-          </span>
+          <HeartHandshake className="mt-1 h-5 w-5 shrink-0 text-[#38BDF8]" aria-hidden="true" />
           <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#52715E]">
+            <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-sky-300/75">
               Challenge inspiration: multigenerational farming experience · Team Overachiever (CIT-U Cebu)
             </p>
             <h3
               id="farmers-reality-heading"
-              className="mt-1 text-xl font-extrabold text-[#17271D]"
+              className="mt-1 text-xl font-extrabold text-[#F0F9FF]"
             >
               About the Farmer&rsquo;s Reality: Why Changing a Generational Crop Calendar Is Hard
             </h3>
-            <p className="mt-2 text-sm leading-6 text-[#3B4D41]">
+            <p className="mt-2 text-sm leading-6 text-[#CBD5E1]">
               For a smallholder family in Nueva Ecija, Bukidnon, Isabela, or Guimaras, a planting calendar is not just a schedule—it is a multigenerational survival contract tied to production loans, local trader advances, irrigation access, and household food security. Trying an unfamiliar crop can mean risking a season&rsquo;s income; seed may be hard to source, buyers are not guaranteed, and weather can shift. FieldShift is designed around{' '}
-              <strong>low-risk relay intercropping, fast 60-to-75-day legume cash turnarounds, farmer-saved open-pollinated seeds, and livestock cut-and-carry forage</strong>—so families can protect their topsoil and cut synthetic urea bills without sacrificing their main harvest.
+              <strong className="text-[#F0F9FF]">low-risk relay intercropping, fast 60-to-75-day legume cash turnarounds, farmer-saved open-pollinated seeds, and livestock cut-and-carry forage</strong>—so families can protect their topsoil and cut synthetic urea bills without sacrificing their main harvest.
             </p>
           </div>
         </div>
@@ -104,13 +102,13 @@ export const FooterAndAttributions: React.FC = () => {
       {/* 2. Plain-Language Earth Science Glossary */}
       <section
         aria-labelledby="earth-science-glossary-heading"
-        className="rounded-2xl border border-[#D4DDD0] bg-white p-5 sm:p-6"
+        className="rounded-2xl border border-sky-400/20 bg-[#0B1426]/85 p-5 backdrop-blur-md sm:p-6"
       >
         <div className="flex items-center gap-2">
-          <BookOpen className="h-4 w-4 text-[#1B4332]" aria-hidden="true" />
+          <BookOpen className="h-4 w-4 text-[#38BDF8]" aria-hidden="true" />
           <h3
             id="earth-science-glossary-heading"
-            className="text-lg font-extrabold text-[#17271D]"
+            className="text-lg font-extrabold text-[#F0F9FF]"
           >
             {t.glossaryTitle}
           </h3>
@@ -119,20 +117,20 @@ export const FooterAndAttributions: React.FC = () => {
           {t.glossaryItems.map((item) => (
             <details
               key={item.term}
-              className="rounded-xl border border-[#E2E8DF] bg-[#FAFBF9] p-4"
+              className="rounded-xl border border-sky-400/20 bg-[#0D182E] p-4"
             >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B3D91]">
-                <h4 className="text-sm font-extrabold text-[#1B4332]">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-2 rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400">
+                <h4 className="text-sm font-extrabold text-[#F0F9FF]">
                   {item.term}
                 </h4>
-                <span className="rounded bg-[#E8F3EC] px-2 py-0.5 font-mono text-[10px] font-bold text-[#2D6A4F]">
+                <span className="rounded border border-sky-400/20 bg-[#0B1426] px-2 py-0.5 font-mono text-[10px] font-bold text-[#7DD3FC]">
                   {item.shortCode}
                 </span>
               </summary>
-              <p className="mt-3 rounded-lg border border-[#E2E8DF] bg-white p-3 text-xs leading-5 text-[#536458]">
+              <p className="mt-3 rounded-lg border border-sky-400/20 bg-[#0B1426] p-3 text-xs leading-5 text-[#CBD5E1]">
                 {item.definition}
               </p>
-              <span className="mt-2 block border-t border-[#E2E8DF] pt-2 text-[#17271D]">
+              <span className="mt-2 block border-t border-sky-400/20 pt-2 text-[#F0F9FF]">
                 <strong>On the farm: </strong>
                 {item.farmerMeaning}
               </span>
@@ -144,13 +142,13 @@ export const FooterAndAttributions: React.FC = () => {
       {/* 3. Global Space Agency & Scientific Attributions */}
       <section
         aria-labelledby="global-attributions-heading"
-        className="rounded-2xl border border-[#D4DDD0] bg-white p-5 sm:p-6"
+        className="rounded-2xl border border-sky-400/20 bg-[#0B1426]/85 p-5 backdrop-blur-md sm:p-6"
       >
         <div className="flex items-center gap-2">
-          <Globe2 className="h-4 w-4 text-[#1B4332]" aria-hidden="true" />
+          <Globe2 className="h-4 w-4 text-[#38BDF8]" aria-hidden="true" />
           <h3
             id="global-attributions-heading"
-            className="text-lg font-extrabold text-[#17271D]"
+            className="text-lg font-extrabold text-[#F0F9FF]"
           >
           Data providers used in FieldShift
           </h3>
@@ -159,18 +157,18 @@ export const FooterAndAttributions: React.FC = () => {
           {globalAgencies.map((item) => (
             <div
               key={item.agency}
-              className="rounded-xl border border-[#E2E8DF] bg-[#F8FAF7] p-3.5 text-xs"
+              className="rounded-xl border border-sky-400/20 bg-[#0D182E] p-3.5 text-xs"
             >
-              <p className="font-mono text-xs font-extrabold text-[#1B4332]">
+              <p className="font-mono text-xs font-extrabold text-[#F0F9FF]">
                 {item.agency}
               </p>
-              <p className="mt-1 text-[11px] leading-4 text-[#536458]">
+              <p className="mt-1 text-[11px] leading-4 text-[#94A3B8]">
                 {item.datasets}
               </p>
-              <ul className="mt-2 flex flex-wrap gap-x-3 gap-y-1 border-t border-[#E2E8DF] pt-2">
+              <ul className="mt-2 flex flex-wrap gap-x-3 gap-y-1 border-t border-sky-400/20 pt-2">
                 {item.citations.map((citation) => (
                   <li key={citation.label}>
-                    <a href={citation.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#285A40] underline underline-offset-2">
+                    <a href={citation.href} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[10px] font-semibold text-sky-300 underline underline-offset-2 hover:text-sky-200">
                       {citation.label}<ExternalLink className="h-2.5 w-2.5" aria-hidden="true" />
                     </a>
                   </li>
@@ -183,13 +181,13 @@ export const FooterAndAttributions: React.FC = () => {
 
       {/* 4. Mandatory Verbatim NASA Space Apps & Agronomic Disclaimer */}
       <div
-        role="contentinfo"
+        role="note"
         aria-label="Mandatory scientific and NASA non-endorsement disclaimer"
-        className="rounded-xl border border-[#C7D5C5] bg-[#17271D] p-4 text-xs leading-5 text-[#E6ECE4]"
+        className="rounded-xl border border-sky-400/20 bg-[#0D182E] p-4 text-xs leading-5 text-[#CBD5E1]"
       >
         <div className="flex items-start gap-3">
           <ShieldAlert
-            className="mt-0.5 h-5 w-5 shrink-0 text-[#74C69D]"
+            className="mt-0.5 h-5 w-5 shrink-0 text-[#38BDF8]"
             aria-hidden="true"
           />
           <p className="font-medium">

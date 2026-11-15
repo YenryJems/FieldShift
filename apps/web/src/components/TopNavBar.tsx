@@ -1,67 +1,90 @@
 import React from 'react';
 import { Compass } from 'lucide-react';
 
-const navigation = [
-  { label: 'Farm' },
-  { label: 'Season' },
-  { label: 'Priorities' },
-  { label: 'Rotations' },
-  { label: 'Review' },
+export type WorkbenchTab =
+  | 'field-season'
+  | 'priorities-rotations'
+  | 'soil-agronomy'
+  | 'sources-brief';
+
+export const WORKBENCH_TABS: ReadonlyArray<{
+  id: WorkbenchTab;
+  number: string;
+  label: string;
+}> = [
+  { id: 'field-season', number: '01', label: 'Field & Season' },
+  { id: 'priorities-rotations', number: '02', label: 'Priorities & Rotations' },
+  { id: 'soil-agronomy', number: '03', label: 'Soil & Agronomy' },
+  { id: 'sources-brief', number: '04', label: 'Sources & Brief' },
 ];
 
-interface TopNavBarProps {
-  plannerStep: number;
-  onPlannerStepChange: (step: number) => void;
+export interface TopNavBarProps {
+  activeTab: WorkbenchTab;
+  onTabChange: (tab: WorkbenchTab) => void;
   onReturnHome: () => void;
 }
 
-export const TopNavBar: React.FC<TopNavBarProps> = ({ plannerStep, onPlannerStepChange, onReturnHome }) => {
-  const navigateToStep = (index: number) => {
-    onPlannerStepChange(index);
-    document.getElementById('workspace-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+export const TopNavBar: React.FC<TopNavBarProps> = ({
+  activeTab,
+  onTabChange,
+  onReturnHome,
+}) => {
+  const navigateToTab = (tab: WorkbenchTab) => {
+    onTabChange(tab);
+    if (typeof document !== 'undefined') {
+      document.getElementById('workspace-content')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   };
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[#E2E8DF] bg-[#FBFCFA]/95 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-sky-400/20 bg-[#08101F]/90 backdrop-blur-md">
       <div className="mx-auto flex min-h-[68px] max-w-[1360px] items-center justify-between gap-3 px-4 sm:px-6 lg:px-10">
         <button
           type="button"
           onClick={onReturnHome}
           aria-label="Return to the FieldShift landing page"
-          className="flex shrink-0 items-center gap-2.5 rounded-md text-left text-[#1B4332] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-[#1B4332]"
+          className="flex shrink-0 items-center gap-2.5 rounded-md text-left text-[#F0F9FF] focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-sky-400"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1B4332] text-white"><Compass className="h-[18px] w-[18px]" aria-hidden="true" /></span>
+          <Compass className="h-5 w-5 text-[#38BDF8]" aria-hidden="true" />
           <span>
-            <span className="block text-[14px] font-extrabold tracking-tight">FieldShift</span>
-            <span className="hidden font-mono text-[8px] uppercase tracking-[0.14em] text-[#78867D] sm:block">Field workspace</span>
+            <span className="block text-[14px] font-extrabold tracking-tight text-[#F0F9FF]">FieldShift</span>
+            <span className="hidden font-mono text-[8px] uppercase tracking-[0.14em] text-sky-300/75 sm:block">
+              Field workbench
+            </span>
           </span>
         </button>
 
-        <nav aria-label="Planning steps" className="flex max-w-[690px] items-center gap-0.5 overflow-x-auto rounded-full border border-[#E0E5DE] bg-white p-1 shadow-[0_2px_12px_rgba(29,47,34,0.05)] sm:gap-1">
-          {navigation.map((item, index) => {
-            const active = plannerStep === index;
+        <nav
+          aria-label="Workbench sections"
+          className="flex max-w-[740px] items-center gap-0.5 overflow-x-auto rounded-lg border border-sky-400/20 bg-[#0B1426]/85 p-1 sm:gap-1"
+        >
+          {WORKBENCH_TABS.map((item) => {
+            const active = activeTab === item.id;
             return (
               <button
-                key={item.label}
+                key={item.id}
                 type="button"
-                aria-current={active ? 'step' : undefined}
-                aria-label={`Go to ${item.label}${active ? ', current step' : ''}`}
-                onClick={() => navigateToStep(index)}
-                className={`inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full px-2.5 text-[10px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#1B4332] sm:px-3.5 sm:text-[11px] ${active ? 'bg-[#1B4332] text-white' : 'text-[#496A50] hover:bg-[#F2F6F0]'}`}
+                aria-current={active ? 'page' : undefined}
+                aria-label={`Go to ${item.label}${active ? ', current view' : ''}`}
+                onClick={() => navigateToTab(item.id)}
+                className={`inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-md border px-2.5 text-[10px] font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-sky-400 sm:px-3.5 sm:text-[11px] ${
+                  active
+                    ? 'border-sky-400 bg-[#0D182E] text-[#F0F9FF] shadow-[0_0_18px_rgba(56,189,248,0.22)]'
+                    : 'border-transparent text-slate-400 hover:bg-[#0D182E]/70 hover:text-[#F0F9FF]'
+                }`}
               >
-                <span className={`font-mono text-[8px] sm:text-[9px] ${active ? 'text-white/65' : ''}`}>{String(index + 1).padStart(2, '0')}</span>
+                <span className={`font-mono text-[8px] sm:text-[9px] ${active ? 'text-[#38BDF8]' : 'text-slate-500'}`}>
+                  {item.number}
+                </span>
                 {item.label}
               </button>
             );
           })}
         </nav>
 
-        <span className="hidden shrink-0 rounded-full border border-[#E0E5DE] bg-white px-3 py-2 font-mono text-[9px] font-semibold uppercase tracking-wider text-[#738078] lg:inline-flex">
-          Step {plannerStep + 1} of {navigation.length}
+        <span className="hidden shrink-0 font-mono text-[9px] font-semibold uppercase tracking-wider text-sky-300/75 lg:inline-flex">
+          Precision-Agri Workbench
         </span>
-      </div>
-      <div className="h-[2px] bg-[#EDF0EB]" aria-hidden="true">
-        <div className="h-full bg-[#789579] transition-[width] duration-500" style={{ width: `${((plannerStep + 1) / navigation.length) * 100}%` }} />
       </div>
     </header>
   );

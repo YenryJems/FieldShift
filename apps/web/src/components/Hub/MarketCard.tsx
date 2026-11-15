@@ -54,83 +54,86 @@ export const MarketCard: React.FC<MarketCardProps> = ({ farmId, strategyId }) =>
   });
 
   return (
-    <section aria-labelledby="market-card-heading" className="rounded-2xl border border-[#D4DDD0] bg-white p-5 sm:p-6">
-      <div className="flex items-center gap-2 border-b border-[#E2E8DF] pb-4">
-        <TrendingUp className="h-4 w-4 text-[#1B4332]" aria-hidden="true" />
+    <section aria-labelledby="market-card-heading" className="rounded-2xl border border-sky-400/20 bg-[#0B1426]/85 p-5 backdrop-blur-md sm:p-6">
+      <div className="flex items-center gap-2 border-b border-sky-400/20 pb-4">
+        <TrendingUp className="h-4 w-4 text-[#38BDF8]" aria-hidden="true" />
         <div>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#52715E]">Forage and market economics</p>
-          <h3 id="market-card-heading" className="mt-1 text-xl font-extrabold text-[#17271D]">Post-harvest value · Strategy {strategy.id}</h3>
+          <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-sky-300/75">Forage and market economics</p>
+          <h3 id="market-card-heading" className="mt-1 text-xl font-extrabold text-[#F0F9FF]">Post-harvest value · Strategy {strategy.id}</h3>
         </div>
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border border-[#C7D5C5] bg-[#F7FAF5] p-4">
+        <div className="rounded-xl border border-sky-400/20 bg-[#0D182E] p-4">
           <div className="flex items-center gap-2">
-            <Leaf className="h-4 w-4 text-[#1B4332]" aria-hidden="true" />
-            <h4 className="text-sm font-extrabold text-[#17271D]">Livestock forage and residue trade-off</h4>
+            <Leaf className="h-4 w-4 text-[#38BDF8]" aria-hidden="true" />
+            <h4 className="text-sm font-extrabold text-[#F0F9FF]">Livestock forage and residue trade-off</h4>
           </div>
-          <p className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-2 py-1 font-mono text-[9px] font-bold uppercase tracking-wide text-amber-900">Modeled strategy profile · not a feed assay</p>
-          <p className="mt-2 text-xs leading-5 text-[#3B4D41]">{strategy.forageSummary}</p>
+          <p className="mt-2 inline-flex items-center gap-1.5 rounded-md border border-sky-400/20 bg-[#0B1426] px-2 py-1 font-mono text-[9px] font-bold uppercase tracking-wide text-[#CBD5E1]">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-400" aria-hidden="true" />
+            Modeled strategy profile · not a feed assay
+          </p>
+          <p className="mt-2 text-xs leading-5 text-[#CBD5E1]">{strategy.forageSummary}</p>
           <div className="mt-3 grid grid-cols-3 gap-2 text-center">
             <Index label="Modeled forage index" value={Math.round(strategy.forageValue * 100)} />
             <Index label="Residue cover index" value={Math.round(strategy.residueMulch * 100)} />
             <Index label="vs. baseline" value={forageChange} signed />
           </div>
-          <p className="mt-2 text-[10px] leading-4 text-[#65766A]">
+          <p className="mt-2 text-[10px] leading-4 text-[#94A3B8]">
             These are strategy indices, not measured forage yield, feed quality, or monetary value. Removing stalks or vines can reduce soil cover; confirm feed safety and residue needs with local livestock and extension advisers.
           </p>
 
-          <div className="mt-4 border-t border-[#DCE5D9] pt-3">
-            <h5 className="text-xs font-bold text-[#263B2E]">Estimate feed replacement from your own numbers</h5>
-            <p className="mt-1 text-[10px] leading-4 text-[#65766A]">Enter harvestable dry matter and the local purchased-feed price. This is a gross equivalent before harvest, storage, transport, spoilage, and ration costs.</p>
+          <div className="mt-4 border-t border-sky-400/20 pt-3">
+            <h5 className="text-xs font-bold text-[#F0F9FF]">Estimate feed replacement from your own numbers</h5>
+            <p className="mt-1 text-[10px] leading-4 text-[#94A3B8]">Enter harvestable dry matter and the local purchased-feed price. This is a gross equivalent before harvest, storage, transport, spoilage, and ration costs.</p>
             <div className="mt-2 grid gap-2 sm:grid-cols-2">
               <NumberField label="Usable dry matter (tonnes/ha)" value={dryMatterYield} onChange={setDryMatterYield} min="0" />
               <NumberField label={`Feed replacement price (${currencyPrefix}/tonne)`} value={replacementPrice} onChange={setReplacementPrice} min="0" />
             </div>
-            <p aria-live="polite" className="mt-2 rounded-lg bg-white p-2.5 font-mono text-xs text-[#1B4332]">
+            <p aria-live="polite" className="mt-2 rounded-lg border border-sky-400/20 bg-[#0B1426] p-2.5 font-mono text-xs text-[#F0F9FF]">
               Gross feed replacement equivalent:{' '}
-              <strong>{grossFeedReplacement === null ? 'enter both values' : `${currencyPrefix} ${currency.format(grossFeedReplacement)}/ha`}</strong>
-              <span className="mt-1 block font-sans text-[10px] text-[#65766A]">Farmer-entered planning estimate; not a quoted market price or guaranteed income.</span>
+              <strong className="text-[#38BDF8]">{grossFeedReplacement === null ? 'enter both values' : `${currencyPrefix} ${currency.format(grossFeedReplacement)}/ha`}</strong>
+              <span className="mt-1 block font-sans text-[10px] text-[#94A3B8]">Farmer-entered planning estimate; not a quoted market price or guaranteed income.</span>
             </p>
           </div>
         </div>
 
-        <div className="rounded-xl border border-[#D4DDD0] bg-white p-4">
+        <div className="rounded-xl border border-sky-400/20 bg-[#0D182E] p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h4 className="text-sm font-extrabold text-[#17271D]">Official commodity benchmarks</h4>
-              <p className="mt-1 text-[10px] text-[#65766A]">Published reference snapshots · farmgate or elevator price, not your farm’s offer.</p>
+              <h4 className="text-sm font-extrabold text-[#F0F9FF]">Official commodity benchmarks</h4>
+              <p className="mt-1 text-[10px] text-[#94A3B8]">Published reference snapshots · farmgate or elevator price, not your farm’s offer.</p>
             </div>
-            <span className="rounded-full bg-slate-100 px-2 py-1 font-mono text-[9px] font-bold text-slate-700">Static published data</span>
+            <span className="rounded-full border border-sky-400/20 bg-[#0B1426] px-2 py-1 font-mono text-[9px] font-bold text-[#7DD3FC]">Static published data</span>
           </div>
-          <div className="mt-3 divide-y divide-[#E2E8DF]">
+          <div className="mt-3 divide-y divide-sky-400/20">
             {benchmarks.map((benchmark) => (
               <div key={benchmark.commodity} className="flex items-center justify-between gap-3 py-2.5">
                 <div>
-                  <p className="text-xs font-semibold text-[#263B2E]">{benchmark.commodity}</p>
-                  <p className="mt-0.5 font-mono text-[10px] text-[#738278]">{benchmark.period}</p>
-                  <p className="mt-0.5 text-[9px] text-[#738278]">
-                    <a className="underline" href={benchmark.citationUrl} target="_blank" rel="noreferrer">{benchmark.source}</a>
+                  <p className="text-xs font-semibold text-[#F0F9FF]">{benchmark.commodity}</p>
+                  <p className="mt-0.5 font-mono text-[10px] text-[#94A3B8]">{benchmark.period}</p>
+                  <p className="mt-0.5 text-[9px] text-[#94A3B8]">
+                    <a className="text-sky-300 underline" href={benchmark.citationUrl} target="_blank" rel="noreferrer">{benchmark.source}</a>
                     {' · '}{benchmark.status} snapshot checked {benchmark.retrievalDate}
                   </p>
                 </div>
-                <p className="shrink-0 font-mono text-sm font-extrabold text-[#1B4332]">{benchmark.value.toFixed(2)} <span className="text-[10px]">{benchmark.unit}</span></p>
+                <p className="shrink-0 font-mono text-sm font-extrabold text-[#38BDF8]">{benchmark.value.toFixed(2)} <span className="text-[10px] text-[#7DD3FC]">{benchmark.unit}</span></p>
               </div>
             ))}
           </div>
-          <div className="mt-2 rounded-lg bg-[#F7FAF5] p-3 text-[10px] leading-4 text-[#536458]">
+          <div className="mt-2 rounded-lg border border-sky-400/15 bg-[#0B1426] p-3 text-[10px] leading-4 text-[#CBD5E1]">
             {farm.country === 'Philippines'
               ? 'PSA national September 2026 farmgate figures; they are not province-level quotes and do not include mungbean, mango, peanut, or forage prices.'
               : 'USDA AMS Central Illinois country-elevator averages. Bids vary with delivery point, moisture, grade, freight, and basis; call a local buyer for a current offer.'}
           </div>
-          <div className="mt-3 flex flex-wrap gap-3 text-[11px] font-bold text-[#1B4332]">
+          <div className="mt-3 flex flex-wrap gap-3 text-[11px] font-bold text-sky-300">
             {farm.country === 'Philippines' ? (
               <>
-                <a className="underline" href={PSA_REPORT_URL} target="_blank" rel="noreferrer">PSA Q3 2026 palay &amp; corn release</a>
-                <a className="underline" href={PSA_OPENSTAT_URL} target="_blank" rel="noreferrer">PSA OpenSTAT price tables</a>
+                <a className="underline hover:text-sky-200" href={PSA_REPORT_URL} target="_blank" rel="noreferrer">PSA Q3 2026 palay &amp; corn release</a>
+                <a className="underline hover:text-sky-200" href={PSA_OPENSTAT_URL} target="_blank" rel="noreferrer">PSA OpenSTAT price tables</a>
               </>
             ) : (
-              <a className="underline" href={USDA_AMS_REPORT_URL} target="_blank" rel="noreferrer">USDA AMS Illinois Grain Bids report</a>
+              <a className="underline hover:text-sky-200" href={USDA_AMS_REPORT_URL} target="_blank" rel="noreferrer">USDA AMS Illinois Grain Bids report</a>
             )}
           </div>
         </div>
@@ -146,9 +149,9 @@ interface IndexProps {
 }
 
 const Index: React.FC<IndexProps> = ({ label, value, signed = false }) => (
-  <div className="rounded-lg bg-white p-2">
-    <p className="text-[9px] leading-3 text-[#65766A]">{label}</p>
-    <p className="mt-1 font-mono text-sm font-extrabold text-[#1B4332]">{signed && value > 0 ? '+' : ''}{value}{signed ? ' pts' : '/100'}</p>
+  <div className="rounded-lg border border-sky-400/20 bg-[#0B1426] p-2">
+    <p className="text-[9px] leading-3 text-sky-300/75">{label}</p>
+    <p className="mt-1 font-mono text-sm font-extrabold text-[#38BDF8]">{signed && value > 0 ? '+' : ''}{value}{signed ? ' pts' : '/100'}</p>
   </div>
 );
 
@@ -160,7 +163,7 @@ interface NumberFieldProps {
 }
 
 const NumberField: React.FC<NumberFieldProps> = ({ label, value, onChange, min }) => (
-  <label className="block text-[10px] font-semibold text-[#536458]">
+  <label className="block text-[10px] font-semibold text-[#CBD5E1]">
     {label}
     <input
       type="number"
@@ -169,7 +172,7 @@ const NumberField: React.FC<NumberFieldProps> = ({ label, value, onChange, min }
       step="any"
       value={value}
       onChange={(event) => onChange(event.currentTarget.value)}
-      className="mt-1 w-full rounded-lg border border-[#C7D5C5] bg-white px-2.5 py-2 font-mono text-xs"
+      className="mt-1 w-full rounded-lg border border-sky-400/20 bg-[#0B1426] px-2.5 py-2 font-mono text-xs text-[#F0F9FF] focus-visible:outline-2 focus-visible:outline-sky-400"
     />
   </label>
 );

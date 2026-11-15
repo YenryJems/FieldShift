@@ -127,7 +127,7 @@ export const calculateTerroirAssessment = (
   ];
 
   const sugarRes = calculateMangoSugarLoadingIndex(
-    climate.solarRadiationMjM2Day,
+    climate.solarRadiationMj,
     climate.dryDaysLt3Mm,
     farm.slopePct,
   );

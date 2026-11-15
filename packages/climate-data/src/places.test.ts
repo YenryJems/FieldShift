@@ -52,21 +52,21 @@ describe('NASA POWER historical monthly summaries', () => {
 
     const january = getMonthlyTelemetry('nueva-ecija', 1);
     expect(january.month).toBe('January');
-    expect(january.t2m).toBeCloseTo(PLACES_BY_ID['nueva-ecija'].monthly[0].meanTemperatureC ?? 0);
-    expect(january.precCorr).toBeCloseTo((0.59 + 3.16 + 2.47 + 2.53 + 0.57 + 1.02) / 6);
-    expect(january.gwetRoot).toBeCloseTo(
-      PLACES_BY_ID['nueva-ecija'].monthly[0].meanRootWetnessIndex ?? 0,
+    expect(january.airTempCelsius).toBeCloseTo(PLACES_BY_ID['nueva-ecija'].monthly[0].meanTemperatureC ?? 0);
+    expect(january.dailyRainfallMm).toBeCloseTo((0.59 + 3.16 + 2.47 + 2.53 + 0.57 + 1.02) / 6);
+    expect(january.rootZoneMoisturePct).toBe(
+      Math.round((PLACES_BY_ID['nueva-ecija'].monthly[0].meanRootWetnessIndex ?? 0) * 100),
     );
     expect(january.relativeHumidityPct).toBeCloseTo(
       PLACES_BY_ID['nueva-ecija'].monthly[0].meanRelativeHumidityPct ?? 0,
     );
-    expect(january.solarRadiationMjM2Day).toBeCloseTo(
+    expect(january.solarRadiationMj).toBeCloseTo(
       PLACES_BY_ID['nueva-ecija'].monthly[0].meanSolarRadiationMjM2Day ?? 0,
     );
-    expect(january.gwetTop).toBeCloseTo(
-      PLACES_BY_ID['nueva-ecija'].monthly[0].meanSurfaceWetnessIndex ?? 0,
+    expect(january.surfaceSoilMoisturePct).toBe(
+      Math.round((PLACES_BY_ID['nueva-ecija'].monthly[0].meanSurfaceWetnessIndex ?? 0) * 100),
     );
-    expect(january.imergPrecipitationMmDay).toBeCloseTo(
+    expect(january.imergRainfallMmDay).toBeCloseTo(
       PLACES_BY_ID['nueva-ecija'].monthly[0].meanImergPrecipitationMmDay ?? 0,
     );
   });

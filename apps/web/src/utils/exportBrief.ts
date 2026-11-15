@@ -21,7 +21,7 @@ export const formatSmsFieldBrief = (params: {
     `[FIELDSHIFT MAO / EXTENSION BRIEF]`,
     `Farm: ${farm.name} (${farm.locationLabel}, ${Math.abs(farm.latitude).toFixed(3)}${latitudeHemisphere}, ${Math.abs(farm.longitude).toFixed(3)}${longitudeHemisphere}, ${farm.elevationM}m, ${farm.slopePct}% slope)`,
     `Soil: ${farm.soilType} | Month: ${climate.monthLabel} | Scenario: ${climate.scenarioLabel}`,
-    `NASA POWER Signals: T2M ${climate.adjustedTempC.toFixed(1)}C (Tmax ${climate.adjustedMaxTempC.toFixed(1)}C) | Rain ${climate.adjustedDailyPrecipMm.toFixed(2)} mm/day | GWETROOT ${climate.adjustedGwetRoot.toFixed(2)}`,
+    `NASA POWER Signals: Air Temp ${climate.adjustedTempC.toFixed(1)}C (Max ${climate.adjustedMaxTempC.toFixed(1)}C) | Rainfall ${climate.adjustedDailyRainfallMm.toFixed(2)} mm/day | Root-Zone Moisture ${climate.adjustedRootZoneMoisturePct}%`,
     `Top Ranked Strategy: ${topStrategy.shortLabel} — FARI ${topScore.fariScore.toFixed(1)}/100 (W:${Math.round(topScore.pillars.water * 100)} E:${Math.round(topScore.pillars.erosion * 100)} N:${Math.round(topScore.pillars.nutrients * 100)} M:${Math.round(topScore.pillars.market * 100)})`,
     `Crops: ${topStrategy.crops.join(' + ')} | Est. N-Fix: +${topStrategy.nFixKgHa} kg N/ha (Projected estimate)`,
     `90-Day Spray Validator (${cfiWindow.monthLabel}): ${cfiWindow.badgeText} — ${cfiWindow.farmerActionAdvisory}`,

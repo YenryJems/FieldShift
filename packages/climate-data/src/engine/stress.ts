@@ -1,4 +1,5 @@
 import extendedTelemetryRaw from '../nasaExtendedTelemetry.json';
+import { wetnessIndexToPct } from '../metricLabels';
 import { getMonthlyTelemetry } from '../nasaTelemetryData';
 import type {
   AdjustedClimateContext,
@@ -123,18 +124,22 @@ export const applyClimateStress = (
   const ext = getExtendedMonthlyRecord(farmId, m);
   const preset = STRESS_PRESETS[scenarioId] ?? STRESS_PRESETS.baseline;
 
-  const adjustedTempC = roundTo(base.t2m + preset.tempDeltaC, 2);
+  const adjustedTempC = roundTo(base.airTempCelsius + preset.tempDeltaC, 2);
   const adjustedMaxTempC = roundTo(ext.t2mMaxC + preset.tempDeltaC, 2);
-  const adjustedDailyPrecipMm = roundTo(
-    Math.max(0, base.precCorr * preset.precipMultiplier),
+  const adjustedDailyRainfallMm = roundTo(
+    Math.max(0, base.dailyRainfallMm * preset.precipMultiplier),
     2,
   );
   const adjustedRainBurstMm = roundTo(
     Math.max(0, ext.p95DailyPrecipMm * preset.precipMultiplier),
     2,
   );
-  const adjustedGwetTop = roundTo(clamp(base.gwetTop * preset.wetnessMultiplier, 0, 1), 3);
-  const adjustedGwetRoot = roundTo(clamp(base.gwetRoot * preset.wetnessMultiplier, 0, 1), 3);
+  const adjustedSurfaceMoisturePct = wetnessIndexToPct(
+    (base.surfaceSoilMoisturePct / 100) * preset.wetnessMultiplier,
+  );
+  const adjustedRootZoneMoisturePct = wetnessIndexToPct(
+    (base.rootZoneMoisturePct / 100) * preset.wetnessMultiplier,
+  );
 
   return {
     scenarioId: preset.id,
@@ -142,20 +147,20 @@ export const applyClimateStress = (
     scenarioDescription: preset.description,
     month: m,
     monthLabel: base.month,
-    baselineTempC: roundTo(base.t2m, 2),
+    baselineTempC: roundTo(base.airTempCelsius, 2),
     adjustedTempC,
     baselineMaxTempC: ext.t2mMaxC,
     adjustedMaxTempC,
     baselineMinTempC: ext.t2mMinC,
-    baselineDailyPrecipMm: roundTo(base.precCorr, 2),
-    adjustedDailyPrecipMm,
+    baselineDailyRainfallMm: roundTo(base.dailyRainfallMm, 2),
+    adjustedDailyRainfallMm,
     baselineRainBurstMm: ext.p95DailyPrecipMm,
     adjustedRainBurstMm,
-    baselineGwetTop: roundTo(base.gwetTop, 3),
-    adjustedGwetTop,
-    baselineGwetRoot: roundTo(base.gwetRoot, 3),
-    adjustedGwetRoot,
-    solarRadiationMjM2Day: roundTo(base.solarRadiationMjM2Day, 2),
+    baselineSurfaceMoisturePct: base.surfaceSoilMoisturePct,
+    adjustedSurfaceMoisturePct,
+    baselineRootZoneMoisturePct: base.rootZoneMoisturePct,
+    adjustedRootZoneMoisturePct,
+    solarRadiationMj: roundTo(base.solarRadiationMj, 2),
     relativeHumidityPct: roundTo(base.relativeHumidityPct, 1),
     evapMmDay: ext.evapMmDay,
     stormDaysGe14Mm: roundTo(ext.meanStormDaysGe14Mm * preset.precipMultiplier, 2),

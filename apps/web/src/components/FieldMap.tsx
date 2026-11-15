@@ -121,21 +121,21 @@ export const FieldMap: React.FC<FieldMapProps> = ({
   };
 
   const getMonthlySignalStyle = (telemetry: MonthlyTelemetry) => {
-    if (telemetry.gwetRoot < 0.55) {
+    if (telemetry.rootZoneMoisturePct < 55) {
       return {
         color: '#ef4444',
         fillColor: '#f97316',
-        label: 'Lower root-zone wetness signal',
+        label: 'Lower root-zone moisture signal',
       };
     }
-    if (telemetry.precCorr > 14 || telemetry.gwetRoot > 0.93) {
+    if (telemetry.dailyRainfallMm > 14 || telemetry.rootZoneMoisturePct > 93) {
       return {
         color: '#3b82f6',
         fillColor: '#0ea5e9',
-        label: 'Higher rainfall or wetness signal',
+        label: 'Higher rainfall or moisture signal',
       };
     }
-    if (telemetry.t2m > 28.5) {
+    if (telemetry.airTempCelsius > 28.5) {
       return {
         color: '#f59e0b',
         fillColor: '#eab308',
@@ -355,9 +355,9 @@ export const FieldMap: React.FC<FieldMapProps> = ({
             <hr style="margin: 6px 0; border-color: #e2e8f0;"/>
             <div style="font-size: 11px; line-height: 1.5; color: #1e293b;">
               <b>Historical ${activeMonthData.month} signal:</b> ${signalStyle.label}<br/>
-              • <b>Root-zone wetness index:</b> ${activeMonthData.gwetRoot.toFixed(2)} (unitless)<br/>
-              • <b>2 m temperature:</b> ${activeMonthData.t2m.toFixed(1)}°C<br/>
-              • <b>Precipitation:</b> ${activeMonthData.precCorr.toFixed(2)} mm/day<br/>
+              • <b>Root-Zone Moisture:</b> ${activeMonthData.rootZoneMoisturePct}%<br/>
+              • <b>Air Temperature:</b> ${activeMonthData.airTempCelsius.toFixed(1)}°C<br/>
+              • <b>Daily Rainfall:</b> ${activeMonthData.dailyRainfallMm.toFixed(2)} mm/day<br/>
               • <b>Soil & slope:</b> ${activeFarm.soilType} (${activeFarm.slopePct}% slope)<br/>
               • <b>NASA POWER point:</b> ${plot.center.lat}°, ${plot.center.lon}° (${plot.center.elevationM} m)
             </div>
@@ -413,13 +413,13 @@ export const FieldMap: React.FC<FieldMapProps> = ({
   return (
     <div className="space-y-3">
       {/* NASA raster products are identified separately from illustrative overlays. */}
-      <div className="rounded-xl border border-[#D4DDD0] bg-[#F7FAF5] p-3">
+      <div className="rounded-xl border border-sky-400/20 bg-[#0B1426]/85 p-3 backdrop-blur-md">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#263B2E]">
+            <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#F0F9FF]">
               Environmental Telemetry Overlays (6 Layers)
             </span>
-            <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 font-mono text-[10px] font-bold text-amber-900">
+            <span className="rounded-full border border-sky-400/20 bg-[#0D182E] px-2 py-0.5 font-mono text-[10px] font-semibold text-[#CBD5E1]">
               Three NASA data layers and three illustrative overlays
             </span>
           </div>
@@ -429,8 +429,8 @@ export const FieldMap: React.FC<FieldMapProps> = ({
             aria-pressed={showSplitComparison}
             className={`rounded-lg border px-2.5 py-1 text-[11px] font-bold transition-colors ${
               showSplitComparison
-                ? 'border-[#1B4332] bg-[#1B4332] text-white'
-                : 'border-[#C7D5C5] bg-white text-[#1B4332] hover:bg-[#EEF5EB]'
+                ? 'border-sky-400 bg-sky-400 text-[#040811] shadow-[0_0_18px_rgba(56,189,248,0.22)]'
+                : 'border-sky-400/20 bg-[#0D182E] text-[#F0F9FF] hover:border-sky-400/50 hover:bg-[#0B1426]'
             }`}
           >
             {showSplitComparison
@@ -442,7 +442,7 @@ export const FieldMap: React.FC<FieldMapProps> = ({
               type="button"
               aria-pressed={showOsmOverlay}
               onClick={() => setShowOsmOverlay((visible) => !visible)}
-              className="rounded-lg border border-[#C7D5C5] bg-white px-2.5 py-1 text-[11px] font-bold text-[#1B4332] hover:bg-[#EEF5EB] focus-visible:outline-2 focus-visible:outline-offset-2"
+              className="rounded-lg border border-sky-400/20 bg-[#0D182E] px-2.5 py-1 text-[11px] font-bold text-[#F0F9FF] transition-colors hover:border-sky-400/50 hover:bg-[#0B1426] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
             >
               {showOsmOverlay ? 'Hide' : 'Show'} OSM roads &amp; boundaries
             </button>
@@ -464,23 +464,23 @@ export const FieldMap: React.FC<FieldMapProps> = ({
                 onClick={() => toggleOverlay(overlay.id)}
                 className={`flex flex-col items-start rounded-lg border p-2.5 text-left transition-colors ${
                   isActive
-                    ? 'border-[#1B4332] bg-white shadow-xs'
-                    : 'border-[#DCE4D9] bg-[#F3F6F1]/70 text-[#536458] hover:bg-white'
+                    ? 'border-sky-400 bg-[#0D182E] shadow-[0_0_18px_rgba(56,189,248,0.22)]'
+                    : 'border-sky-400/20 bg-[#0D182E]/70 text-[#94A3B8] hover:border-sky-400/50 hover:bg-[#0B1426]'
                 }`}
               >
                 <div className="flex w-full items-center justify-between gap-2">
-                  <span className="flex items-center gap-1.5 text-xs font-bold text-[#17271D]">
+                  <span className="flex items-center gap-1.5 text-xs font-bold text-[#F0F9FF]">
                     <span
-                      className="inline-block h-2.5 w-2.5 rounded-full"
+                      className="inline-block h-2 w-2 rounded-full"
                       style={{ backgroundColor: overlay.color }}
                     />
                     {overlay.label}
                   </span>
-                  <span className={`rounded px-1.5 py-0.5 font-mono text-[9px] font-semibold ${overlay.statusLabel.startsWith('NASA') ? 'bg-sky-100 text-sky-950' : 'bg-amber-100/90 text-amber-900'}`}>
+                  <span className="rounded border border-sky-400/20 bg-[#0B1426] px-1.5 py-0.5 font-mono text-[9px] font-semibold text-[#7DD3FC]">
                     {overlay.statusLabel}
                   </span>
                 </div>
-                <span className="mt-1 font-mono text-[10px] text-[#52715E]">
+                <span className="mt-1 font-mono text-[10px] text-sky-300/75">
                   {overlay.shortSensor}
                 </span>
               </button>
@@ -493,9 +493,9 @@ export const FieldMap: React.FC<FieldMapProps> = ({
       {tileError && (
         <div
           role="status"
-          className="rounded-lg border border-amber-300 bg-amber-50 px-3.5 py-2.5 text-xs text-amber-950"
+          className="rounded-lg border border-sky-400/20 bg-[#0D182E] px-3.5 py-2.5 text-xs text-[#CBD5E1]"
         >
-          <span className="font-bold">Offline / Tile-Server Fallback Active:</span> Map imagery
+          <span className="font-bold text-[#F0F9FF]">Offline / Tile-Server Fallback Active:</span> Map imagery
           tiles could not be reached. Vector study-area extents, NASA POWER point coordinates (
           {plotConfig.center.lat}°, {plotConfig.center.lon}°), and all FARI crop-rotation
           calculations remain 100% functional offline.
@@ -503,7 +503,7 @@ export const FieldMap: React.FC<FieldMapProps> = ({
       )}
 
       {/* Map Canvas + Optional Split-Screen Visual Comparison */}
-      <div className="relative h-[420px] w-full overflow-hidden rounded-xl border border-[#D4DDD0] bg-[#E8EFE6] shadow-lg">
+      <div className="relative h-[420px] w-full overflow-hidden rounded-xl border border-sky-400/20 bg-[#08101F]">
         <div
           ref={mapContainerRef}
           className="z-0 h-full w-full"
@@ -513,13 +513,13 @@ export const FieldMap: React.FC<FieldMapProps> = ({
 
         {showSplitComparison && <SplitSlider value={splitPercent} onChange={setSplitPercent} />}
 
-        <div className={`absolute ${showSplitComparison ? 'bottom-16' : 'bottom-3'} left-3 z-[1000] max-w-[calc(100%-1.5rem)] rounded-lg border border-slate-700 bg-slate-900/90 px-3 py-2 text-xs text-slate-100 shadow backdrop-blur-sm`}>
-          <span className="font-semibold text-emerald-400">
+        <div className={`absolute ${showSplitComparison ? 'bottom-16' : 'bottom-3'} left-3 z-[1000] max-w-[calc(100%-1.5rem)] rounded-lg border border-sky-400/25 bg-[#08101F]/90 px-3 py-2 text-xs text-[#F0F9FF] backdrop-blur-md`}>
+          <span className="font-semibold text-[#7DD3FC]">
             Historical {activeMonthData.month} signal:
           </span>{' '}
-          {signalStyle.label} · {activeMonthData.t2m.toFixed(1)}°C ·{' '}
-          {activeMonthData.precCorr.toFixed(2)} mm/day · GWETROOT{' '}
-          {activeMonthData.gwetRoot.toFixed(2)}
+          {signalStyle.label} · {activeMonthData.airTempCelsius.toFixed(1)}°C ·{' '}
+          {activeMonthData.dailyRainfallMm.toFixed(2)} mm/day · Root-Zone Moisture{' '}
+          {activeMonthData.rootZoneMoisturePct}%
         </div>
       </div>
 

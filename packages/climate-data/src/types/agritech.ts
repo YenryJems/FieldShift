@@ -201,15 +201,15 @@ export interface AdjustedClimateContext {
   baselineMaxTempC: number;
   adjustedMaxTempC: number;
   baselineMinTempC: number;
-  baselineDailyPrecipMm: number;
-  adjustedDailyPrecipMm: number;
+  baselineDailyRainfallMm: number;
+  adjustedDailyRainfallMm: number;
   baselineRainBurstMm: number;
   adjustedRainBurstMm: number;
-  baselineGwetTop: number;
-  adjustedGwetTop: number;
-  baselineGwetRoot: number;
-  adjustedGwetRoot: number;
-  solarRadiationMjM2Day: number;
+  baselineSurfaceMoisturePct: number;
+  adjustedSurfaceMoisturePct: number;
+  baselineRootZoneMoisturePct: number;
+  adjustedRootZoneMoisturePct: number;
+  solarRadiationMj: number;
   relativeHumidityPct: number;
   evapMmDay: number;
   stormDaysGe14Mm: number;
@@ -245,6 +245,7 @@ export interface TerroirAssessment {
 
 export interface MonthlyZScoreAnomaly {
   variable: 'T2M' | 'PRECTOTCORR' | 'GWETROOT' | 'GWETTOP' | 'ALLSKY_SFC_SW_DWN';
+  rawCode: 'T2M' | 'PRECTOTCORR' | 'GWETROOT' | 'GWETTOP' | 'ALLSKY_SFC_SW_DWN';
   label: string;
   unit: string;
   currentValue: number;
@@ -294,9 +295,9 @@ export interface CfiMonthWindow {
   heatStressDaysGe33C: number;
   coldDaysLe2C: number;
   dryDaysLt3Mm: number;
-  t2mMaxC: number;
-  t2mMinC: number;
-  gwetRoot: number;
+  maxTempC: number;
+  minTempC: number;
+  rootZoneMoisturePct: number;
   farmerActionAdvisory: string;
 }
 

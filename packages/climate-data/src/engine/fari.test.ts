@@ -192,6 +192,10 @@ describe('Phase 5 & 4 — Terroir, SI Comparison, CFI Spray Validator & Soil Cer
     const si = calculateSiComparison('guimaras', 3, 'baseline', 'S3');
     expect(si.approachA.sampleYears).toBe(25);
     expect(si.approachA.anomalies).toHaveLength(5);
+    const rootAnomaly = si.approachA.anomalies.find((a) => a.rawCode === 'GWETROOT');
+    expect(rootAnomaly?.unit).toBe('%');
+    expect(rootAnomaly?.currentValue).toBeGreaterThanOrEqual(0);
+    expect(rootAnomaly?.currentValue).toBeLessThanOrEqual(100);
     expect(si.approachB.label).toBe('Rule-based suitability ensemble (RF-style)');
     expect(si.approachB.orbitalConfidencePct).toBe(80);
     expect(si.approachB.groundTruthRequiredPct).toBe(20);
@@ -216,6 +220,9 @@ describe('Phase 5 & 4 — Terroir, SI Comparison, CFI Spray Validator & Soil Cer
 
     expect(drySeasonWindows).toHaveLength(3);
     expect(drySeasonWindows[0].riskLevel).toBe('green');
+    expect(drySeasonWindows[0].rootZoneMoisturePct).toBeGreaterThanOrEqual(0);
+    expect(drySeasonWindows[0].rootZoneMoisturePct).toBeLessThanOrEqual(100);
+    expect(drySeasonWindows[0].maxTempC).toBeGreaterThan(drySeasonWindows[0].minTempC);
     expect(wetSeasonWindows[0].riskLevel).toBe('red');
   });
 

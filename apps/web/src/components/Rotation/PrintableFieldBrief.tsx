@@ -126,20 +126,20 @@ export const PrintableFieldBrief: React.FC<PrintableFieldBriefProps> = ({
           <div><span>Selected month</span><strong>{climate.monthLabel}</strong></div>
           <div><span>Scenario</span><strong>{climate.scenarioLabel}</strong></div>
           <div><span>Air temperature · mean</span><strong>{fixed(climate.baselineTempC, 1)} → {fixed(climate.adjustedTempC, 1)} °C</strong></div>
-          <div><span>Daily precipitation · mean</span><strong>{fixed(climate.baselineDailyPrecipMm, 2)} → {fixed(climate.adjustedDailyPrecipMm, 2)} mm/day</strong></div>
-          <div><span>Root wetness index</span><strong>{fixed(climate.baselineGwetRoot)} → {fixed(climate.adjustedGwetRoot)}</strong></div>
-          <div><span>Surface wetness index</span><strong>{fixed(climate.baselineGwetTop)} → {fixed(climate.adjustedGwetTop)}</strong></div>
+          <div><span>Daily rainfall · mean</span><strong>{fixed(climate.baselineDailyRainfallMm, 2)} → {fixed(climate.adjustedDailyRainfallMm, 2)} mm/day</strong></div>
+          <div><span>Root-Zone Moisture</span><strong>{climate.baselineRootZoneMoisturePct}% → {climate.adjustedRootZoneMoisturePct}%</strong></div>
+          <div><span>Surface Moisture</span><strong>{climate.baselineSurfaceMoisturePct}% → {climate.adjustedSurfaceMoisturePct}%</strong></div>
         </div>
         <table className="brief-table">
           <thead><tr><th>Historical signal · {monthlyTelemetry.month}</th><th>Value</th><th>Units / meaning</th></tr></thead>
           <tbody>
-            <tr><td>T2M</td><td>{fixed(monthlyTelemetry.t2m, 2)}</td><td>°C · 2 m air-temperature mean</td></tr>
-            <tr><td>PRECTOTCORR</td><td>{fixed(monthlyTelemetry.precCorr, 2)}</td><td>mm/day · corrected precipitation mean</td></tr>
-            <tr><td>IMERG_PRECTOT</td><td>{fixed(monthlyTelemetry.imergPrecipitationMmDay, 2)}</td><td>mm/day · separate GPM precipitation product</td></tr>
-            <tr><td>GWETROOT</td><td>{fixed(monthlyTelemetry.gwetRoot, 3)}</td><td>Unitless NASA POWER root-zone wetness index · not a soil-water percentage</td></tr>
-            <tr><td>GWETTOP</td><td>{fixed(monthlyTelemetry.gwetTop, 3)}</td><td>Unitless NASA POWER surface wetness index · not a field measurement</td></tr>
-            <tr><td>RH2M</td><td>{fixed(monthlyTelemetry.relativeHumidityPct, 1)}</td><td>% · relative humidity at 2 m</td></tr>
-            <tr><td>ALLSKY_SFC_SW_DWN</td><td>{fixed(monthlyTelemetry.solarRadiationMjM2Day, 2)}</td><td>MJ/m²/day · all-sky surface shortwave radiation</td></tr>
+            <tr><td>Air Temperature</td><td>{fixed(monthlyTelemetry.airTempCelsius, 2)}</td><td>°C · 2 m air-temperature mean</td></tr>
+            <tr><td>Daily Rainfall</td><td>{fixed(monthlyTelemetry.dailyRainfallMm, 2)}</td><td>mm/day · corrected precipitation mean</td></tr>
+            <tr><td>GPM IMERG Rainfall</td><td>{fixed(monthlyTelemetry.imergRainfallMmDay, 2)}</td><td>mm/day · separate GPM precipitation product</td></tr>
+            <tr><td>Root-Zone Moisture</td><td>{monthlyTelemetry.rootZoneMoisturePct}%</td><td>0–100% scaled NASA POWER root-zone wetness · not a field probe reading</td></tr>
+            <tr><td>Surface Moisture</td><td>{monthlyTelemetry.surfaceSoilMoisturePct}%</td><td>0–100% scaled NASA POWER surface wetness · not a field measurement</td></tr>
+            <tr><td>Relative Humidity</td><td>{fixed(monthlyTelemetry.relativeHumidityPct, 1)}</td><td>% · relative humidity at 2 m</td></tr>
+            <tr><td>Solar Radiation</td><td>{fixed(monthlyTelemetry.solarRadiationMj, 2)}</td><td>MJ/m²/day · all-sky surface shortwave radiation</td></tr>
             <tr><td>Historical storm-day mean</td><td>{fixed(climate.stormDaysGe14Mm, 1)}</td><td>Days/month at or above 14 mm/day · 2020–2025 daily summary</td></tr>
             <tr><td>Historical dry-day mean</td><td>{fixed(climate.dryDaysLt3Mm, 1)}</td><td>Days/month below 3 mm/day · 2020–2025 daily summary</td></tr>
           </tbody>
@@ -169,9 +169,9 @@ export const PrintableFieldBrief: React.FC<PrintableFieldBriefProps> = ({
       <section className="brief-section">
         <div className="brief-section-heading"><span>04</span><div><h2>Seasonal risk window · next 90 climatological days</h2><p>Historical 2020–2025 monthly event frequencies, not a day-specific forecast.</p></div></div>
         <table className="brief-table">
-          <thead><tr><th>Month</th><th>Screening result</th><th>Storm days ≥14 mm</th><th>Heat days ≥33 °C</th><th>Dry days &lt;3 mm</th><th>Root wetness</th></tr></thead>
+          <thead><tr><th>Month</th><th>Screening result</th><th>Storm days ≥14 mm</th><th>Heat days ≥33 °C</th><th>Dry days &lt;3 mm</th><th>Root-Zone Moisture</th></tr></thead>
           <tbody>{cfiWindows.map((window) => <tr key={window.month}>
-            <td><b>{window.monthLabel}</b></td><td>{window.badgeText}</td><td>{fixed(window.stormDaysGe14Mm, 1)}</td><td>{fixed(window.heatStressDaysGe33C, 1)}</td><td>{fixed(window.dryDaysLt3Mm, 1)}</td><td>{fixed(window.gwetRoot, 2)}</td>
+            <td><b>{window.monthLabel}</b></td><td>{window.badgeText}</td><td>{fixed(window.stormDaysGe14Mm, 1)}</td><td>{fixed(window.heatStressDaysGe33C, 1)}</td><td>{fixed(window.dryDaysLt3Mm, 1)}</td><td>{window.rootZoneMoisturePct}%</td>
           </tr>)}</tbody>
         </table>
         <p className="brief-note"><b>Use:</b> Treat the color class as a historical screening signal. Check a local 24-hour forecast and crop-specific extension guidance before any planting, flower-induction, or foliar-application decision.</p>

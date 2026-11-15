@@ -42,11 +42,13 @@ export const calculateSiComparison = (
     roundTo((val - meanVal) / Math.max(stdVal, 0.01), 2);
 
   const zTemp = computeZ(climate.adjustedTempC, b25.t2mMeanC, b25.t2mStdC);
-  const zPrec = computeZ(climate.adjustedDailyPrecipMm, b25.precMeanMmDay, b25.precStdMmDay);
-  const zRoot = computeZ(climate.adjustedGwetRoot, b25.gwetRootMean, b25.gwetRootStd);
-  const zTop = computeZ(climate.adjustedGwetTop, b25.gwetTopMean, b25.gwetTopStd);
+  const zPrec = computeZ(climate.adjustedDailyRainfallMm, b25.precMeanMmDay, b25.precStdMmDay);
+  const rootNorm = clamp(climate.adjustedRootZoneMoisturePct / 100, 0, 1);
+  const topNorm = clamp(climate.adjustedSurfaceMoisturePct / 100, 0, 1);
+  const zRoot = computeZ(rootNorm, b25.gwetRootMean, b25.gwetRootStd);
+  const zTop = computeZ(topNorm, b25.gwetTopMean, b25.gwetTopStd);
   const zSolar = computeZ(
-    climate.solarRadiationMjM2Day,
+    climate.solarRadiationMj,
     b25.solarMeanMjM2Day,
     b25.solarStdMjM2Day,
   );
@@ -54,11 +56,12 @@ export const calculateSiComparison = (
   const anomalies: MonthlyZScoreAnomaly[] = [
     {
       variable: 'GWETROOT',
-      label: 'Root-Zone Soil Wetness (0–100 cm)',
-      unit: '0–1 index',
-      currentValue: climate.adjustedGwetRoot,
-      mean2001_2025: b25.gwetRootMean,
-      std2001_2025: b25.gwetRootStd,
+      rawCode: 'GWETROOT',
+      label: 'Root-Zone Moisture (0–100 cm)',
+      unit: '%',
+      currentValue: climate.adjustedRootZoneMoisturePct,
+      mean2001_2025: roundTo(b25.gwetRootMean * 100, 1),
+      std2001_2025: roundTo(b25.gwetRootStd * 100, 1),
       zScore: zRoot,
       anomalyClass: classifyZScore(zRoot),
       plainInterpretation:
@@ -70,21 +73,23 @@ export const calculateSiComparison = (
     },
     {
       variable: 'GWETTOP',
-      label: 'Surface Soil Wetness (0–5 cm)',
-      unit: '0–1 index',
-      currentValue: climate.adjustedGwetTop,
-      mean2001_2025: b25.gwetTopMean,
-      std2001_2025: b25.gwetTopStd,
+      rawCode: 'GWETTOP',
+      label: 'Surface Moisture (0–5 cm)',
+      unit: '%',
+      currentValue: climate.adjustedSurfaceMoisturePct,
+      mean2001_2025: roundTo(b25.gwetTopMean * 100, 1),
+      std2001_2025: roundTo(b25.gwetTopStd * 100, 1),
       zScore: zTop,
       anomalyClass: classifyZScore(zTop),
       plainInterpretation:
-        zTop <= -0.8 || climate.adjustedGwetTop < 0.55
+        zTop <= -0.8 || climate.adjustedSurfaceMoisturePct < 55
           ? 'Topsoil is dry and exposed to evaporative baking; surface mulch or fast-closing relay cover is critical.'
           : 'Surface moisture is adequate for seed germination and shallow root establishment.',
     },
     {
       variable: 'T2M',
-      label: '2m Mean Air Temperature',
+      rawCode: 'T2M',
+      label: 'Air Temperature (2 m)',
       unit: '°C',
       currentValue: climate.adjustedTempC,
       mean2001_2025: b25.t2mMeanC,
@@ -98,9 +103,10 @@ export const calculateSiComparison = (
     },
     {
       variable: 'PRECTOTCORR',
-      label: 'Daily Precipitation Rate',
+      rawCode: 'PRECTOTCORR',
+      label: 'Daily Rainfall',
       unit: 'mm/day',
-      currentValue: climate.adjustedDailyPrecipMm,
+      currentValue: climate.adjustedDailyRainfallMm,
       mean2001_2025: b25.precMeanMmDay,
       std2001_2025: b25.precStdMmDay,
       zScore: zPrec,
@@ -114,15 +120,16 @@ export const calculateSiComparison = (
     },
     {
       variable: 'ALLSKY_SFC_SW_DWN',
-      label: 'Surface Solar Irradiance',
+      rawCode: 'ALLSKY_SFC_SW_DWN',
+      label: 'Solar Radiation',
       unit: 'MJ/m²/day',
-      currentValue: climate.solarRadiationMjM2Day,
+      currentValue: climate.solarRadiationMj,
       mean2001_2025: b25.solarMeanMjM2Day,
       std2001_2025: b25.solarStdMjM2Day,
       zScore: zSolar,
       anomalyClass: classifyZScore(zSolar),
       plainInterpretation:
-        climate.solarRadiationMjM2Day >= 20
+        climate.solarRadiationMj >= 20
           ? 'High solar energy supports C4 photosynthesis and mango sugar loading if soil moisture is mulched.'
           : 'Moderate cloud-attenuated solar radiation.',
     },
@@ -165,8 +172,8 @@ export const calculateSiComparison = (
       baselinePeriod: '2001–2025 (25-year monthly climatology)',
       sampleYears: b25.yearsSampled,
       anomalies,
-      bareFieldRiskDetected: climate.adjustedGwetTop < 0.6 || zTop <= -0.8,
-      droughtOnsetDetected: climate.adjustedGwetRoot < 0.62 || zRoot <= -0.8,
+      bareFieldRiskDetected: climate.adjustedSurfaceMoisturePct < 60 || zTop <= -0.8,
+      droughtOnsetDetected: climate.adjustedRootZoneMoisturePct < 62 || zRoot <= -0.8,
       thermalStressDetected: climate.adjustedMaxTempC >= 33.0 || zTemp >= 1.0,
     },
     approachB: {
@@ -202,13 +209,13 @@ export const calculateCfiSprayCalendar = (
     const climate = applyClimateStress(farmId, m, scenarioId);
 
     const isRedWashout =
-      climate.stormDaysGe14Mm >= 4.0 || climate.adjustedDailyPrecipMm >= 8.0;
+      climate.stormDaysGe14Mm >= 4.0 || climate.adjustedDailyRainfallMm >= 8.0;
     const isAmberStress =
       !isRedWashout &&
       (climate.heatStressDaysGe33C >= 8.0 ||
         climate.adjustedMaxTempC >= 33.0 ||
         climate.coldDaysLe2C >= 2.0 ||
-        climate.adjustedGwetRoot < 0.45);
+        climate.adjustedRootZoneMoisturePct < 45);
 
     if (isRedWashout) {
       return {
@@ -220,9 +227,9 @@ export const calculateCfiSprayCalendar = (
         heatStressDaysGe33C: climate.heatStressDaysGe33C,
         coldDaysLe2C: climate.coldDaysLe2C,
         dryDaysLt3Mm: climate.dryDaysLt3Mm,
-        t2mMaxC: climate.adjustedMaxTempC,
-        t2mMinC: climate.baselineMinTempC,
-        gwetRoot: climate.adjustedGwetRoot,
+        maxTempC: climate.adjustedMaxTempC,
+        minTempC: climate.baselineMinTempC,
+        rootZoneMoisturePct: climate.adjustedRootZoneMoisturePct,
         farmerActionAdvisory: `Delay KNO₃ flower induction and foliar sprays: historical 2020–2025 records average ${climate.stormDaysGe14Mm.toFixed(1)} heavy storm days (≥14 mm/day) in ${climate.monthLabel}. Prioritize contour ground cover and drainage.`,
       };
     }
@@ -241,9 +248,9 @@ export const calculateCfiSprayCalendar = (
         heatStressDaysGe33C: climate.heatStressDaysGe33C,
         coldDaysLe2C: climate.coldDaysLe2C,
         dryDaysLt3Mm: climate.dryDaysLt3Mm,
-        t2mMaxC: climate.adjustedMaxTempC,
-        t2mMinC: climate.baselineMinTempC,
-        gwetRoot: climate.adjustedGwetRoot,
+        maxTempC: climate.adjustedMaxTempC,
+        minTempC: climate.baselineMinTempC,
+        rootZoneMoisturePct: climate.adjustedRootZoneMoisturePct,
         farmerActionAdvisory: `Caution for ${climate.monthLabel}: ${reason}. Apply organic ring-mulch or relay legume cover first, and spray only in cool early-morning hours (5:30–8:00 AM).`,
       };
     }
@@ -257,9 +264,9 @@ export const calculateCfiSprayCalendar = (
       heatStressDaysGe33C: climate.heatStressDaysGe33C,
       coldDaysLe2C: climate.coldDaysLe2C,
       dryDaysLt3Mm: climate.dryDaysLt3Mm,
-      t2mMaxC: climate.adjustedMaxTempC,
-      t2mMinC: climate.baselineMinTempC,
-      gwetRoot: climate.adjustedGwetRoot,
+      maxTempC: climate.adjustedMaxTempC,
+      minTempC: climate.baselineMinTempC,
+      rootZoneMoisturePct: climate.adjustedRootZoneMoisturePct,
       farmerActionAdvisory: `Favorable climatological window in ${climate.monthLabel} (${climate.dryDaysLt3Mm.toFixed(1)} dry days <3 mm/day, only ${climate.stormDaysGe14Mm.toFixed(1)} storm days ≥14 mm/day). Confirm 24-hour local weather forecast before spraying.`,
     };
   });

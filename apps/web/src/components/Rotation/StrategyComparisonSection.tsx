@@ -14,6 +14,7 @@ import {
 import {
   calculateCfiSprayCalendar,
   DEFAULT_FIELD_CONSTRAINTS,
+  DEFAULT_PRIORITY_WEIGHTS,
   FarmId,
   FieldConstraints,
   getMonthlyTelemetry,
@@ -55,6 +56,13 @@ const PEST_DISRUPTION_NOTES: Record<FarmId, string> = {
     'Soybean and cover-crop phases indicate planned non-corn intervals that can disrupt corn pest carryover; this calendar does not measure field pest populations.',
 };
 
+const INITIAL_PRIORITY_WEIGHTS: PriorityWeights = {
+  water: Math.round(DEFAULT_PRIORITY_WEIGHTS.water * 100),
+  erosion: Math.round(DEFAULT_PRIORITY_WEIGHTS.erosion * 100),
+  nutrients: Math.round(DEFAULT_PRIORITY_WEIGHTS.nutrients * 100),
+  market: Math.round(DEFAULT_PRIORITY_WEIGHTS.market * 100),
+};
+
 interface StrategyComparisonSectionProps {
   farmId: FarmId;
   selectedMonth: number;
@@ -62,6 +70,13 @@ interface StrategyComparisonSectionProps {
   displayMode?: 'all' | 'controls' | 'compare' | 'review';
   selectedStrategyId?: StrategyId | null;
   onSelectStrategy?: (strategyId: StrategyId) => void;
+  weights?: PriorityWeights;
+  onWeightsChange?: (weights: PriorityWeights) => void;
+  stressScenario?: StressScenarioId;
+  onStressScenarioChange?: (scenario: StressScenarioId) => void;
+  constraints?: FieldConstraints;
+  onConstraintsChange?: (constraints: FieldConstraints) => void;
+  onEditPriorities?: () => void;
 }
 
 const STAGE_STYLES: Record<
@@ -69,33 +84,33 @@ const STAGE_STYLES: Record<
   { bg: string; text: string; label: string }
 > = {
   'main-crop': {
-    bg: 'bg-[#1B4332]',
-    text: 'text-white',
+    bg: 'bg-sky-400',
+    text: 'text-[#040811]',
     label: 'Primary Crop',
   },
   'legume-relay': {
-    bg: 'bg-[#2D6A4F]',
-    text: 'text-white',
+    bg: 'bg-sky-400/25 border border-sky-400/40',
+    text: 'text-[#F0F9FF]',
     label: 'N-Fixing Legume Relay',
   },
   'resilient-relay': {
-    bg: 'bg-[#40916C]',
-    text: 'text-white',
+    bg: 'bg-[#0D182E] border border-sky-300/40',
+    text: 'text-[#7DD3FC]',
     label: 'Drought/Slope Resilient Relay',
   },
   'cover-mulch': {
-    bg: 'bg-[#74C69D]',
-    text: 'text-[#112A1E]',
+    bg: 'bg-emerald-400/20 border border-emerald-400/35',
+    text: 'text-emerald-200',
     label: 'Protective Cover / Mulch',
   },
   'harvest-transition': {
-    bg: 'bg-[#D8F3DC]',
-    text: 'text-[#1B4332]',
+    bg: 'bg-[#0D182E] border border-sky-400/20',
+    text: 'text-[#CBD5E1]',
     label: 'Harvest & Residue Return',
   },
   'bare-fallow': {
-    bg: 'bg-[#FDE2E4]',
-    text: 'text-[#8C1D28]',
+    bg: 'bg-[#08101F] border border-dashed border-sky-400/25',
+    text: 'text-[#94A3B8]',
     label: 'Bare Unshielded Fallow',
   },
 };
@@ -107,21 +122,51 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
   displayMode = 'all',
   selectedStrategyId = null,
   onSelectStrategy,
+  weights: controlledWeights,
+  onWeightsChange,
+  stressScenario: controlledStressScenario,
+  onStressScenarioChange,
+  constraints: controlledConstraints,
+  onConstraintsChange,
+  onEditPriorities,
 }) => {
   const { t } = useLanguage();
-  const [weights, setWeights] = useState<PriorityWeights>({
-    water: 25,
-    erosion: 25,
-    nutrients: 25,
-    market: 25,
-  });
-  const [stressScenario, setStressScenario] = useState<StressScenarioId>('baseline');
-  const [constraints, setConstraints] = useState<FieldConstraints>(
+  const [internalWeights, setInternalWeights] = useState<PriorityWeights>(
+    INITIAL_PRIORITY_WEIGHTS,
+  );
+  const [internalStressScenario, setInternalStressScenario] =
+    useState<StressScenarioId>('baseline');
+  const [internalConstraints, setInternalConstraints] = useState<FieldConstraints>(
     DEFAULT_FIELD_CONSTRAINTS,
   );
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [copiedSms, setCopiedSms] = useState(false);
   const [copyFailed, setCopyFailed] = useState(false);
+
+  const weights = controlledWeights ?? internalWeights;
+  const stressScenario = controlledStressScenario ?? internalStressScenario;
+  const constraints = controlledConstraints ?? internalConstraints;
+
+  const updateWeights = (next: PriorityWeights) => {
+    if (controlledWeights === undefined) {
+      setInternalWeights(next);
+    }
+    onWeightsChange?.(next);
+  };
+
+  const updateStressScenario = (next: StressScenarioId) => {
+    if (controlledStressScenario === undefined) {
+      setInternalStressScenario(next);
+    }
+    onStressScenarioChange?.(next);
+  };
+
+  const updateConstraints = (next: FieldConstraints) => {
+    if (controlledConstraints === undefined) {
+      setInternalConstraints(next);
+    }
+    onConstraintsChange?.(next);
+  };
 
   const farm = getFarmById(farmId);
   const evaluation = rankFarmStrategies(
@@ -156,8 +201,8 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
 
   const isDroughtCondition =
     stressScenario === 'drought' ||
-    evaluation.climate.adjustedGwetRoot < 0.6 ||
-    evaluation.climate.adjustedGwetTop < 0.55;
+    evaluation.climate.adjustedRootZoneMoisturePct < 60 ||
+    evaluation.climate.adjustedSurfaceMoisturePct < 55;
 
   const fieldBrief = formatSmsFieldBrief({
     farm,
@@ -172,14 +217,14 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
     : `No drought trigger is active. Review the ${cfiWindows[0].badgeText.toLowerCase()} 90-day spray window before applying inputs.`;
 
   const handleWeightChange = (key: keyof PriorityWeights, value: number) => {
-    setWeights((prev) => ({
-      ...prev,
+    updateWeights({
+      ...weights,
       [key]: Math.max(0, Math.min(100, value)),
-    }));
+    });
   };
 
   const handleConstraintChange = (key: keyof FieldConstraints, value: boolean) => {
-    setConstraints((previous) => ({ ...previous, [key]: value }));
+    updateConstraints({ ...constraints, [key]: value });
   };
 
   const handleToggleSpeech = () => {
@@ -266,7 +311,7 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
     <section
       id="fari-engine"
       aria-labelledby="fari-engine-heading"
-      className="scroll-mt-28 space-y-6 rounded-2xl border border-[#D4DDD0] bg-white p-5 shadow-xs sm:p-7"
+      className="scroll-mt-28 space-y-6 rounded-2xl border border-sky-400/20 bg-[#0B1426]/85 p-5 backdrop-blur-md sm:p-7"
     >
       <PrintableFieldBrief
         farm={farm}
@@ -284,26 +329,26 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
         droughtAlert={isDroughtCondition ? t.droughtAlertBanner : undefined}
       />
       {/* Section Header & Action Toolbar */}
-      <div className="flex flex-col gap-4 border-b border-[#E2E8DF] pb-5 lg:flex-row lg:items-start lg:justify-between">
+      <div className="flex flex-col gap-4 border-b border-sky-400/20 pb-5 lg:flex-row lg:items-start lg:justify-between">
         <div className="max-w-3xl">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#E8F3EC] px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[#1B4332]">
-              <Sprout className="h-3.5 w-3.5" aria-hidden="true" />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-400/25 bg-[#0D182E] px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-wider text-[#7DD3FC]">
+              <Sprout className="h-3.5 w-3.5 text-[#38BDF8]" aria-hidden="true" />
               FARI Multi-Criteria Engine · 0–100 Scale
             </span>
             {farm.isBenchmarkPlot && (
-              <span className="rounded-full bg-[#E6EFF8] px-2.5 py-1 font-mono text-[10px] font-bold text-[#1D4E89]">
+              <span className="rounded-full border border-sky-400/20 bg-[#0D182E] px-2.5 py-1 font-mono text-[10px] font-bold text-[#CBD5E1]">
                 Global Space Agency Benchmark Plot ({farm.country})
               </span>
             )}
           </div>
           <h2
             id="fari-engine-heading"
-            className="mt-2 text-2xl font-extrabold tracking-tight text-[#17271D] sm:text-3xl"
+            className="mt-2 text-2xl font-extrabold tracking-tight text-[#F0F9FF] sm:text-3xl"
           >
             {displayMode === 'controls' ? 'Set priorities for this season' : displayMode === 'compare' ? 'Compare three crop strategies' : isReview ? 'Your draft field plan' : t.fariSectionTitle}
           </h2>
-          <p className="mt-1 text-sm leading-6 text-[#536458]">
+          <p className="mt-1 text-sm leading-6 text-[#94A3B8]">
             {displayMode === 'controls'
               ? 'Tell FieldShift what matters on this field, then test a climate scenario. Scores recalculate from these choices.'
               : displayMode === 'compare'
@@ -322,8 +367,8 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
               onClick={handleToggleSpeech}
               className={`inline-flex min-h-10 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-bold transition-colors ${
                 isSpeaking
-                  ? 'border-[#9C2B23] bg-[#FDF2F2] text-[#9C2B23]'
-                  : 'border-[#C7D5C5] bg-[#F7FAF5] text-[#1B4332] hover:bg-[#EAF2E6]'
+                  ? 'border-sky-400 bg-sky-400 text-[#040811]'
+                  : 'border-sky-400/20 bg-[#0D182E] text-[#F0F9FF] hover:border-sky-400/50 hover:bg-[#0B1426]'
               }`}
             >
               {isSpeaking ? (
@@ -342,18 +387,18 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
           <button
             type="button"
             onClick={handleCopyBrief}
-            className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-[#C7D5C5] bg-white px-3 py-2 text-xs font-bold text-[#1B4332] transition-colors hover:bg-[#F3F6F1]"
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-sky-400/20 bg-[#0D182E] px-3 py-2 text-xs font-bold text-[#F0F9FF] transition-colors hover:border-sky-400/50 hover:bg-[#0B1426]"
           >
             <ClipboardCopy className="h-4 w-4" aria-hidden="true" />
             <span>{copiedSms ? 'Copied SMS brief!' : t.copySmsBriefButton}</span>
           </button>
-          <span aria-live="polite" className="text-xs font-semibold text-[#536458]">
+          <span aria-live="polite" className="text-xs font-semibold text-[#7DD3FC]">
             {copiedSms ? 'Brief copied.' : copyFailed ? 'Copy unavailable in this browser.' : ''}
           </span>
           <button
             type="button"
             onClick={handlePrintBrief}
-            className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-[#1B4332] px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-[#2D6A4F]"
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-lg bg-sky-400 px-3 py-2 text-xs font-bold text-[#040811] transition-colors hover:bg-sky-300"
           >
             <Printer className="h-4 w-4" aria-hidden="true" />
             <span>{t.printBriefButton}</span>
@@ -370,33 +415,33 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
         aria-label="Field moisture & spray advisory banner"
         className={`rounded-xl border p-4 ${
           isDroughtCondition
-            ? 'border-[#E6B86A] bg-[#FFF8EB] text-[#5F3DC4]'
-            : 'border-[#C7D5C5] bg-[#F5F9F3]'
+            ? 'border-amber-400/40 bg-[#0D182E]'
+            : 'border-sky-400/20 bg-[#0D182E]'
         }`}
       >
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
             <AlertTriangle
-              className="mt-0.5 h-5 w-5 shrink-0 text-[#B45309]"
+              className={`mt-0.5 h-5 w-5 shrink-0 ${isDroughtCondition ? 'text-[#FBBF24]' : 'text-[#38BDF8]'}`}
               aria-hidden="true"
             />
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#92400E]">
+                <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-sky-300/75">
                   Field Action Advisory · {t.languageName}
                 </span>
               </div>
-              <p className="mt-1 text-sm font-bold text-[#1F2937]">
+              <p className="mt-1 text-sm font-bold text-[#F0F9FF]">
                 {fieldAdvisory}
               </p>
             </div>
           </div>
-          <div className="shrink-0 rounded-lg border border-[#E2E8DF] bg-white px-3 py-2 font-mono text-xs text-[#263B2E]">
+          <div className="shrink-0 rounded-lg border border-sky-400/20 bg-[#0B1426] px-3 py-2 font-mono text-xs text-[#CBD5E1]">
             <div>
-              GWETROOT: <strong>{evaluation.climate.adjustedGwetRoot.toFixed(2)}</strong>
+              Root-Zone Moisture: <strong className="text-[#38BDF8]">{evaluation.climate.adjustedRootZoneMoisturePct}%</strong>
             </div>
             <div>
-              GWETTOP: <strong>{evaluation.climate.adjustedGwetTop.toFixed(2)}</strong>
+              Surface Moisture: <strong className="text-[#38BDF8]">{evaluation.climate.adjustedSurfaceMoisturePct}%</strong>
             </div>
           </div>
         </div>
@@ -411,7 +456,7 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
           labels={t}
           onWeightChange={handleWeightChange}
           onConstraintChange={handleConstraintChange}
-          onResetWeights={() => setWeights({ water: 25, erosion: 25, nutrients: 25, market: 25 })}
+          onResetWeights={() => updateWeights(INITIAL_PRIORITY_WEIGHTS)}
         />
         <StressToggles
           scenario={stressScenario}
@@ -419,44 +464,73 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
           cfiWindows={cfiWindows}
           slopePct={farm.slopePct}
           labels={t}
-          onScenarioChange={setStressScenario}
+          onScenarioChange={updateStressScenario}
         />
       </div>}
       {isReview && (
-        <section aria-labelledby="draft-plan-heading" className="overflow-hidden rounded-2xl border border-[#BCD3C2] bg-[#F3F7F0]">
+        <section aria-labelledby="draft-plan-heading" className="overflow-hidden rounded-2xl border border-sky-400/20 bg-[#0D182E]">
           <div className="grid lg:grid-cols-[1fr_0.72fr]">
             <div className="p-5 sm:p-7">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[#52715E]">{selectedStrategyId ? 'Your draft choice' : 'Leading option to consider'} · {farm.name}</p>
-              <h3 id="draft-plan-heading" className="mt-2 max-w-2xl text-2xl font-semibold leading-tight tracking-tight text-[#17271D] sm:text-3xl">{planStrategyObj.name}</h3>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-[#465A4E]">{selectedStrategyId ? 'You selected this option as a starting point. Review its trade-offs and confirm it with a local farmer or extension officer before planting.' : 'This option currently ranks highest for your priorities and scenario. Return to Compare rotations to choose this or another option for your draft.'}</p>
+              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-sky-300/75">{selectedStrategyId ? 'Your draft choice' : 'Leading option to consider'} · {farm.name}</p>
+              <h3 id="draft-plan-heading" className="mt-2 max-w-2xl text-2xl font-semibold leading-tight tracking-tight text-[#F0F9FF] sm:text-3xl">{planStrategyObj.name}</h3>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-[#94A3B8]">{selectedStrategyId ? 'You selected this option as a starting point. Review its trade-offs and confirm it with a local farmer or extension officer before planting.' : 'This option currently ranks highest for your priorities and scenario. Return to Priorities & Rotations to choose this or another option for your draft.'}</p>
               <div className="mt-5 flex flex-wrap gap-2">
-                {planStrategyObj.crops.map((crop) => <span key={crop} className="rounded-full border border-[#C8D7C7] bg-white px-3 py-1.5 text-xs font-semibold text-[#263B2E]">{crop}</span>)}
+                {planStrategyObj.crops.map((crop) => <span key={crop} className="rounded-full border border-sky-400/20 bg-[#0B1426] px-3 py-1.5 text-xs font-semibold text-[#F0F9FF]">{crop}</span>)}
+              </div>
+              <div className="mt-4 rounded-xl border border-sky-400/20 bg-[#0B1426] p-3.5 text-xs text-[#94A3B8]">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-sky-300/75">
+                    Active priority weights &amp; constraints
+                  </span>
+                  {onEditPriorities && (
+                    <button
+                      type="button"
+                      onClick={onEditPriorities}
+                      className="inline-flex min-h-8 items-center rounded-md border border-sky-400/20 bg-[#0D182E] px-2.5 py-1 text-[11px] font-bold text-[#F0F9FF] transition-colors hover:border-sky-400/50 hover:bg-[#08101F] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
+                    >
+                      Edit priorities or change draft →
+                    </button>
+                  )}
+                </div>
+                <p className="mt-2 font-mono text-[11px] font-bold text-[#38BDF8]">
+                  W {Math.round(evaluation.normalizedWeights.water * 100)}% / E {Math.round(evaluation.normalizedWeights.erosion * 100)}% / N {Math.round(evaluation.normalizedWeights.nutrients * 100)}% / M {Math.round(evaluation.normalizedWeights.market * 100)}%
+                </p>
+                <p className="mt-1 text-[11px] text-[#94A3B8]">
+                  Constraints:{' '}
+                  {[
+                    constraints.rainfedOnly ? 'Rainfed Only' : null,
+                    constraints.manualToolsOnly ? 'Manual Tools Only' : null,
+                    constraints.fastCashNeeded ? 'Fast 60-Day Cash Needed' : null,
+                  ]
+                    .filter((item): item is string => item !== null)
+                    .join(' · ') || 'None active'}
+                </p>
               </div>
             </div>
-            <div className="bg-[#10251B] p-5 text-white sm:p-7">
-              <div className="flex items-end justify-between gap-3 border-b border-white/15 pb-4">
-                <div><p className="font-mono text-[9px] font-bold uppercase tracking-wider text-[#C5D5C5]">FARI · 0–100</p><p className="mt-1 font-mono text-5xl font-semibold tabular-nums text-[#D4E6A7]">{planScore.fariScore.toFixed(1)}</p></div>
-                <span className="rounded-full bg-white/10 px-3 py-1.5 text-xs font-bold">{selectedStrategyId ? `Rank #${planScore.rank} · your choice` : 'Highest score · not selected'}</span>
+            <div className="border-t border-sky-400/20 bg-[#08101F] p-5 text-[#F0F9FF] lg:border-l lg:border-t-0 sm:p-7">
+              <div className="flex items-end justify-between gap-3 border-b border-sky-400/20 pb-4">
+                <div><p className="font-mono text-[9px] font-bold uppercase tracking-wider text-sky-300/75">FARI · 0–100</p><p className="mt-1 font-mono text-5xl font-semibold tabular-nums text-[#38BDF8]">{planScore.fariScore.toFixed(1)}</p></div>
+                <span className="rounded-full border border-sky-400/25 bg-[#0D182E] px-3 py-1.5 text-xs font-bold text-[#7DD3FC]">{selectedStrategyId ? `Rank #${planScore.rank} · your choice` : 'Highest score · not selected'}</span>
               </div>
-              <p className="mt-4 text-sm font-semibold">{evaluation.climate.scenarioLabel} · {evaluation.climate.monthLabel}</p>
-              <p className="mt-1 text-xs leading-5 text-[#D0DAD1]">Historical NASA POWER / GPM IMERG baseline with the selected what-if adjustments.</p>
-              <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.06] p-3">
-                <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-[#D4E6A7]">Before planting, confirm locally</p>
-                <p className="mt-1.5 text-xs leading-5 text-white/85">Soil pH and N-P-K, seed access, water supply, drainage, labor, and current local advice.</p>
+              <p className="mt-4 text-sm font-semibold text-[#F0F9FF]">{evaluation.climate.scenarioLabel} · {evaluation.climate.monthLabel}</p>
+              <p className="mt-1 text-xs leading-5 text-[#94A3B8]">Historical NASA POWER / GPM IMERG baseline with the selected what-if adjustments.</p>
+              <div className="mt-4 rounded-xl border border-sky-400/20 bg-[#0D182E] p-3">
+                <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-sky-300/75">Before planting, confirm locally</p>
+                <p className="mt-1.5 text-xs leading-5 text-[#CBD5E1]">Soil pH and N-P-K, seed access, water supply, drainage, labor, and current local advice.</p>
               </div>
             </div>
           </div>
-          <p className="border-t border-[#D8E2D4] px-5 py-3 text-xs leading-5 text-[#526257] sm:px-7">The score ranks the options using your selected weights. It does not guarantee yield or account for every field condition.</p>
+          <p className="border-t border-sky-400/20 px-5 py-3 text-xs leading-5 text-[#94A3B8] sm:px-7">The score ranks the options using your selected weights. It does not guarantee yield or account for every field condition.</p>
         </section>
       )}
       {/* 3-Strategy Side-by-Side Comparison Cards (S1, S2, S3) */}
       {showComparison && <>
       <div>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <h3 className="text-lg font-extrabold text-[#17271D]">
+          <h3 className="text-lg font-extrabold text-[#F0F9FF]">
             {t.strategyComparisonTitle} — {farm.name} ({farm.locationLabel})
           </h3>
-          <span className="font-mono text-xs font-semibold text-[#52715E]">
+          <span className="font-mono text-xs font-semibold text-sky-300/75">
             Slope: {farm.slopePct}% · Elevation: {farm.elevationM} m · Soil: {farm.soilType}
           </span>
         </div>
@@ -472,12 +546,12 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
               <article
                 key={strategy.id}
                 aria-label={`Strategy ${strategy.id}: ${strategy.name}`}
-                className={`flex flex-col justify-between rounded-xl border p-5 transition-shadow ${
+                className={`flex flex-col justify-between rounded-xl border p-5 ${
                   selectedStrategyId === strategy.id
-                    ? 'border-2 border-[#1D6B46] bg-[#F3FAF5] shadow-md'
+                    ? 'border-2 border-sky-400 bg-[#0D182E] shadow-[0_0_18px_rgba(56,189,248,0.22)]'
                     : isTopRanked
-                    ? 'border-2 border-[#1B4332] bg-[#F6FBF7] shadow-sm'
-                    : 'border-[#D4DDD0] bg-white'
+                    ? 'border-2 border-sky-400/60 bg-[#0B1426]/90'
+                    : 'border-sky-400/20 bg-[#0B1426]/85'
                 }`}
               >
                 <div>
@@ -486,17 +560,15 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
                     <span
                       className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-mono text-[10px] font-bold uppercase ${
                         isTopRanked
-                          ? 'bg-[#1B4332] text-white'
-                          : strategy.isBaseline
-                            ? 'bg-[#EAECE9] text-[#465A4E]'
-                            : 'bg-[#E2F0E8] text-[#1B4332]'
+                          ? 'bg-sky-400 text-[#040811]'
+                          : 'border border-sky-400/20 bg-[#0D182E] text-[#CBD5E1]'
                       }`}
                     >
                       {isTopRanked && <Award className="h-3.5 w-3.5" aria-hidden="true" />}
                       Rank #{scoreData.rank} · {strategy.id}{' '}
                       {strategy.isBaseline ? '(Baseline Practice)' : '(Adaptive Rotation)'}
                     </span>
-                    <span className="rounded-full border border-[#DCE5D8] bg-white px-2 py-1 text-[10px] font-semibold text-[#536458]">
+                    <span className="rounded-full border border-sky-400/20 bg-[#0D182E] px-2 py-1 text-[10px] font-semibold text-[#7DD3FC]">
                       {STRATEGY_ROLE_LABELS[strategy.id]}
                     </span>
 
@@ -504,8 +576,8 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
                       <span
                         className={`font-mono text-xs font-extrabold ${
                           scoreData.deltaVsBaseline >= 0
-                            ? 'text-[#1B4332]'
-                            : 'text-[#B45309]'
+                            ? 'text-[#34D399]'
+                            : 'text-[#94A3B8]'
                         }`}
                       >
                         {scoreData.deltaVsBaseline >= 0 ? '+' : ''}
@@ -515,16 +587,16 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
                   </div>
 
                   {/* Title & FARI Score */}
-                  <div className="mt-3 flex items-baseline justify-between gap-3 border-b border-[#E2E8DF] pb-3">
+                  <div className="mt-3 flex items-baseline justify-between gap-3 border-b border-sky-400/20 pb-3">
                     <div>
-                      <h4 className="text-base font-extrabold text-[#17271D]">
+                      <h4 className="text-base font-extrabold text-[#F0F9FF]">
                         {strategy.name}
                       </h4>
                       <div className="mt-1.5 flex flex-wrap gap-1">
                         {strategy.crops.map((crop) => (
                           <span
                             key={crop}
-                            className="rounded-md bg-[#EBF2EA] px-2 py-0.5 text-[11px] font-semibold text-[#263B2E]"
+                            className="rounded-md border border-sky-400/20 bg-[#0D182E] px-2 py-0.5 text-[11px] font-semibold text-[#CBD5E1]"
                           >
                             {crop}
                           </span>
@@ -532,38 +604,38 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
                       </div>
                     </div>
                     <div className="shrink-0 text-right">
-                      <p className="font-mono text-[10px] font-bold uppercase text-[#52715E]">
+                      <p className="font-mono text-[10px] font-bold uppercase text-sky-300/75">
                         FARI Score
                       </p>
-                      <p className="font-mono text-3xl font-extrabold tabular-nums text-[#1B4332]">
+                      <p className="font-mono text-3xl font-extrabold tabular-nums text-[#38BDF8]">
                         {scoreData.fariScore.toFixed(1)}
                       </p>
                     </div>
                   </div>
 
                   {/* 4 Pillar Breakdown Bars (W, E, N, M) */}
-                  <div className="mt-3 space-y-2 border-b border-[#E2E8DF] pb-3">
+                  <div className="mt-3 space-y-2 border-b border-sky-400/20 pb-3">
                     {(
                       [
                         {
                           label: 'Water (W)',
                           val: scoreData.pillars.water,
-                          barClass: 'bg-[#2563EB]',
+                          barClass: 'bg-sky-400',
                         },
                         {
                           label: 'Erosion (E)',
                           val: scoreData.pillars.erosion,
-                          barClass: 'bg-[#D97706]',
+                          barClass: 'bg-sky-300',
                         },
                         {
                           label: 'Nutrients (N)',
                           val: scoreData.pillars.nutrients,
-                          barClass: 'bg-[#1B4332]',
+                          barClass: 'bg-slate-400',
                         },
                         {
                           label: 'Market (M)',
                           val: scoreData.pillars.market,
-                          barClass: 'bg-[#7C3AED]',
+                          barClass: 'bg-slate-500',
                         },
                       ] as const
                     ).map((pillar) => {
@@ -571,14 +643,14 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
                       return (
                         <div key={pillar.label} className="text-xs">
                           <div className="flex justify-between font-mono text-[11px]">
-                            <span className="font-semibold text-[#3B4D41]">
+                            <span className="font-semibold text-[#CBD5E1]">
                               {pillar.label}
                             </span>
-                            <span className="font-bold text-[#17271D]">
+                            <span className="font-bold text-[#F0F9FF]">
                               {pct}/100
                             </span>
                           </div>
-                          <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-[#E6ECE4]">
+                          <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-[#0D182E]">
                             <div
                               className={`h-full rounded-full ${pillar.barClass}`}
                               style={{ width: `${pct}%` }}
@@ -590,128 +662,169 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
                   </div>
 
                   {/* Biophysical Parameter Chips */}
-                  <dl className="mt-3 grid grid-cols-2 gap-2 border-b border-[#E2E8DF] pb-3 font-mono text-[11px]">
-                    <div className="rounded bg-[#F5F8F3] px-2.5 py-1.5">
-                      <dt className="text-[9px] uppercase text-[#65766A]">Root Depth</dt>
-                      <dd className="font-bold text-[#17271D]">
+                  <dl className="mt-3 grid grid-cols-2 gap-2 border-b border-sky-400/20 pb-3 font-mono text-[11px]">
+                    <div className="rounded border border-sky-400/15 bg-[#0D182E] px-2.5 py-1.5">
+                      <dt className="text-[9px] uppercase text-sky-300/75">Root Depth</dt>
+                      <dd className="font-bold text-[#F0F9FF]">
                         {strategy.rootDepthCm} cm (Ideal {scoreData.diagnostics.idealRootCm} cm)
                       </dd>
                     </div>
-                    <div className="rounded bg-[#F5F8F3] px-2.5 py-1.5">
-                      <dt className="text-[9px] uppercase text-[#65766A]">N-Fixation</dt>
-                      <dd className="font-bold text-[#17271D]">
+                    <div className="rounded border border-sky-400/15 bg-[#0D182E] px-2.5 py-1.5">
+                      <dt className="text-[9px] uppercase text-sky-300/75">N-Fixation</dt>
+                      <dd className="font-bold text-[#F0F9FF]">
                         +{strategy.nFixKgHa} kg N/ha
                         {strategy.nFixKgHa > 0 && (
                           <span
                             title="Projected estimate: modeled biological nitrogen fixation, not a measured field result."
-                            className="ml-1 rounded bg-[#FFF3CD] px-1 py-0.5 text-[8px] font-bold text-[#856404]"
+                            className="ml-1 rounded border border-sky-400/20 bg-[#0B1426] px-1 py-0.5 text-[8px] font-bold text-[#7DD3FC]"
                           >
                             Projected estimate
                           </span>
                         )}
                       </dd>
                     </div>
-                    <div className="rounded bg-[#F5F8F3] px-2.5 py-1.5">
-                      <dt className="text-[9px] uppercase text-[#65766A]">Canopy Closure</dt>
-                      <dd className="font-bold text-[#17271D]">
+                    <div className="rounded border border-sky-400/15 bg-[#0D182E] px-2.5 py-1.5">
+                      <dt className="text-[9px] uppercase text-sky-300/75">Canopy Closure</dt>
+                      <dd className="font-bold text-[#F0F9FF]">
                         {strategy.canopyClosureDays} days
                       </dd>
                     </div>
-                    <div className="rounded bg-[#F5F8F3] px-2.5 py-1.5">
-                      <dt className="text-[9px] uppercase text-[#65766A]">Cash Turnaround</dt>
-                      <dd className="font-bold text-[#17271D]">
+                    <div className="rounded border border-sky-400/15 bg-[#0D182E] px-2.5 py-1.5">
+                      <dt className="text-[9px] uppercase text-sky-300/75">Cash Turnaround</dt>
+                      <dd className="font-bold text-[#F0F9FF]">
                         {strategy.cashTurnaroundDays} days
                       </dd>
                     </div>
                   </dl>
 
+                  <details className="mt-3 rounded-lg border border-sky-400/20 bg-[#0D182E] p-2.5 text-xs text-[#CBD5E1]">
+                    <summary className="cursor-pointer select-none font-bold text-[#F0F9FF]">
+                      Configured cultivars &amp; seed notes ({strategy.cultivars.length})
+                    </summary>
+                    <ul className="mt-2 space-y-2 border-t border-sky-400/20 pt-2">
+                      {strategy.cultivars.map((cultivar) => (
+                        <li
+                          key={`${strategy.id}-${cultivar.crop}-${cultivar.name}`}
+                          className="rounded-md border border-sky-400/20 bg-[#0B1426] p-2"
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-1.5">
+                            <span className="font-bold text-[#F0F9FF]">
+                              {cultivar.crop}: {cultivar.name}
+                            </span>
+                            <span className="rounded border border-sky-400/20 bg-[#0D182E] px-1.5 py-0.5 font-mono text-[10px] font-semibold text-[#7DD3FC]">
+                              {cultivar.type} · {cultivar.maturityDays} days
+                            </span>
+                          </div>
+                          <p className="mt-1 text-[11px] leading-4 text-[#CBD5E1]">
+                            {cultivar.traitHighlight}
+                          </p>
+                          <p className="mt-1 text-[10px] text-[#94A3B8]">
+                            {cultivar.seedSourceNote}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="mt-2 text-[10px] font-medium text-[#94A3B8]">
+                      Seed stock not verified locally — confirm local availability and germination with your MAO or cooperative.
+                    </p>
+                  </details>
+
                   {/* All 5 Mandatory Rubric Explanations */}
-                  <div className="mt-3 space-y-2.5 text-xs leading-5">
-                    <div>
-                      <p className="font-bold text-[#1B4332]">
-                        {t.whySuggestedLabel}
-                      </p>
-                      <p className="text-[#3B4D41]">
-                        {strategy.explanations.whySuggested}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="font-bold text-[#1D4E89]">
-                        {t.supportingEvidenceLabel}
-                      </p>
-                      <p className="text-[#3B4D41]">
-                        {strategy.explanations.supportingEvidence}
-                      </p>
-                      <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 rounded-lg border border-[#DCE5D8] bg-[#F8FAF7] p-2 font-mono text-[10px] text-[#3B4D41] sm:grid-cols-3">
-                        <div>
-                          <dt>NASA POWER T2M</dt>
-                          <dd className="font-bold">{monthlyTelemetry.t2m.toFixed(1)}°C</dd>
-                        </div>
-                        <div>
-                          <dt>NASA POWER PRECTOTCORR</dt>
-                          <dd className="font-bold">{monthlyTelemetry.precCorr.toFixed(2)} mm/day</dd>
-                        </div>
-                        <div>
-                          <dt>GPM IMERG precipitation</dt>
-                          <dd className="font-bold">{monthlyTelemetry.imergPrecipitationMmDay.toFixed(2)} mm/day</dd>
-                        </div>
-                        <div>
-                          <dt>POWER GWETROOT index</dt>
-                          <dd className="font-bold">{monthlyTelemetry.gwetRoot.toFixed(2)}</dd>
-                        </div>
-                        <div>
-                          <dt>POWER GWETTOP index</dt>
-                          <dd className="font-bold">{monthlyTelemetry.gwetTop.toFixed(2)}</dd>
-                        </div>
-                        <div>
-                          <dt>Configured slope context</dt>
-                          <dd className="font-bold">{farm.slopePct}% slope</dd>
-                        </div>
-                      </dl>
-                      {stressScenario !== 'baseline' && (
-                        <p className="mt-1 text-[10px] text-[#92400E]">
-                          Scenario-adjusted inputs: T2M {evaluation.climate.adjustedTempC.toFixed(1)}°C, rain{' '}
-                          {evaluation.climate.adjustedDailyPrecipMm.toFixed(2)} mm/day, GWETROOT{' '}
-                          {evaluation.climate.adjustedGwetRoot.toFixed(2)}.
-                          <span className="ml-1 rounded bg-amber-100 px-1 font-bold">Illustrative / modeled</span>
+                  <details className="mt-3 rounded-lg border border-sky-400/20 bg-[#0D182E] p-2.5 text-xs leading-5">
+                    <summary className="cursor-pointer select-none font-bold text-[#F0F9FF]">
+                      Evidence, science &amp; local review rubric (5 parts)
+                    </summary>
+                    <div className="mt-2.5 space-y-2.5 border-t border-sky-400/20 pt-2.5">
+                      <div>
+                        <p className="font-bold text-[#F0F9FF]">
+                          {t.whySuggestedLabel}
                         </p>
-                      )}
-                      <p className="mt-1 text-[10px] text-[#65766A]">
-                        Map imagery is shown separately and does not enter these farm-level scores. Scores use historical climate data and clearly labeled what-if adjustments.
-                      </p>
+                        <p className="text-[#CBD5E1]">
+                          {strategy.explanations.whySuggested}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-bold text-[#F0F9FF]">
+                          {t.supportingEvidenceLabel}
+                        </p>
+                        <p className="text-[#CBD5E1]">
+                          {strategy.explanations.supportingEvidence}
+                        </p>
+                        <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 rounded-lg border border-sky-400/20 bg-[#0B1426] p-2 font-mono text-[10px] text-[#94A3B8] sm:grid-cols-3">
+                          <div>
+                            <dt>Air Temperature</dt>
+                            <dd className="font-bold text-[#F0F9FF]">{monthlyTelemetry.airTempCelsius.toFixed(1)}°C</dd>
+                          </div>
+                          <div>
+                            <dt>Daily Rainfall</dt>
+                            <dd className="font-bold text-[#F0F9FF]">{monthlyTelemetry.dailyRainfallMm.toFixed(2)} mm/day</dd>
+                          </div>
+                          <div>
+                            <dt>GPM IMERG rainfall</dt>
+                            <dd className="font-bold text-[#F0F9FF]">{monthlyTelemetry.imergRainfallMmDay.toFixed(2)} mm/day</dd>
+                          </div>
+                          <div>
+                            <dt>Root-Zone Moisture</dt>
+                            <dd className="font-bold text-[#F0F9FF]">{monthlyTelemetry.rootZoneMoisturePct}%</dd>
+                          </div>
+                          <div>
+                            <dt>Surface Moisture</dt>
+                            <dd className="font-bold text-[#F0F9FF]">{monthlyTelemetry.surfaceSoilMoisturePct}%</dd>
+                          </div>
+                          <div>
+                            <dt>Configured slope context</dt>
+                            <dd className="font-bold text-[#F0F9FF]">{farm.slopePct}% slope</dd>
+                          </div>
+                        </dl>
+                        {stressScenario !== 'baseline' && (
+                          <p className="mt-1 text-[10px] text-[#CBD5E1]">
+                            Scenario-adjusted inputs: Air Temp {evaluation.climate.adjustedTempC.toFixed(1)}°C, rain{' '}
+                            {evaluation.climate.adjustedDailyRainfallMm.toFixed(2)} mm/day, Root-Zone Moisture{' '}
+                            {evaluation.climate.adjustedRootZoneMoisturePct}%.
+                            <span className="ml-1 rounded border border-sky-400/20 bg-[#0B1426] px-1 font-bold text-[#7DD3FC]">Illustrative / modeled</span>
+                          </p>
+                        )}
+                        <p className="mt-1 text-[10px] text-[#94A3B8]">
+                          Map imagery is shown separately and does not enter these farm-level scores. Scores use historical climate data and clearly labeled what-if adjustments.
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-bold text-[#F0F9FF]">
+                          {t.expectedBenefitsLabel}
+                        </p>
+                        <p className="text-[#CBD5E1]">
+                          {strategy.explanations.expectedBenefits}
+                        </p>
+                      </div>
+                      <div className="rounded-lg border border-sky-400/20 bg-[#0B1426] p-2.5">
+                        <p className="font-bold text-[#F0F9FF]">
+                          {t.dataGapsLabel}
+                        </p>
+                        <p className="mt-0.5 text-[11px] text-[#CBD5E1]">
+                          {strategy.explanations.dataGaps}
+                        </p>
+                      </div>
+                      <div className="rounded-lg border border-sky-400/25 bg-[#0B1426] p-2.5">
+                        <p className="font-bold text-[#F0F9FF]">
+                          {t.localReviewAlertsLabel}
+                        </p>
+                        <p className="mt-0.5 text-[11px] text-[#CBD5E1]">
+                          {strategy.explanations.localReviewAlerts}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-bold text-[#2D6A4F]">
-                        {t.expectedBenefitsLabel}
-                      </p>
-                      <p className="text-[#3B4D41]">
-                        {strategy.explanations.expectedBenefits}
-                      </p>
-                    </div>
-                    <div className="rounded-lg border border-[#E2E8DF] bg-[#F8FAF7] p-2.5">
-                      <p className="font-bold text-[#52715E]">
-                        {t.dataGapsLabel}
-                      </p>
-                      <p className="mt-0.5 text-[11px] text-[#536458]">
-                        {strategy.explanations.dataGaps}
-                      </p>
-                    </div>
-                    <div className="rounded-lg border border-[#F3D9A4] bg-[#FFFBEB] p-2.5">
-                      <p className="font-bold text-[#92400E]">
-                        {t.localReviewAlertsLabel}
-                      </p>
-                      <p className="mt-0.5 text-[11px] text-[#78350F]">
-                        {strategy.explanations.localReviewAlerts}
-                      </p>
-                    </div>
-                  </div>
+                  </details>
                 </div>
-                {displayMode === 'compare' && (
+                {showComparison && (
                   <button
                     type="button"
                     aria-pressed={selectedStrategyId === strategy.id}
                     onClick={() => onSelectStrategy?.(strategy.id)}
-                    className={`mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 text-xs font-extrabold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332] ${selectedStrategyId === strategy.id ? 'bg-[#D8F3DC] text-[#1B4332]' : 'bg-[#1B4332] text-white hover:bg-[#2D6A4F]'}`}
+                    className={`mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border px-4 text-xs font-extrabold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400 ${
+                      selectedStrategyId === strategy.id
+                        ? 'border-sky-400 bg-[#0D182E] text-[#38BDF8] shadow-[0_0_18px_rgba(56,189,248,0.22)]'
+                        : 'border-sky-400 bg-sky-400 text-[#040811] hover:bg-sky-300'
+                    }`}
                   >
                     {selectedStrategyId === strategy.id ? 'Selected for my draft' : 'Use as my draft plan'}
                   </button>
@@ -723,19 +836,19 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
       </div>
 
       {/* 12-Month Bare-Field & Pest-Disruption Gantt Timeline */}
-      <div className="rounded-xl border border-[#D4DDD0] bg-[#F8FAF7] p-4 sm:p-5">
+      <div className="rounded-xl border border-sky-400/20 bg-[#0D182E] p-4 sm:p-5">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="flex items-center gap-2">
-              <Layers className="h-4 w-4 text-[#1B4332]" aria-hidden="true" />
-              <h3 className="text-base font-extrabold text-[#17271D]">
+              <Layers className="h-4 w-4 text-[#38BDF8]" aria-hidden="true" />
+              <h3 className="text-base font-extrabold text-[#F0F9FF]">
                 {t.timelineTitle}
               </h3>
             </div>
-            <p className="mt-0.5 text-xs text-[#536458]">
+            <p className="mt-0.5 text-xs text-[#94A3B8]">
               Ground-cover estimates show bare-field exposure; the shield marks a planned pest/disease management interval. Click a month to inspect its telemetry.
             </p>
-            <p className="mt-1 text-[11px] leading-5 text-[#536458]">{PEST_DISRUPTION_NOTES[farmId]}</p>
+            <p className="mt-1 text-[11px] leading-5 text-[#94A3B8]">{PEST_DISRUPTION_NOTES[farmId]}</p>
           </div>
           <div className="flex flex-wrap gap-1.5 text-[10px] font-semibold">
             {Object.entries(STAGE_STYLES).map(([key, style]) => (
@@ -752,7 +865,7 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[760px] border-collapse text-left text-xs">
             <thead>
-              <tr className="border-b border-[#D4DDD0] font-mono text-[10px] uppercase text-[#52715E]">
+              <tr className="border-b border-sky-400/20 font-mono text-[10px] uppercase text-sky-300/75">
                 <th className="py-2 pr-3 font-bold">Strategy</th>
                 {farm.strategies[0].monthlySchedule.map((item) => (
                   <th key={item.month} className="px-1 py-2 text-center">
@@ -761,8 +874,8 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
                       onClick={() => onSelectMonth?.(item.month)}
                       className={`w-full rounded px-1.5 py-1 font-bold transition-colors ${
                         selectedMonth === item.month
-                          ? 'bg-[#1B4332] text-white'
-                          : 'hover:bg-[#E2ECE0]'
+                          ? 'bg-sky-400 text-[#040811]'
+                          : 'text-[#CBD5E1] hover:bg-[#0B1426]'
                       }`}
                     >
                       {item.monthLabel}
@@ -771,11 +884,11 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E2E8DF]">
+            <tbody className="divide-y divide-sky-400/20">
               {farm.strategies.map((strategy) => (
                 <tr key={strategy.id}>
-                  <td className="py-2.5 pr-3 font-bold text-[#17271D]">
-                    <div className="font-mono text-[10px] text-[#52715E]">
+                  <td className="py-2.5 pr-3 font-bold text-[#F0F9FF]">
+                    <div className="font-mono text-[10px] text-sky-300/75">
                       {strategy.id}
                     </div>
                     <div className="max-w-[160px] truncate" title={strategy.name}>
@@ -790,7 +903,7 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
                         <div
                           className={`flex min-h-[58px] flex-col justify-between rounded-md p-1.5 text-[10px] leading-tight ${style.bg} ${style.text} ${
                             selectedMonth === cell.month
-                              ? 'ring-2 ring-[#1B4332] ring-offset-1'
+                              ? 'ring-2 ring-sky-400 ring-offset-1 ring-offset-[#0D182E]'
                               : ''
                           }`}
                         >
@@ -802,7 +915,7 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
                                 title={farmId === 'guimaras'
                                   ? 'Living cover and mulch reduce soil splash; mango remains the host crop'
                                   : 'Scheduled non-host phase; pest populations are not measured'}
-                                className="inline-flex items-center rounded bg-white/25 px-1 font-bold"
+                                className="inline-flex items-center rounded bg-[#040811]/25 px-1 font-bold"
                               >
                                 {farmId === 'guimaras' ? 'Splash Control' : 'Host Break'}
                               </span>
@@ -823,16 +936,16 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
       <div>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-[#1B4332]" aria-hidden="true" />
-            <h3 className="text-base font-extrabold text-[#17271D]">
+            <TrendingUp className="h-4 w-4 text-[#38BDF8]" aria-hidden="true" />
+            <h3 className="text-base font-extrabold text-[#F0F9FF]">
               {t.projectedImpactsTitle}
             </h3>
           </div>
           <span
             title={t.projectedEstimateTooltip}
-            className="inline-flex items-center gap-1 rounded-full border border-[#D97706]/40 bg-[#FFFBEB] px-2.5 py-1 font-mono text-[10px] font-bold text-[#92400E]"
+            className="inline-flex items-center gap-1 rounded-full border border-sky-400/20 bg-[#0D182E] px-2.5 py-1 font-mono text-[10px] font-bold text-[#7DD3FC]"
           >
-            <Info className="h-3 w-3" aria-hidden="true" />
+            <Info className="h-3 w-3 text-[#38BDF8]" aria-hidden="true" />
             {t.projectedEstimateBadge} — Hover or read note for scientific bounds
           </span>
         </div>
@@ -841,33 +954,33 @@ export const StrategyComparisonSection: React.FC<StrategyComparisonSectionProps>
           {projectedImpactCards.map((card) => (
             <article
               key={card.title}
-              className="flex flex-col justify-between rounded-xl border border-[#D4DDD0] bg-[#F9FBF8] p-4"
+              className="flex flex-col justify-between rounded-xl border border-sky-400/20 bg-[#0D182E] p-4"
             >
               <div>
                 <div className="flex items-center justify-between gap-2">
                   <span
                     title={t.projectedEstimateTooltip}
-                    className="inline-flex items-center gap-1 rounded bg-[#FFF3CD] px-2 py-0.5 font-mono text-[10px] font-bold text-[#856404]"
+                    className="inline-flex items-center gap-1 rounded border border-sky-400/20 bg-[#0B1426] px-2 py-0.5 font-mono text-[10px] font-bold text-[#7DD3FC]"
                   >
                     {t.projectedEstimateBadge}
                   </span>
                   <Info
-                    className="h-4 w-4 text-[#9A6B0D]"
+                    className="h-4 w-4 text-[#94A3B8]"
                     aria-hidden="true"
                   />
                 </div>
-                <p className="mt-2.5 font-mono text-xl font-extrabold text-[#1B4332]">
+                <p className="mt-2.5 font-mono text-xl font-extrabold text-[#38BDF8]">
                   {card.metric}
                 </p>
-                <h4 className="mt-1 text-xs font-extrabold text-[#17271D]">
+                <h4 className="mt-1 text-xs font-extrabold text-[#F0F9FF]">
                   {card.title}
                 </h4>
-                <p className="mt-1.5 text-xs leading-5 text-[#536458]">
+                <p className="mt-1.5 text-xs leading-5 text-[#CBD5E1]">
                   {card.detail}
                 </p>
               </div>
-              <div className="mt-3 border-t border-[#E2E8DF] pt-2 text-[10px] leading-4 text-[#65766A]">
-                <p className="font-semibold text-[#3B4D41]">
+              <div className="mt-3 border-t border-sky-400/20 pt-2 text-[10px] leading-4 text-[#94A3B8]">
+                <p className="font-semibold text-[#CBD5E1]">
                   Basis: {card.source}
                 </p>
                 <p className="mt-0.5 italic">{t.projectedEstimateTooltip}</p>

@@ -1,0 +1,5 @@
+packages/climate-data/raw/
+**/*.csv
+docs/
+.agents/
+AGENTS.md

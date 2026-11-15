@@ -1,22 +1,21 @@
 import rawProfiles from './ecocropReference.json';
 
 export interface EcoCropClimateProfile {
-  ecoPortCode: number;
+  rawEcoPortCode: number;
   scientificName: string;
   commonNames: string;
-  optimumTemperatureMinC: number | null;
-  optimumTemperatureMaxC: number | null;
-  temperatureToleranceMinC: number | null;
-  temperatureToleranceMaxC: number | null;
-  optimumRainfallMinMmYr: number | null;
-  optimumRainfallMaxMmYr: number | null;
-  rainfallToleranceMinMmYr: number | null;
-  rainfallToleranceMaxMmYr: number | null;
-  soilPhMin: number | null;
-  soilPhMax: number | null;
-  maxElevationM: number | null;
-  cycleDaysMin: number | null;
-  cycleDaysMax: number | null;
+  optimalTempRangeC: { min: number | null; max: number | null };
+  temperatureToleranceC: { min: number | null; max: number | null };
+  optimalSeasonalRainMm: { min: number | null; max: number | null };
+  rainfallToleranceMm: { min: number | null; max: number | null };
+  idealSoilPhRange: { min: number | null; max: number | null };
+  daysToHarvestRange: { min: number | null; max: number | null };
+  rootDepthCm: number;
+  plantFamilyGroup: string;
+  maxElevationMeters: number | null;
+  soilTextureType: string;
+  soilDrainageClass: string;
+  soilNutrientDemand: string;
   cropAliases: readonly string[];
 }
 
@@ -37,10 +36,16 @@ interface RawEcoCropProfile {
   ALTMX: number | null;
   GMIN: number | null;
   GMAX: number | null;
+  rootDepthCm: number;
+  plantFamilyGroup: string;
+  soilTextureType: string;
+  soilDrainageClass: string;
+  soilNutrientDemand: string;
 }
 
 const CROP_ALIASES: Record<number, readonly string[]> = {
   481: ['oat', 'oats'],
+  745: ['adlai', "job's tears", 'adlay'],
   1150: ['soy', 'soybean'],
   1265: ['sweet potato', 'camote'],
   1416: ['mango'],
@@ -59,22 +64,21 @@ const sourceProfiles = rawProfiles as RawEcoCropProfile[];
 
 export const ECOCROP_CLIMATE_PROFILES: EcoCropClimateProfile[] = sourceProfiles.map(
   (profile) => ({
-    ecoPortCode: profile.EcoPortCode,
+    rawEcoPortCode: profile.EcoPortCode,
     scientificName: profile.ScientificName,
     commonNames: profile.COMNAME,
-    optimumTemperatureMinC: profile.TOPMN,
-    optimumTemperatureMaxC: profile.TOPMX,
-    temperatureToleranceMinC: profile.TMIN,
-    temperatureToleranceMaxC: profile.TMAX,
-    optimumRainfallMinMmYr: profile.ROPMN,
-    optimumRainfallMaxMmYr: profile.ROPMX,
-    rainfallToleranceMinMmYr: profile.RMIN,
-    rainfallToleranceMaxMmYr: profile.RMAX,
-    soilPhMin: profile.PHMIN,
-    soilPhMax: profile.PHMAX,
-    maxElevationM: profile.ALTMX,
-    cycleDaysMin: profile.GMIN,
-    cycleDaysMax: profile.GMAX,
+    optimalTempRangeC: { min: profile.TOPMN, max: profile.TOPMX },
+    temperatureToleranceC: { min: profile.TMIN, max: profile.TMAX },
+    optimalSeasonalRainMm: { min: profile.ROPMN, max: profile.ROPMX },
+    rainfallToleranceMm: { min: profile.RMIN, max: profile.RMAX },
+    idealSoilPhRange: { min: profile.PHMIN, max: profile.PHMAX },
+    daysToHarvestRange: { min: profile.GMIN, max: profile.GMAX },
+    rootDepthCm: profile.rootDepthCm,
+    plantFamilyGroup: profile.plantFamilyGroup,
+    maxElevationMeters: profile.ALTMX,
+    soilTextureType: profile.soilTextureType,
+    soilDrainageClass: profile.soilDrainageClass,
+    soilNutrientDemand: profile.soilNutrientDemand,
     cropAliases: CROP_ALIASES[profile.EcoPortCode] ?? [],
   }),
 );

@@ -40,8 +40,8 @@ export const calculateWaterPillar = (
   climate: AdjustedClimateContext,
   constraints: FieldConstraints = DEFAULT_FIELD_CONSTRAINTS,
 ): WaterPillarResult => {
-  const gwetTopNorm = clamp(climate.adjustedGwetTop, 0, 1);
-  const gwetRootNorm = clamp(climate.adjustedGwetRoot, 0, 1);
+  const gwetTopNorm = clamp(climate.adjustedSurfaceMoisturePct / 100, 0, 1);
+  const gwetRootNorm = clamp(climate.adjustedRootZoneMoisturePct / 100, 0, 1);
 
   const idealRootCm = 30 + 70 * (1 - gwetTopNorm);
   const rootMatch = clamp(1 - Math.abs(strategy.rootDepthCm - idealRootCm) / 100, 0, 1);
