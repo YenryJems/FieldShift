@@ -149,14 +149,12 @@ const AdditionalSignalsPanel: React.FC<{
 const FieldMapPanel: React.FC<{
   selectedPlot: PlaceClimate;
   selectedMonth: number;
-  onMonthChange: (month: number) => void;
   mapLayer: MapLayer;
   onMapLayerChange: (layer: MapLayer) => void;
   onSelectPlot: (id: PlaceId) => void;
 }> = ({
   selectedPlot,
   selectedMonth,
-  onMonthChange,
   mapLayer,
   onMapLayerChange,
   onSelectPlot,
@@ -172,25 +170,10 @@ const FieldMapPanel: React.FC<{
           </p>
           <h3 className="mt-1 text-lg font-extrabold text-[#17271D]">Satellite field view</h3>
           <p className="mt-1 text-xs leading-5 text-[#65766A]">
-            NASA POWER point and configured study-area extent for {selectedPlot.name}.
+            NASA POWER point and configured study-area extent for {selectedPlot.name} ({selectedMonthTelemetry.month}).
           </p>
         </div>
         <div className="flex flex-wrap items-end gap-2">
-          <label className="grid gap-1 text-[10px] font-bold uppercase tracking-wider text-[#65766A]">
-            Historical month
-            <select
-              aria-label="Select month for map telemetry"
-              value={selectedMonth}
-              onChange={(event) => onMonthChange(Number(event.target.value))}
-              className="h-10 rounded-lg border border-[#C7D5C5] bg-white px-3 text-xs font-semibold normal-case tracking-normal text-[#263B2E] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1B4332]"
-            >
-              {selectedPlot.monthly.map((month) => (
-                <option key={month.month} value={month.month}>
-                  {month.label}
-                </option>
-              ))}
-            </select>
-          </label>
           <div
             role="group"
             aria-label="Map layer"
@@ -787,7 +770,6 @@ export const WorkspaceView: React.FC<WorkspaceViewProps> = ({ plannerStep, onPla
             <FieldMapPanel
               selectedPlot={place}
               selectedMonth={selectedMonth}
-              onMonthChange={setSelectedMonth}
               mapLayer={mapLayer}
               onMapLayerChange={setMapLayer}
               onSelectPlot={selectFarm}
